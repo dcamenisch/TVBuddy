@@ -1,0 +1,32 @@
+{
+  "pins" : [
+    {
+      "identity" : "nuke",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kean/Nuke",
+      "state" : {
+        "revision" : "3f666f120b63ea7de57d42e9a7c9b47f8e7a290b",
+        "version" : "12.1.6"
+      }
+    },
+    {
+      "identity" : "swiftuipager",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/fermoya/SwiftUIPager/",
+      "state" : {
+        "revision" : "4ddc04c801aac143090bb14cf26603a3bf9c74cb",
+        "version" : "2.5.0"
+      }
+    },
+    {
+      "identity" : "tmdb",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/adamayoung/TMDb.git",
+      "state" : {
+        "revision" : "764e59eede24ea912a924663e6a068b8d3c8551b",
+        "version" : "9.0.0"
+      }
+    }
+  ],
+  "version" : 2
+}
