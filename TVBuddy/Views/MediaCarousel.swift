@@ -25,7 +25,9 @@ struct MediaCarousel: View {
         if !trendingMovies.isEmpty {
             Pager(page: page, data: trendingMovies.prefix(10)) { movie in
                 NavigationLink {
-                    MovieDetailView(id: movie.id)
+                    LazyView {
+                        MovieDetailView(id: movie.id)
+                    }
                 } label: {
                     ImageView(title: movie.title, url: movieStore.backdropWithText(withID: movie.id))
                         .backdropStyle()

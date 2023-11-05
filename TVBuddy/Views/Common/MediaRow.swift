@@ -19,13 +19,17 @@ struct MediaRow: View {
         switch mediaItem {
         case .movie(let movie):
             NavigationLink {
-                MovieDetailView(id: movie.id)
+                LazyView {
+                    MovieDetailView(id: movie.id)
+                }
             } label: {
                 movieRow(movie: movie)
             }
         case .tvShow(let tvShow):
             NavigationLink {
-                TVShowDetailView(id: tvShow.id)
+                LazyView {
+                    TVShowDetailView(id: tvShow.id)
+                }
             } label: {
                 tvShowRow(tvShow: tvShow)
             }
