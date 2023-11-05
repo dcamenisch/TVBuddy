@@ -1,6 +1,6 @@
 //
-//  tvBuddyApp.swift
-//  tvBuddy
+//  TVBuddyApp.swift
+//  TVBuddy
 //
 //  Created by Danny on 16.09.2023.
 //

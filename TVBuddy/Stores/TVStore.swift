@@ -9,6 +9,26 @@ import Foundation
 import TMDb
 
 class TVStore: ObservableObject {
+    
+    private let fetchSeriesQueue          = DispatchQueue(label: "\(String(describing: Bundle.main.bundleIdentifier)).fetchSeriesQueueTVStore")
+    private let fetchSeasonQueue          = DispatchQueue(label: "\(String(describing: Bundle.main.bundleIdentifier)).fetchSeasonQueueTVStore")
+    private let fetchPosterQueue          = DispatchQueue(label: "\(String(describing: Bundle.main.bundleIdentifier)).fetchPosterQueueTVStore")
+    private let fetchBackdropQueue        = DispatchQueue(label: "\(String(describing: Bundle.main.bundleIdentifier)).fetchBackdropQueueTVStore")
+    private let fetchBackdropTextQueue    = DispatchQueue(label: "\(String(describing: Bundle.main.bundleIdentifier)).fetchBackdropTextQueueTVStore")
+    private let fetchCreditsQueue         = DispatchQueue(label: "\(String(describing: Bundle.main.bundleIdentifier)).fetchCreditsQueueTVStore")
+    private let fetchRecommendationsQueue = DispatchQueue(label: "\(String(describing: Bundle.main.bundleIdentifier)).fetchRecommendationsQueueTVStore")
+    private let fetchTrendingQueue        = DispatchQueue(label: "\(String(describing: Bundle.main.bundleIdentifier)).fetchTrendingQueueTVStore")
+    private let fetchDiscoverQueue        = DispatchQueue(label: "\(String(describing: Bundle.main.bundleIdentifier)).fetchDiscoverQueueTVStore")
+
+    private var pendingFetchSeriesTasks: [TMDb.TVShow.ID: Task<(), Never>]          = [:]
+    private var pendingFetchSeasonTasks: [TMDb.TVShow.ID: Task<(), Never>]          = [:]
+    private var pendingFetchPosterTasks: [TMDb.TVShow.ID: Task<(), Never>]          = [:]
+    private var pendingFetchBackdropTasks: [TMDb.TVShow.ID: Task<(), Never>]        = [:]
+    private var pendingFetchBackdropTextTasks: [TMDb.TVShow.ID: Task<(), Never>]    = [:]
+    private var pendingFetchCreditsTasks: [TMDb.TVShow.ID: Task<(), Never>]         = [:]
+    private var pendingFetchRecommendationsTasks: [TMDb.TVShow.ID: Task<(), Never>] = [:]
+    private var pendingFetchTrendingTask: [Int: Task<(), Never>]                    = [:]
+    private var pendingFetchDiscoverTask: [Int: Task<(), Never>]                    = [:]
 	
 	private let tvManager: TVManager
 	
@@ -31,125 +51,238 @@ class TVStore: ObservableObject {
 	
     @MainActor
 	func show(withID id: TMDb.TVShow.ID) -> TMDb.TVShow? {
-        if shows[id] == nil {
-            Task {
-                let show = await tvManager.fetchShow(withID: id)
-                guard let show = show else { return }
-                shows[id] = show
-                                
-                show.seasons?.forEach { season in
-                    _ = self.season(season.seasonNumber, forTVShow: id)
-                }
-            }
+        if let show = shows[id] {
+            return show
         }
         
-		return shows[id]
+        if pendingFetchSeriesTasks[id] != nil {
+            return nil
+        }
+        
+        let fetchTask = Task {
+            let show = await tvManager.fetchShow(withID: id)
+            if let show = show {
+                shows[id] = show
+            }
+            
+            fetchSeriesQueue.sync {
+                pendingFetchSeriesTasks[id] = nil
+            }
+        }
+
+        fetchSeriesQueue.sync {
+            pendingFetchSeriesTasks[id] = fetchTask
+        }
+
+        return nil
 	}
 	
     @MainActor
 	func season(_ season: Int, forTVShow id: TMDb.TVShow.ID) -> TMDb.TVShowSeason? {
-        if seasons[id]?[season] == nil {
-            Task {
-                let result = await tvManager.fetchSeason(season, forTVShow: id)
-                guard let result = result else { return }
-                
+        if let season = seasons[id]?[season] {
+            return season
+        }
+        
+        if pendingFetchSeasonTasks[id * 100 + season] != nil {
+            return nil
+        }
+        
+        let fetchTask = Task {
+            let result = await tvManager.fetchSeason(season, forTVShow: id)
+            if let result = result {
                 var tmpSeasons = seasons[id] ?? [:]
                 tmpSeasons[season] = result
                 self.seasons[id] = tmpSeasons
             }
+            
+            fetchSeasonQueue.sync {
+                pendingFetchSeasonTasks[id * 100 + season] = nil
+            }
         }
-                
-        return seasons[id]?[season]
+
+        fetchSeasonQueue.sync {
+            pendingFetchSeasonTasks[id * 100 + season] = fetchTask
+        }
+
+        return nil
 	}
 	
     @MainActor
     func episode(_ episode: Int, season: Int, forTVShow id: TMDb.TVShow.ID) -> TMDb.TVShowEpisode? {
-        
         return self.season(season, forTVShow: id)?.episodes?[episode - 1]
     }
     
     @MainActor
 	func poster(withID id: TMDb.TVShow.ID) -> URL? {
-        if posters[id] == nil {
-            Task {
-                let url = await tvManager.fetchPoster(withID: id)
-                guard let url = url else { return }
-                posters[id] = url
-            }
+        if let url = posters[id] {
+            return url
         }
         
-		return posters[id]
+        if pendingFetchPosterTasks[id] != nil {
+            return nil
+        }
+        
+        let fetchTask = Task {
+            let url = await tvManager.fetchPoster(withID: id)
+            if let url = url {
+                posters[id] = url
+            }
+            
+            fetchPosterQueue.sync {
+                pendingFetchPosterTasks[id] = nil
+            }
+        }
+
+        fetchPosterQueue.sync {
+            pendingFetchPosterTasks[id] = fetchTask
+        }
+
+        return nil
 	}
     
     @MainActor
 	func backdrop(withID id: TMDb.TVShow.ID) -> URL? {
-        if backdrops[id] == nil {
-            Task {
-                let url = await tvManager.fetchBackdrop(withID: id)
-                guard let url = url else { return }
-                backdrops[id] = url
-            }
+        if let url = backdrops[id] {
+            return url
         }
         
-		return backdrops[id]
+        if pendingFetchBackdropTasks[id] != nil {
+            return nil
+        }
+        
+        let fetchTask = Task {
+            let url = await tvManager.fetchBackdrop(withID: id)
+            if let url = url {
+                backdrops[id] = url
+            }
+            
+            fetchBackdropQueue.sync {
+                pendingFetchBackdropTasks[id] = nil
+            }
+        }
+
+        fetchBackdropQueue.sync {
+            pendingFetchBackdropTasks[id] = fetchTask
+        }
+
+        return nil
 	}
     
     @MainActor
     func backdropWithText(withID id: TMDb.TVShow.ID) -> URL? {
-        if backdropsWithText[id] == nil {
-            Task {
-                let url = await tvManager.fetchBackdropWithText(withID: id)
-                guard let url = url else { return }
-                backdropsWithText[id] = url
-            }
+        if let url = backdropsWithText[id] {
+            return url
         }
         
-        return backdropsWithText[id]
+        if pendingFetchBackdropTextTasks[id] != nil {
+            return nil
+        }
+        
+        let fetchTask = Task {
+            let url = await tvManager.fetchBackdropWithText(withID: id)
+            if let url = url {
+                backdropsWithText[id] = url
+            }
+            
+            fetchBackdropTextQueue.sync {
+                pendingFetchBackdropTextTasks[id] = nil
+            }
+        }
+
+        fetchBackdropTextQueue.sync {
+            pendingFetchBackdropTextTasks[id] = fetchTask
+        }
+
+        return nil
     }
 		
     @MainActor
 	func credits(forTVShow id: TMDb.TVShow.ID) -> ShowCredits? {
-        if credits[id] == nil {
-            Task {
-                let credits = await tvManager.fetchCredits(forTVShow: id)
-                guard let credits = credits else { return }
-                self.credits[id] = credits
-            }
+        if let credits = self.credits[id] {
+            return credits
         }
         
-        return credits[id]
+        if pendingFetchCreditsTasks[id] != nil {
+            return nil
+        }
+        
+        let fetchTask = Task {
+            let credits = await tvManager.fetchCredits(forTVShow: id)
+            if let credits = credits {
+                self.credits[id] = credits
+            }
+            
+            fetchCreditsQueue.sync {
+                pendingFetchCreditsTasks[id] = nil
+            }
+        }
+
+        fetchCreditsQueue.sync {
+            pendingFetchCreditsTasks[id] = fetchTask
+        }
+
+        return nil
 	}
 	
     @MainActor
     func recommendations(forTVShow id: TMDb.TVShow.ID) -> [TMDb.TVShow]? {
-        if recommendationsIDs[id] == nil {
-            Task {
-                let shows = await self.tvManager.fetchRecommendations(forTVShow: id)
-                guard let shows = shows else { return }
-                
+        if let shows = recommendationsIDs[id] {
+            return shows.compactMap { self.shows[$0] }
+        }
+        
+        if pendingFetchRecommendationsTasks[id] != nil {
+            return nil
+        }
+        
+        let fetchTask = Task {
+            let shows = await tvManager.fetchRecommendations(forTVShow: id)?.prefix(10)
+            if let shows = shows {
                 shows.forEach { show in
                     _ = self.show(withID: show.id)
                 }
                 
                 recommendationsIDs[id] = shows.compactMap { $0.id }
             }
+            
+            fetchRecommendationsQueue.sync {
+                pendingFetchRecommendationsTasks[id] = nil
+            }
         }
-        
-        return recommendationsIDs[id]?.compactMap { shows[$0] }
+
+        fetchRecommendationsQueue.sync {
+            pendingFetchRecommendationsTasks[id] = fetchTask
+        }
+
+        return nil
     }
     
     @MainActor
     func trending() -> [TMDb.TVShow] {
-        if trendingIDs.isEmpty {
-            trendingPage = 1
+        if trendingPage == 1 {
+            return trendingIDs.compactMap { shows[$0] }
+        }
+        
+        trendingPage = 1
+        
+        if pendingFetchTrendingTask[trendingPage] != nil {
+            return trendingIDs.compactMap { shows[$0] }
+        }
+        
+        let fetchTask = Task {
+            let newPage = await tvManager.fetchTrending(page: trendingPage)
             
-            Task {
-                let newPage = await tvManager.fetchTrending(page: trendingPage)
-                newPage?.forEach { show in
-                    _ = self.show(withID: show.id)
-                    if !trendingIDs.contains(show.id) { trendingIDs.append(show.id) }
-                }
+            newPage?.forEach { show in
+                _ = self.show(withID: show.id)
+                if !trendingIDs.contains(show.id) { trendingIDs.append(show.id) }
             }
+        
+            fetchTrendingQueue.sync {
+                pendingFetchRecommendationsTasks[trendingPage] = nil
+            }
+        }
+        
+        fetchTrendingQueue.sync {
+            pendingFetchTrendingTask[trendingPage] = fetchTask
         }
         
         return trendingIDs.compactMap { shows[$0] }
@@ -157,16 +290,31 @@ class TVStore: ObservableObject {
     
     @MainActor
     func discover() -> [TMDb.TVShow] {
-        if discoverIDs.isEmpty {
-            discoverPage = 1
+        if discoverPage == 1 {
+            return discoverIDs.compactMap { shows[$0] }
+        }
+        
+        discoverPage = 1
+        
+        if pendingFetchDiscoverTask[discoverPage] != nil {
+            return discoverIDs.compactMap { shows[$0] }
+        }
+        
+        let fetchTask = Task {
+            let newPage = await tvManager.fetchDiscover(page: trendingPage)
             
-            Task {
-                let newPage = await tvManager.fetchDiscover(page: discoverPage)
-                newPage?.forEach { show in
-                    _ = self.show(withID: show.id)
-                    if !discoverIDs.contains(show.id) { discoverIDs.append(show.id) }
-                }
+            newPage?.forEach { show in
+                _ = self.show(withID: show.id)
+                if !discoverIDs.contains(show.id) { discoverIDs.append(show.id) }
             }
+        
+            fetchDiscoverQueue.sync {
+                pendingFetchDiscoverTask[discoverPage] = nil
+            }
+        }
+        
+        fetchDiscoverQueue.sync {
+            pendingFetchDiscoverTask[discoverPage] = fetchTask
         }
         
         return discoverIDs.compactMap { shows[$0] }

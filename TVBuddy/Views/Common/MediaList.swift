@@ -34,7 +34,7 @@ struct MediaList: View {
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack {
-                    ForEach(media) { item in
+                    ForEach(media, id: \.id) { item in
                         navLink(item: item)
                     }
                 }
@@ -73,10 +73,6 @@ struct MediaList: View {
             })
         }
     }
-}
-
-#Preview {
-    MediaList(movies: [TMDb.Movie(id: 1, title: "Test")])
 }
 
 struct LazyView <T>: View where T: View {
