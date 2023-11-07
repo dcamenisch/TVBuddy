@@ -32,6 +32,11 @@ struct SearchView: View {
 		.listStyle(.plain)
 		.overlay(overlay)
 		.searchable(text: $searchStore.searchQuery)
+        .searchScopes($searchStore.searchScope) {
+            ForEach(SearchScope.allCases) { category in
+                Text(category.rawValue).tag(SearchScope.init(rawValue: category.rawValue))
+            }
+        }
 		.onReceive(searchStore.$searchQuery) { _ in
 			Task { await searchStore.search() }
 		}

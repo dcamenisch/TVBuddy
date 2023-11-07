@@ -8,11 +8,21 @@
 import Foundation
 import TMDb
 
+enum SearchScope: String, Codable, CaseIterable, Identifiable, Hashable {
+    case all = "All"
+    case movies = "Movies"
+    case tvseries = "TV Series"
+    case people = "People"
+    
+    var id: String { rawValue }
+}
+
 class SearchStore: ObservableObject {
-	
+    
 	@Published var searchQuery: String = ""
 	@Published var results: [TMDb.Media]?
 	@Published var isSearching = false
+    @Published var searchScope: SearchScope = .all
 	
 	private let searchManager: SearchManager
 	
