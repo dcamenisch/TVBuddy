@@ -102,14 +102,14 @@ struct TVShowDetailView: View {
             
             Button {
                 if let show = _show {
-                    show.watched.toggle()
+                    show.finishedWatching.toggle()
                     try? context.save()
                 } else {
                     insertTVSeries(tmdbSeries: show!)
                 }
             } label: {
                 HStack {
-                    Image(systemName: _show == nil ? "eye" : _show?.watched ?? false ? "eye.fill" : "eye")
+                    Image(systemName: _show == nil ? "eye" : _show?.finishedWatching ?? false ? "eye.fill" : "eye")
                     Text("Watched")
                 }
                 .bold()

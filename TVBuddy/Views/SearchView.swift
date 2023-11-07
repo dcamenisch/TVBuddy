@@ -1,6 +1,6 @@
 //
 //  SearchView.swift
-//  tvTracker
+//  TVBuddy
 //
 //  Created by Danny on 24.06.22.
 //

@@ -18,14 +18,14 @@ final class TVSeries {
     @Relationship(deleteRule: .cascade, inverse: \TVEpisode.tvSeries)
     var episodes: [TVEpisode] = []
     
-    var watching: Bool
-    var watched: Bool
+    var startedWatching: Bool
+    var finishedWatching: Bool
     
-    init(tvSeries: TMDb.TVShow, watching: Bool = false, watched: Bool = false) {
-        self.id = tvSeries.id
+    init(tvSeries: TMDb.TVShow, startedWatching: Bool = false, finishedWatching: Bool = false) {
+        self.id   = tvSeries.id
         self.name = tvSeries.name
         
-        self.watching = watching
-        self.watched = watched
+        self.startedWatching  = startedWatching
+        self.finishedWatching = finishedWatching
     }
 }
