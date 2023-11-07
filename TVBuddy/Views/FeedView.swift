@@ -15,8 +15,11 @@ struct FeedView: View {
 
     @Environment(\.modelContext) private var context
 
-    @Query
+    @Query(filter: #Predicate<Movie> { !$0.watched })
     private var _movies: [Movie]
+    
+    @Query(filter: #Predicate<Movie> { $0.watched })
+    private var _watchedMovies: [Movie]
     
     @Query
     private var _tvShows: [TVSeries]
@@ -26,6 +29,12 @@ struct FeedView: View {
     
     private var movies: [TMDb.Movie] {
         _movies.compactMap { movie in
+            movieStore.movie(withID: movie.id)
+        }
+    }
+    
+    private var watchedMovies: [TMDb.Movie] {
+        _watchedMovies.compactMap { movie in
             movieStore.movie(withID: movie.id)
         }
     }
@@ -45,6 +54,8 @@ struct FeedView: View {
                 MediaList(shows: tvShows, title: "TV Show Watchlist (\(tvShows.count))")
                 MediaList(movies: movies, title: "Movie Watchlist (\(movies.count))")
                 // TODO: Upcoming Movies
+                
+                MediaList(movies: watchedMovies, title: "Watched Movies (\(watchedMovies.count))")
             }
             .padding(.horizontal)
         }
