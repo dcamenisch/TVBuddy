@@ -189,9 +189,6 @@ struct TVShowDetailView: View {
             $0
         })
         
-        tmdbEpisodes?.forEach({ episode in
-            let tvEpisode = TVEpisode(tvEpisode: episode)
-            tvSeries.episodes.append(tvEpisode)
-        })
+        tvSeries.episodes.append(contentsOf: tmdbEpisodes?.compactMap { TVEpisode(tvEpisode: $0) } ?? [])
     }
 }
