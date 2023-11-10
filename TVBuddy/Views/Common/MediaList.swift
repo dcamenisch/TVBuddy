@@ -17,11 +17,17 @@ struct MediaList: View {
     var media: [TMDb.Media] {
         var result: [TMDb.Media] = []
         
-        var tmpMovies = movies.compactMap { movieStore.movie(withID: $0.id) }
-        result.append(contentsOf: tmpMovies.map({TMDb.Media.movie($0)}))
+        result.append(
+            contentsOf:
+                movies.compactMap { movieStore.movie(withID: $0.id) }
+                .map { TMDb.Media.movie($0) }
+        )
         
-        var tmpTVShows = tvShows.compactMap { tvStore.show(withID: $0.id) }
-        result.append(contentsOf: tmpTVShows.map({TMDb.Media.tvShow($0)}))
+        result.append(
+            contentsOf:
+                tvShows.compactMap { tvStore.show(withID: $0.id) }
+                .map { TMDb.Media.tvShow($0) }
+        )
         
         result.append(contentsOf: tmdbMovies.map({TMDb.Media.movie($0)}))
         result.append(contentsOf: tmdbTVShows.map({TMDb.Media.tvShow($0)}))

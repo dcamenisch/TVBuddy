@@ -38,4 +38,14 @@ final class TVShow {
             finishedWatching: finishedWatching
         )
     }
+    
+    func toggleWatched() {
+        episodes.forEach { $0.watched = !finishedWatching }
+        checkWatching()
+    }
+    
+    func checkWatching() {
+        startedWatching = episodes.contains { $0.watched }
+        finishedWatching = episodes.allSatisfy { $0.watched }
+    }
 }

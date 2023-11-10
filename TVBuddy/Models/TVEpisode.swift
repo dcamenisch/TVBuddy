@@ -36,4 +36,9 @@ final class TVEpisode {
             watched: watched
         )
     }
+    
+    func toggleWatched() {
+        watched.toggle()
+        tvShow?.checkWatching()
+    }
 }

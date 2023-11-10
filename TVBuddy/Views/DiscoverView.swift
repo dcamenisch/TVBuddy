@@ -9,6 +9,7 @@ import SwiftUI
 import TMDb
 
 struct DiscoverView: View {
+
     @EnvironmentObject private var tvStore: TVStore
     @EnvironmentObject private var movieStore: MovieStore
 

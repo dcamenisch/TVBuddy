@@ -91,7 +91,7 @@ struct TVShowView: View {
                 if let show = _show {
                     context.delete(show)
                 } else {
-                    insertTVShow(tmdbTVShow: show!)
+                    insertTVShow(tmdbTVShow: show!, watched: false)
                 }
             } label: {
                 HStack {
@@ -106,10 +106,10 @@ struct TVShowView: View {
             
             Button {
                 if let show = _show {
-                    show.finishedWatching.toggle()
+                    show.toggleWatched()
                     try? context.save()
                 } else {
-                    insertTVShow(tmdbTVShow: show!)
+                    insertTVShow(tmdbTVShow: show!, watched: true)
                 }
             } label: {
                 HStack {
@@ -181,18 +181,37 @@ struct TVShowView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     
-    private func insertTVShow(tmdbTVShow: TMDb.TVShow) {
-        let tvShow: TVShow = TVShow(tvShow: tmdbTVShow)
+    private func insertTVShow(tmdbTVShow: TMDb.TVShow, watched: Bool = false) {
+        let tvShow: TVShow = TVShow(
+            tvShow: tmdbTVShow, startedWatching: watched, finishedWatching: watched)
         context.insert(tvShow)
         
-        let tmdbEpisodes = tmdbTVShow.seasons?.compactMap({ season in
-            tvStore.season(season.seasonNumber, forTVShow: tmdbTVShow.id)
-        }).compactMap({ season in
-            season.episodes
-        }).flatMap({
-            $0
-        })
-        
-        tvShow.episodes.append(contentsOf: tmdbEpisodes?.compactMap { TVEpisode(episode: $0) } ?? [])
+        Task {
+            let tmdbEpisodes = await withTaskGroup(
+                of: TMDb.TVShowSeason?.self, returning: [TMDb.TVShowSeason].self
+            ) { group in
+                for season in tmdbTVShow.seasons ?? [] {
+                    group.addTask {
+                        await tvStore.seasonSync(season.seasonNumber, forTVShow: tmdbTVShow.id)
+                    }
+                }
+
+                var childTaskResults = [TMDb.TVShowSeason]()
+                for await result in group {
+                    if let result = result {
+                        childTaskResults.append(result)
+                    }
+                }
+
+                return childTaskResults
+            }.compactMap({ season in
+                season.episodes
+            }).flatMap({
+                $0
+            })
+
+            tvShow.episodes.append(
+                contentsOf: tmdbEpisodes.compactMap { TVEpisode(episode: $0, watched: watched) })
+        }
     }
 }

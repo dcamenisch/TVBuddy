@@ -23,24 +23,17 @@ struct FeedView: View {
 
     @Query(filter: #Predicate<TVShow> { !$0.startedWatching })
     private var tvShows: [TVShow]
+    
+    @Query(filter: #Predicate<TVShow> { $0.finishedWatching })
+    private var watchedTVShows: [TVShow]
 
     @Query(
-        filter: #Predicate<TVEpisode> { !$0.watched && $0.seasonNumber > 0 },
+        filter: #Predicate<TVEpisode> {
+            !$0.watched && $0.seasonNumber > 0 && $0.tvShow?.startedWatching == true
+        },
         sort: [SortDescriptor(\TVEpisode.seasonNumber), SortDescriptor(\TVEpisode.episodeNumber)]
     )
     private var tvEpisodes: [TVEpisode]
-
-    //    private var tmdbMovies: [TMDb.Movie] {
-    //        movies.compactMap { movieStore.movie(withID: $0.id) }
-    //    }
-    //
-    //    private var watchedTMDBMovies: [TMDb.Movie] {
-    //        watchedMovies.compactMap { movieStore.movie(withID: $0.id) }
-    //    }
-    //
-    //    private var tmdbTVShows: [TMDb.TVShow] {
-    //        tvShows.compactMap { tvStore.show(withID: $0.id) }
-    //    }
 
     private var firstUnseenTVEpisodes: [TVEpisode] {
         var firstUnseenEpisode: [String: TVEpisode] = [:]
@@ -71,6 +64,7 @@ struct FeedView: View {
                 }
 
                 MediaList(title: "TV Show Watchlist (\(tvShows.count))", tvShows: tvShows)
+                MediaList(title: "Watched TV Shows (\(watchedTVShows.count))", tvShows: watchedTVShows)
                 MediaList(title: "Movie Watchlist (\(movies.count))", movies: movies)
                 MediaList(title: "Watched Movies (\(watchedMovies.count))", movies: watchedMovies)
             }

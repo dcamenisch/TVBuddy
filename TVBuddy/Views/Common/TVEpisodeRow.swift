@@ -84,7 +84,7 @@ struct TVEpisodeRow: View {
             Spacer()
             
             Button(action: {
-                _episode?.watched.toggle()
+                _episode?.toggleWatched()
                 try? context.save()
             }, label: {
                 Image(systemName: _episode?.watched ?? false ? "checkmark.circle" : "plus.circle")

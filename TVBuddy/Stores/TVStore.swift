@@ -115,6 +115,20 @@ class TVStore: ObservableObject {
 
         return nil
     }
+    
+    @MainActor
+    func seasonSync(_ season: Int, forTVShow id: TMDb.TVShow.ID) async -> TMDb.TVShowSeason? {
+            if seasons[id]?[season] == nil {
+                let result = await tvManager.fetchSeason(season, forTVShow: id)
+                guard let result = result else { return nil }
+                    
+                var tmpSeasons = seasons[id] ?? [:]
+                tmpSeasons[season] = result
+                self.seasons[id] = tmpSeasons
+            }
+                    
+            return seasons[id]?[season]
+        }
 
     @MainActor
     func episode(_ episode: Int, season: Int, forTVShow id: TMDb.TVShow.ID) -> TMDb.TVShowEpisode? {
