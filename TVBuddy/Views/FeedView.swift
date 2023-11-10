@@ -24,7 +24,10 @@ struct FeedView: View {
     @Query
     private var _tvShows: [TVSeries]
     
-    @Query
+    @Query(
+        filter: #Predicate<TVEpisode> { !$0.watched && $0.seasonNumber > 0},
+        sort: [SortDescriptor(\TVEpisode.seasonNumber), SortDescriptor(\TVEpisode.episodeNumber)]
+    )
     private var _tvEpisodes: [TVEpisode]
     
     private var movies: [TMDb.Movie] {
@@ -44,17 +47,39 @@ struct FeedView: View {
             tvStore.show(withID: tvShow.id)
         }
     }
+    
+    private var tvEpisodes: [TVEpisode] {
+        var firstEpisode: [String: TVEpisode] = [:]
+        
+        for tvEpisode in _tvEpisodes where firstEpisode[tvEpisode.tvSeries!.name] == nil {
+            firstEpisode[tvEpisode.tvSeries!.name] = tvEpisode
+        }
+
+        return Array(firstEpisode.values).sorted { ep1, ep2 in
+            ep1.tvSeries!.name < ep2.tvSeries!.name
+        }
+    }
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: 10) {
-                // TODO: TV Show Progress
-                Text("TV Episodes (\(_tvEpisodes.count))")
-                // TODO: Upcoming Episodes
-                MediaList(shows: tvShows, title: "TV Show Watchlist (\(tvShows.count))")
-                MediaList(movies: movies, title: "Movie Watchlist (\(movies.count))")
-                // TODO: Upcoming Movies
                 
+                VStack(alignment: .leading) {
+                    Text("TV Series Progress (\(_tvEpisodes.count))")
+                        .font(.title2)
+                        .bold()
+                    ForEach(tvEpisodes) { tvEpisode in
+                        TVEpisodeRow(
+                            tvSeriesID: tvEpisode.tvSeries!.id,
+                            tvSeriesSeasonNumber: tvEpisode.seasonNumber,
+                            tvSeriesEpisodeNumber: tvEpisode.episodeNumber,
+                            showOverview: false
+                        )
+                    }
+                }
+                
+                MediaList(shows: tvShows, title: "TV Series Watchlist (\(tvShows.count))")
+                MediaList(movies: movies, title: "Movie Watchlist (\(movies.count))")
                 MediaList(movies: watchedMovies, title: "Watched Movies (\(watchedMovies.count))")
             }
             .padding(.horizontal)

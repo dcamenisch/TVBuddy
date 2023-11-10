@@ -109,7 +109,9 @@ class TVStore: ObservableObject {
 	
     @MainActor
     func episode(_ episode: Int, season: Int, forTVShow id: TMDb.TVShow.ID) -> TMDb.TVShowEpisode? {
-        return self.season(season, forTVShow: id)?.episodes?[episode - 1]
+        return self.season(season, forTVShow: id)?.episodes?.first(where: { tvEpisode in
+            tvEpisode.episodeNumber == episode
+        })
     }
     
     @MainActor

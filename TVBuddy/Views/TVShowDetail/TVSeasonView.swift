@@ -78,7 +78,8 @@ struct TVSeasonView: View {
                             TVEpisodeRow(
                                 tvSeriesID: tvShowID,
                                 tvSeriesSeasonNumber: episode.seasonNumber,
-                                tvSeriesEpisodeNumber: episode.episodeNumber
+                                tvSeriesEpisodeNumber: episode.episodeNumber,
+                                showOverview: true
                             )
                         }
                     }

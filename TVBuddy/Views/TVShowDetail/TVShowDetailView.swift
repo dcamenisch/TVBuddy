@@ -28,6 +28,10 @@ struct TVShowDetailView: View {
     private var poster: URL? { tvStore.poster(withID: id) }
     private var backdrop: URL? { tvStore.backdrop(withID: id) }
     private var progress: CGFloat { offset / 350.0 }
+    
+    private var hasSpecials: Bool {
+        return show?.seasons?.count != show?.numberOfSeasons
+    }
 	
     init(id: TMDb.TVShow.ID) {
         self.id = id
@@ -138,7 +142,7 @@ struct TVShowDetailView: View {
                     .bold()
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack {
-                        ForEach(1...show!.numberOfSeasons!, id: \.self) { season in
+                        ForEach((hasSpecials ? 0 : 1)...show!.numberOfSeasons!, id: \.self) { season in
                             NavigationLink {
                                 TVSeasonView(seasonNumber: season, tvShowID: id)
                             } label: {
