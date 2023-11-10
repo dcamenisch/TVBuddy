@@ -269,10 +269,10 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6FE148B92AB5BA5E00D007B6 /* Build configuration list for PBXNativeTarget "TVBuddy" */;
 			buildPhases = (
-				6FE148BC2AB5BA9D00D007B6 /* ShellScript */,
 				6FE148A52AB5BA5C00D007B6 /* Sources */,
 				6FE148A62AB5BA5C00D007B6 /* Frameworks */,
 				6FE148A72AB5BA5C00D007B6 /* Resources */,
+				6FE148BC2AB5BA9D00D007B6 /* ShellScript */,
 			);
 			buildRules = (
 			);
