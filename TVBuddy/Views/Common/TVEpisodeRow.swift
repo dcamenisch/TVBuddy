@@ -84,8 +84,12 @@ struct TVEpisodeRow: View {
             Spacer()
             
             Button(action: {
-                _episode?.toggleWatched()
-                try? context.save()
+                if let episode = _episode {
+                    _episode?.toggleWatched()
+                    try? context.save()
+                } else {
+                    insertTVShowWithEpisode(tmdbTVShow: show!, tmdbEpisode: episode!, watched: false)
+                }
             }, label: {
                 Image(systemName: _episode?.watched ?? false ? "checkmark.circle" : "plus.circle")
                     .font(.title)
@@ -95,4 +99,42 @@ struct TVEpisodeRow: View {
             })
         }
     }
+    
+    private func insertTVShowWithEpisode(
+        tmdbTVShow: TMDb.TVShow, tmdbEpisode: TMDb.TVShowEpisode, watched: Bool = false
+    ) {
+        let tvShow: TVShow = TVShow(
+            tvShow: tmdbTVShow, startedWatching: watched, finishedWatching: watched)
+        context.insert(tvShow)
+
+        Task {
+            let tmdbEpisodes = await withTaskGroup(
+                of: TMDb.TVShowSeason?.self, returning: [TMDb.TVShowSeason].self
+            ) { group in
+                for season in tmdbTVShow.seasons ?? [] {
+                    group.addTask {
+                        await tvStore.seasonSync(season.seasonNumber, forTVShow: tmdbTVShow.id)
+                    }
+                }
+
+                var childTaskResults = [TMDb.TVShowSeason]()
+                for await result in group {
+                    if let result = result {
+                        childTaskResults.append(result)
+                    }
+                }
+
+                return childTaskResults
+            }.compactMap({ season in
+                season.episodes
+            }).flatMap({
+                $0
+            })
+
+            tvShow.episodes.append(
+                contentsOf: tmdbEpisodes.compactMap { TVEpisode(episode: $0, watched: watched) })
+            tvShow.episodes.first { $0.id == tmdbEpisode.id }?.toggleWatched()
+        }
+    }
+
 }
