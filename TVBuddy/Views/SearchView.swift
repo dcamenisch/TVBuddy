@@ -46,20 +46,9 @@ struct SearchView: View {
 	@ViewBuilder private var overlay: some View {
 		if isSearching && (media?.isEmpty ?? true || media == nil) {
 			ProgressView()
-		}
-		
-		Group {
-			if !isSearching && searchStore.searchQuery.isEmpty {
-				Text("Search for Movies, TV Shows and People")
-			}
-			
-			if !isSearching && !searchStore.searchQuery.isEmpty && (media?.isEmpty ?? false) {
-				Text("No results found")
-			}
-		}
-		.multilineTextAlignment(.center)
-		.foregroundColor(.secondary)
-		.padding(.horizontal)
+        } else if media?.isEmpty ?? true {
+            ContentUnavailableView.search(text: searchStore.searchQuery)
+        }
 	}
 	
 	private func mediaItemDidAppear(currentMediaItem mediaItem: Media, offset: Int = 15) {
