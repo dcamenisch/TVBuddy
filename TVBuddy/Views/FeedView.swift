@@ -25,7 +25,7 @@ struct FeedView: View {
     private var _tvShows: [TVSeries]
     
     @Query(
-        filter: #Predicate<TVEpisode> { !$0.watched },
+        filter: #Predicate<TVEpisode> { !$0.watched && $0.seasonNumber > 0},
         sort: [SortDescriptor(\TVEpisode.seasonNumber), SortDescriptor(\TVEpisode.episodeNumber)]
     )
     private var _tvEpisodes: [TVEpisode]
@@ -63,15 +63,23 @@ struct FeedView: View {
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: 10) {
-                Text("TV Episodes (\(_tvEpisodes.count))")
-                ForEach(tvEpisodes) { tvEpisode in
-                    TVEpisodeRow(tvSeriesID: tvEpisode.tvSeries!.id, tvSeriesSeasonNumber: tvEpisode.seasonNumber, tvSeriesEpisodeNumber: tvEpisode.episodeNumber)
+                
+                VStack(alignment: .leading) {
+                    Text("TV Series Progress (\(_tvEpisodes.count))")
+                        .font(.title2)
+                        .bold()
+                    ForEach(tvEpisodes) { tvEpisode in
+                        TVEpisodeRow(
+                            tvSeriesID: tvEpisode.tvSeries!.id,
+                            tvSeriesSeasonNumber: tvEpisode.seasonNumber,
+                            tvSeriesEpisodeNumber: tvEpisode.episodeNumber,
+                            showOverview: false
+                        )
+                    }
                 }
-                // TODO: Upcoming Episodes
+                
                 MediaList(shows: tvShows, title: "TV Series Watchlist (\(tvShows.count))")
                 MediaList(movies: movies, title: "Movie Watchlist (\(movies.count))")
-                // TODO: Upcoming Movies
-                
                 MediaList(movies: watchedMovies, title: "Watched Movies (\(watchedMovies.count))")
             }
             .padding(.horizontal)
