@@ -5,13 +5,13 @@
 //  Created by Danny on 16.09.2023.
 //
 
-import SwiftUI
 import NukeUI
+import SwiftUI
 
 struct ImageView: View {
     let title: String
     let url: URL?
-    
+
     var body: some View {
         LazyImage(url: url) { state in
             if let image = state.image {
@@ -29,9 +29,4 @@ struct ImageView: View {
             }
         }
     }
-}
-
-#Preview(traits: .sizeThatFitsLayout) {
-    ImageView(title: "Ashoka", url: URL(string: "https://www.themoviedb.org/t/p/original/laCJxobHoPVaLQTKxc14Y2zV64J.jpg"))
-        .posterStyle(size: .large)
 }

@@ -1,5 +1,5 @@
 //
-//  TVShowDetailHeader.swift
+//  TVShowHeader.swift
 //  TVBuddy
 //
 //  Created by Danny on 08.07.22.
@@ -9,7 +9,7 @@ import NukeUI
 import SwiftUI
 import TMDb
 
-struct TVShowDetailHeader: View {
+struct TVShowHeader: View {
 	
 	let show: TMDb.TVShow
 	let poster: URL?

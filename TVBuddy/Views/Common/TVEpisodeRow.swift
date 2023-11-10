@@ -39,7 +39,7 @@ struct TVEpisodeRow: View {
         _episodes = Query(filter: #Predicate<TVEpisode> {
             $0.episodeNumber == tvSeriesEpisodeNumber
             && $0.seasonNumber == tvSeriesSeasonNumber
-            && $0.tvSeries?.id == tvSeriesID
+            && $0.tvShow?.id == tvSeriesID
         })
     }
     

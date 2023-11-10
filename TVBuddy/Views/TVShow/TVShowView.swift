@@ -1,5 +1,5 @@
 //
-//  TVShowDetailView.swift
+//  TVShowView.swift
 //  TVBuddy
 //
 //  Created by Danny on 08.07.22.
@@ -9,7 +9,7 @@ import SwiftData
 import SwiftUI
 import TMDb
 
-struct TVShowDetailView: View {
+struct TVShowView: View {
 	
 	let id: TMDb.TVShow.ID
 	
@@ -21,8 +21,8 @@ struct TVShowDetailView: View {
     @EnvironmentObject private var tvStore: TVStore
     
     @Query
-    private var shows: [TVSeries]
-    private var _show: TVSeries? { shows.first }
+    private var shows: [TVShow]
+    private var _show: TVShow? { shows.first }
 
     private var show: TMDb.TVShow? { tvStore.show(withID: id) }
     private var poster: URL? { tvStore.poster(withID: id) }
@@ -35,7 +35,7 @@ struct TVShowDetailView: View {
 	
     init(id: TMDb.TVShow.ID) {
         self.id = id
-        _shows = Query(filter: #Predicate<TVSeries> { $0.id == id })
+        _shows = Query(filter: #Predicate<TVShow> { $0.id == id })
     }
     
     var body: some View {
@@ -71,7 +71,7 @@ struct TVShowDetailView: View {
                 offset = -point.y
                 visibility = offset > 290 ? .visible : .hidden
             } content: {
-                TVShowDetailHeader(show: show, poster: poster, backdrop: backdrop)
+                TVShowHeader(show: show, poster: poster, backdrop: backdrop)
                     .padding(.bottom, 10)
                 
                 VStack {
@@ -91,7 +91,7 @@ struct TVShowDetailView: View {
                 if let show = _show {
                     context.delete(show)
                 } else {
-                    insertTVSeries(tmdbSeries: show!)
+                    insertTVShow(tmdbTVShow: show!)
                 }
             } label: {
                 HStack {
@@ -109,7 +109,7 @@ struct TVShowDetailView: View {
                     show.finishedWatching.toggle()
                     try? context.save()
                 } else {
-                    insertTVSeries(tmdbSeries: show!)
+                    insertTVShow(tmdbTVShow: show!)
                 }
             } label: {
                 HStack {
@@ -174,25 +174,25 @@ struct TVShowDetailView: View {
             
             // Similar TV Series
             if let shows = tvStore.recommendations(forTVShow: id), !shows.isEmpty {
-                MediaList(shows: shows, title: "Similar TV Series")
+                MediaList(title: "Similar TV Series", tmdbTVShows: shows)
             }
             
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     
-    private func insertTVSeries(tmdbSeries: TMDb.TVShow) {
-        let tvSeries: TVSeries = TVSeries(tvSeries: tmdbSeries)
-        context.insert(tvSeries)
+    private func insertTVShow(tmdbTVShow: TMDb.TVShow) {
+        let tvShow: TVShow = TVShow(tvShow: tmdbTVShow)
+        context.insert(tvShow)
         
-        let tmdbEpisodes = tmdbSeries.seasons?.compactMap({ season in
-            tvStore.season(season.seasonNumber, forTVShow: tmdbSeries.id)
+        let tmdbEpisodes = tmdbTVShow.seasons?.compactMap({ season in
+            tvStore.season(season.seasonNumber, forTVShow: tmdbTVShow.id)
         }).compactMap({ season in
             season.episodes
         }).flatMap({
             $0
         })
         
-        tvSeries.episodes.append(contentsOf: tmdbEpisodes?.compactMap { TVEpisode(tvEpisode: $0) } ?? [])
+        tvShow.episodes.append(contentsOf: tmdbEpisodes?.compactMap { TVEpisode(episode: $0) } ?? [])
     }
 }

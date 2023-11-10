@@ -16,21 +16,21 @@ struct TabBarView: View {
                 Image(systemName: "house.fill")
                 Text("Feed")
             }
-            
+
             NavigationStack {
                 DiscoverView()
             }.tabItem {
                 Image(systemName: "binoculars.fill")
                 Text("Discover")
             }
-            
+
             NavigationStack {
                 SearchView()
             }.tabItem {
                 Image(systemName: "text.magnifyingglass")
                 Text("Search")
             }
-            
+
             NavigationStack {
                 ProfilView()
             }.tabItem {

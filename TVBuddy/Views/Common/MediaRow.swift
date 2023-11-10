@@ -20,7 +20,7 @@ struct MediaRow: View {
         case .movie(let movie):
             NavigationLink {
                 LazyView {
-                    MovieDetailView(id: movie.id)
+                    MovieView(id: movie.id)
                 }
             } label: {
                 movieRow(movie: movie)
@@ -28,7 +28,7 @@ struct MediaRow: View {
         case .tvShow(let tvShow):
             NavigationLink {
                 LazyView {
-                    TVShowDetailView(id: tvShow.id)
+                    TVShowView(id: tvShow.id)
                 }
             } label: {
                 tvShowRow(tvShow: tvShow)

@@ -9,7 +9,8 @@ import SwiftUI
 
 struct BackdropStyle: ViewModifier {
     func body(content: Content) -> some View {
-        return content
+        return
+            content
             .cornerRadius(15)
     }
 }
