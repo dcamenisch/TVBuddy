@@ -8,26 +8,26 @@
 import SwiftUI
 
 struct VoteLabel: View {
-	var voteAverage: Double
+    let voteAverage: Double
 
-	private var voteColor: Color {
-		if voteAverage < 4 {
-			return .red
-		}
+    private var voteColor: Color {
+        if voteAverage < 4 {
+            return .red
+        }
 
-		if voteAverage < 5.5 {
-			return .orange
-		}
+        if voteAverage < 5.5 {
+            return .orange
+        }
 
-		if voteAverage < 7.0 {
-			return .yellow
-		}
+        if voteAverage < 7.0 {
+            return .yellow
+        }
 
-		return .green
-	}
+        return .green
+    }
 
-	var body: some View {
-		Label("\(Int(voteAverage * 10))%", systemImage: "rosette")
-			.foregroundColor(voteColor)
-	}
+    var body: some View {
+        Label("\(Int(voteAverage * 10))%", systemImage: "rosette")
+            .foregroundColor(voteColor)
+    }
 }

@@ -10,28 +10,30 @@ import SwiftUIPager
 import TMDb
 
 struct MediaCarousel: View {
-	@StateObject var page: Page = .first()
-	@EnvironmentObject private var movieStore: MovieStore
-	
-	private var trendingMovies: [TMDb.Movie] {
+    @StateObject var page: Page = .first()
+    @EnvironmentObject private var movieStore: MovieStore
+
+    private var trendingMovies: [TMDb.Movie] {
         movieStore.trending()
-	}
-	
-	var body: some View {
-		content
-	}
-    
+    }
+
+    var body: some View {
+        content
+    }
+
     @ViewBuilder private var content: some View {
         if !trendingMovies.isEmpty {
             Pager(page: page, data: trendingMovies.prefix(10)) { movie in
                 NavigationLink {
                     LazyView {
-                        MovieDetailView(id: movie.id)
+                        MovieView(id: movie.id)
                     }
                 } label: {
-                    ImageView(title: movie.title, url: movieStore.backdropWithText(withID: movie.id))
-                        .backdropStyle()
-                        .padding(5)
+                    ImageView(
+                        title: movie.title, url: movieStore.backdropWithText(withID: movie.id)
+                    )
+                    .backdropStyle()
+                    .padding(5)
                 }
                 .buttonStyle(.plain)
             }
@@ -52,5 +54,5 @@ struct MediaCarousel: View {
                 }
         }
     }
-    
+
 }

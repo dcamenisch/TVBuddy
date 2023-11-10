@@ -59,7 +59,7 @@ struct TVSeasonView: View {
                 offset = -point.y
                 visibility = offset > 290 ? .visible : .hidden
             } content: {
-                TVSeasonHeaderView(season: season, poster: poster, backdrop: backdrop)
+                TVSeasonHeader(season: season, poster: poster, backdrop: backdrop)
                     .padding(.bottom, 10)
                 
                 VStack(alignment: .leading, spacing: 10) {

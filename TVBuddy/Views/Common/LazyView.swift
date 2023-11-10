@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-struct LazyView <T>: View where T: View {
+struct LazyView<T>: View where T: View {
     var view: () -> T
     var body: some View {
         self.view()

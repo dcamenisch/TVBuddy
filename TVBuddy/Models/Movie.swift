@@ -7,19 +7,23 @@
 
 import Foundation
 import SwiftData
+import TMDb
 
 @Model
 final class Movie {
     @Attribute(.unique)
     let id: Int
     let title: String
-    
+
     var watched: Bool
-    
-    init(id: Int, title: String, watched: Bool = false) {
+
+    init(id: Int, title: String, watched: Bool) {
         self.id = id
         self.title = title
-        
         self.watched = watched
+    }
+
+    convenience init(movie: TMDb.Movie, watched: Bool = false) {
+        self.init(id: movie.id, title: movie.title, watched: watched)
     }
 }

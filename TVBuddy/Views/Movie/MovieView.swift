@@ -1,5 +1,5 @@
 //
-//  TestDetailView.swift
+//  MovieView.swift
 //  TVBuddy
 //
 //  Created by Danny on 17.09.2023.
@@ -9,30 +9,30 @@ import SwiftData
 import SwiftUI
 import TMDb
 
-struct MovieDetailView: View {
+struct MovieView: View {
     let id: TMDb.Movie.ID
-    
+
     @State var offset: CGFloat = 0.0
     @State var visibility: Visibility = .hidden
-    
+
     @Environment(\.presentationMode) var presentationMode
     @Environment(\.modelContext) private var context
     @EnvironmentObject private var movieStore: MovieStore
-    
+
     @Query
     private var movies: [Movie]
     private var _movie: Movie? { movies.first }
-    
-    private var movie: TMDb.Movie? { movieStore.movie(withID: id) }
+
+    private var tmdbMovie: TMDb.Movie? { movieStore.movie(withID: id) }
     private var poster: URL? { movieStore.poster(withID: id) }
     private var backdrop: URL? { movieStore.backdrop(withID: id) }
     private var progress: CGFloat { offset / 350.0 }
-    
+
     init(id: TMDb.Movie.ID) {
         self.id = id
         _movies = Query(filter: #Predicate<Movie> { $0.id == id })
     }
-    
+
     var body: some View {
         content
             .toolbarBackground(.black)
@@ -49,9 +49,9 @@ struct MovieDetailView: View {
                             .foregroundStyle(.accent)
                     }
                 }
-                
+
                 ToolbarItem(placement: .principal) {
-                    Text(movie?.title ?? "")
+                    Text(tmdbMovie?.title ?? "")
                         .font(.system(size: 18, weight: .semibold))
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
@@ -59,16 +59,16 @@ struct MovieDetailView: View {
                 }
             }
     }
-    
+
     @ViewBuilder private var content: some View {
-        if let movie = movie {
+        if let tmdbMovie = tmdbMovie {
             OffsettableScrollView(showsIndicators: false) { point in
                 offset = -point.y
                 visibility = offset > 290 ? .visible : .hidden
             } content: {
-                MovieDetailHeader(movie: movie, poster: poster, backdrop: backdrop)
+                MovieHeader(movie: tmdbMovie, poster: poster, backdrop: backdrop)
                     .padding(.bottom, 10)
-                
+
                 VStack {
                     watchButtons
                     details
@@ -79,14 +79,14 @@ struct MovieDetailView: View {
             ProgressView()
         }
     }
-    
+
     private var watchButtons: some View {
         HStack {
             Button {
                 if let movie = _movie {
                     context.delete(movie)
                 } else {
-                    context.insert(Movie(id: id, title: self.movie!.title))
+                    context.insert(Movie(movie: tmdbMovie!))
                 }
             } label: {
                 HStack {
@@ -98,17 +98,19 @@ struct MovieDetailView: View {
                 .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
-            
+
             Button {
                 if let movie = _movie {
                     movie.watched.toggle()
                     try? context.save()
                 } else {
-                    context.insert(Movie(id: id, title: self.movie!.title, watched: true))
+                    context.insert(Movie(movie: tmdbMovie!, watched: true))
                 }
             } label: {
                 HStack {
-                    Image(systemName: _movie == nil ? "eye" : _movie?.watched ?? false ? "eye.fill" : "eye")
+                    Image(
+                        systemName: _movie == nil
+                            ? "eye" : _movie?.watched ?? false ? "eye.fill" : "eye")
                     Text("Watched")
                 }
                 .bold()
@@ -118,18 +120,18 @@ struct MovieDetailView: View {
             .buttonStyle(.bordered)
         }
     }
-    
+
     private var details: some View {
         VStack(alignment: .leading, spacing: 10) {
-            
+
             // Storyline for the Movie
-            if movie!.overview != nil {
+            if tmdbMovie!.overview != nil {
                 Text("Storyline")
                     .font(.title2)
                     .bold()
-                Text(movie!.overview ?? "")
+                Text(tmdbMovie!.overview ?? "")
             }
-            
+
             // Movie Cast
             if let credits = movieStore.credits(forMovie: id), !credits.cast.isEmpty {
                 VStack(alignment: .leading, spacing: 0) {
@@ -139,12 +141,12 @@ struct MovieDetailView: View {
                     PeopleList(credits: credits)
                 }
             }
-            
+
             // Similar Movies
             if let movies = movieStore.recommendations(forMovie: id), !movies.isEmpty {
-                MediaList(movies: movies, title: "Similar Movies")
+                MediaList(title: "Similar Movies", tmdbMovies: movies)
             }
-            
+
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

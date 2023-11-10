@@ -14,18 +14,52 @@ struct MediaList: View {
     @EnvironmentObject private var personStore: PersonStore
     @EnvironmentObject private var tvStore: TVStore
     
-    var media = [TMDb.Media]()
+    var media: [TMDb.Media] {
+        var result: [TMDb.Media] = []
+        
+        result.append(
+            contentsOf:
+                movies.compactMap { movieStore.movie(withID: $0.id) }
+                .map { TMDb.Media.movie($0) }
+        )
+        
+        result.append(
+            contentsOf:
+                tvShows.compactMap { tvStore.show(withID: $0.id) }
+                .map { TMDb.Media.tvShow($0) }
+        )
+        
+        result.append(contentsOf: tmdbMovies.map({TMDb.Media.movie($0)}))
+        result.append(contentsOf: tmdbTVShows.map({TMDb.Media.tvShow($0)}))
+        result.append(contentsOf: tmdbPerson.map({TMDb.Media.person($0)}))
+        
+        return result
+    }
     
     let title: String
     
-    init(movies: [TMDb.Movie] = [], persons: [TMDb.Person] = [], shows: [TMDb.TVShow] = [], title: String = "") {
-        self.title = title
-        
-        media.append(contentsOf: movies.map({TMDb.Media.movie($0)}))
-        media.append(contentsOf: persons.map({TMDb.Media.person($0)}))
-        media.append(contentsOf: shows.map({TMDb.Media.tvShow($0)}))
-    }
+    let movies: [Movie]
+    let tvShows: [TVShow]
+    let tmdbMovies: [TMDb.Movie]
+    let tmdbTVShows: [TMDb.TVShow]
+    let tmdbPerson: [TMDb.Person]
     
+    init(
+        title: String = "",
+        movies: [Movie] = [],
+        tvShows: [TVShow] = [],
+        tmdbMovies: [TMDb.Movie] = [],
+        tmdbTVShows: [TMDb.TVShow] = [],
+        tmdbPerson: [TMDb.Person] = []
+    ) {
+        self.title = title
+        self.movies = movies
+        self.tvShows = tvShows
+        self.tmdbMovies = tmdbMovies
+        self.tmdbTVShows = tmdbTVShows
+        self.tmdbPerson = tmdbPerson
+    }
+
     var body: some View {
         VStack(alignment: .leading) {
             Text(title)
@@ -47,7 +81,7 @@ struct MediaList: View {
         case .movie(let movie):
             return AnyView(NavigationLink {
                 LazyView {
-                    MovieDetailView(id: movie.id)
+                    MovieView(id: movie.id)
                 }
             } label: {
                 ImageView(title: movie.title, url: movieStore.poster(withID: movie.id))
@@ -57,7 +91,7 @@ struct MediaList: View {
         case .tvShow(let tvShow):
             return AnyView(NavigationLink {
                 LazyView {
-                    TVShowDetailView(id: tvShow.id)
+                    TVShowView(id: tvShow.id)
                 }
             } label: {
                 ImageView(title: tvShow.name, url: tvStore.poster(withID: tvShow.id))
