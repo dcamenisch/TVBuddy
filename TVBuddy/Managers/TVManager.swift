@@ -33,8 +33,7 @@ class TVManager {
     }
 
     func fetchEpisode(_ episode: Int, forSeason season: Int, forTVSeries id: TMDb.TVShow.ID) async
-        -> TMDb.TVShowEpisode?
-    {
+        -> TMDb.TVShowEpisode? {
         do {
             return try await tmdb
                 .tvShowEpisodes

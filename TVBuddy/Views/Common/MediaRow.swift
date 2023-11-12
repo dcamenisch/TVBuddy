@@ -9,42 +9,44 @@ import SwiftUI
 import TMDb
 
 struct MediaRow: View {
+    
     let mediaItem: TMDb.Media
-    
-    @EnvironmentObject private var movieStore: MovieStore
-    @EnvironmentObject private var personStore: PersonStore
-    @EnvironmentObject private var tvStore: TVStore
-    
+
     var body: some View {
         switch mediaItem {
         case .movie(let movie):
             NavigationLink {
-                LazyView {
-                    MovieView(id: movie.id)
-                }
+                LazyView(MovieView(id: movie.id))
             } label: {
-                movieRow(movie: movie)
+                MovieRow(movie: movie)
             }
         case .tvShow(let tvShow):
             NavigationLink {
-                LazyView {
-                    TVShowView(id: tvShow.id)
-                }
+                LazyView(TVShowView(id: tvShow.id))
             } label: {
-                tvShowRow(tvShow: tvShow)
+                TVShowRow(tvShow: tvShow)
             }
         case .person(let person):
             NavigationLink {
                 
             } label: {
-                personRow(person: person)
+                PersonRow(person: person)
             }
         }
     }
+}
+
+struct MovieRow: View {
     
-    func movieRow(movie: TMDb.Movie) -> some View {
+    @EnvironmentObject private var movieStore: MovieStore
+
+    let movie: TMDb.Movie
+    
+    @State var poster: URL?
+    
+    var body: some View {
         HStack(alignment: .center, spacing: 15) {
-            ImageView(title: movie.title, url: movieStore.poster(withID: movie.id))
+            ImageView(title: movie.title, url: poster)
                 .posterStyle(size: .small)
 
             VStack(alignment: .leading, spacing: 5) {
@@ -58,11 +60,23 @@ struct MediaRow: View {
                     .lineLimit(2)
             }
         }
+        .task {
+            poster = await movieStore.poster(withID: movie.id)
+        }
     }
+}
+
+struct TVShowRow: View {
     
-    func tvShowRow(tvShow: TMDb.TVShow) -> some View {
+    @EnvironmentObject private var tvStore: TVStore
+    
+    @State var poster: URL?
+    
+    let tvShow: TMDb.TVShow
+    
+    var body: some View {
         HStack(alignment: .center, spacing: 15) {
-            ImageView(title: tvShow.name, url: tvStore.poster(withID: tvShow.id))
+            ImageView(title: tvShow.name, url: poster)
                 .posterStyle(size: .small)
 
             VStack(alignment: .leading, spacing: 5) {
@@ -76,11 +90,23 @@ struct MediaRow: View {
                     .lineLimit(2)
             }
         }
+        .task {
+            poster = await tvStore.poster(withID: tvShow.id)
+        }
     }
+}
+
+struct PersonRow: View {
     
-    func personRow(person: TMDb.Person) -> some View {
+    @EnvironmentObject private var personStore: PersonStore
+    
+    @State var image: URL?
+
+    let person: TMDb.Person
+    
+    var body: some View {
         HStack(alignment: .center, spacing: 15) {
-            ImageView(title: person.name, url: personStore.image(forPerson: person.id))
+            ImageView(title: person.name, url: image)
                 .posterStyle(size: .small)
 
             VStack(alignment: .leading, spacing: 5) {
@@ -88,6 +114,9 @@ struct MediaRow: View {
                     .font(.system(size: 22, weight: .bold))
                     .lineLimit(2)
             }
+        }
+        .task {
+            image = await personStore.image(forPerson: person.id)
         }
     }
 }

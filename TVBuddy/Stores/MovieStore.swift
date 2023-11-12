@@ -10,32 +10,6 @@ import TMDb
 
 class MovieStore: ObservableObject {
 
-    private let fetchMovieQueue = DispatchQueue(
-        label: "\(String(describing: Bundle.main.bundleIdentifier)).fetchMovieQueue")
-    private let fetchPosterQueue = DispatchQueue(
-        label: "\(String(describing: Bundle.main.bundleIdentifier)).fetchPosterQueue")
-    private let fetchBackdropQueue = DispatchQueue(
-        label: "\(String(describing: Bundle.main.bundleIdentifier)).fetchBackdropQueue")
-    private let fetchBackdropTextQueue = DispatchQueue(
-        label: "\(String(describing: Bundle.main.bundleIdentifier)).fetchBackdropTextQueue")
-    private let fetchCreditsQueue = DispatchQueue(
-        label: "\(String(describing: Bundle.main.bundleIdentifier)).fetchCreditsQueue")
-    private let fetchRecommendationsQueue = DispatchQueue(
-        label: "\(String(describing: Bundle.main.bundleIdentifier)).fetchRecommendationsQueue")
-    private let fetchTrendingQueue = DispatchQueue(
-        label: "\(String(describing: Bundle.main.bundleIdentifier)).fetchTrendingQueue")
-    private let fetchDiscoverQueue = DispatchQueue(
-        label: "\(String(describing: Bundle.main.bundleIdentifier)).fetchDiscoverQueue")
-
-    private var pendingFetchMovieTasks: [TMDb.Movie.ID: Task<(), Never>] = [:]
-    private var pendingFetchPosterTasks: [TMDb.Movie.ID: Task<(), Never>] = [:]
-    private var pendingFetchBackdropTasks: [TMDb.Movie.ID: Task<(), Never>] = [:]
-    private var pendingFetchBackdropTextTasks: [TMDb.Movie.ID: Task<(), Never>] = [:]
-    private var pendingFetchCreditsTasks: [TMDb.Movie.ID: Task<(), Never>] = [:]
-    private var pendingFetchRecommendationsTasks: [TMDb.Movie.ID: Task<(), Never>] = [:]
-    private var pendingFetchTrendingTask: [Int: Task<(), Never>] = [:]
-    private var pendingFetchDiscoverTask: [Int: Task<(), Never>] = [:]
-
     private let moviesManager: MovieManager
 
     @Published var movies: [TMDb.Movie.ID: TMDb.Movie] = [:]
@@ -53,240 +27,136 @@ class MovieStore: ObservableObject {
     init(moviesManager: MovieManager = MovieManager()) {
         self.moviesManager = moviesManager
     }
-
+    
     @MainActor
-    func movie(withID id: TMDb.Movie.ID) -> TMDb.Movie? {
-        if let movie = movies[id] {
-            return movie
-        }
-
-        if pendingFetchMovieTasks[id] != nil {
-            return nil
-        }
-
-        let fetchTask = Task {
+    func movie(withID id: TMDb.Movie.ID) async -> TMDb.Movie? {
+        if self.movies[id] == nil {
             let movie = await moviesManager.fetchMovie(withID: id)
-            if let movie = movie {
-                movies[id] = movie
-            }
-
-            fetchMovieQueue.sync {
-                pendingFetchMovieTasks[id] = nil
-            }
+            guard let movie = movie else { return nil }
+            
+            self.movies[id] = movie
         }
-
-        fetchMovieQueue.sync {
-            pendingFetchMovieTasks[id] = fetchTask
-        }
-
-        return nil
+        
+        return self.movies[id]
     }
-
+    
     @MainActor
-    func poster(withID id: TMDb.Movie.ID) -> URL? {
-        if let url = posters[id] {
-            return url
-        }
-
-        if pendingFetchPosterTasks[id] != nil {
-            return nil
-        }
-
-        let fetchTask = Task {
+    func poster(withID id: TMDb.Movie.ID) async -> URL? {
+        if self.posters[id] == nil {
             let url = await moviesManager.fetchPoster(withID: id)
-            if let url = url {
-                posters[id] = url
-            }
-
-            fetchPosterQueue.sync {
-                pendingFetchPosterTasks[id] = nil
-            }
+            guard let url = url else { return nil }
+            
+            self.posters[id] = url
         }
-
-        fetchPosterQueue.sync {
-            pendingFetchPosterTasks[id] = fetchTask
-        }
-
-        return nil
+        
+        return self.posters[id]
     }
-
+    
     @MainActor
-    func backdrop(withID id: TMDb.Movie.ID) -> URL? {
-        if let url = backdrops[id] {
-            return url
-        }
-
-        if pendingFetchBackdropTasks[id] != nil {
-            return nil
-        }
-
-        let fetchTask = Task {
+    func backdrop(withID id: TMDb.Movie.ID) async -> URL? {
+        if self.backdrops[id] == nil {
             let url = await moviesManager.fetchBackdrop(withID: id)
-            if let url = url {
-                backdrops[id] = url
-            }
-
-            fetchBackdropQueue.sync {
-                pendingFetchBackdropTasks[id] = nil
-            }
+            guard let url = url else { return nil }
+            
+            self.backdrops[id] = url
         }
-
-        fetchBackdropQueue.sync {
-            pendingFetchBackdropTasks[id] = fetchTask
-        }
-
-        return nil
+        
+        return self.backdrops[id]
     }
-
+    
     @MainActor
-    func backdropWithText(withID id: TMDb.Movie.ID) -> URL? {
-        if let url = backdropsWithText[id] {
-            return url
-        }
-
-        if pendingFetchBackdropTextTasks[id] != nil {
-            return nil
-        }
-
-        let fetchTask = Task {
+    func backdropWithText(withID id: TMDb.Movie.ID) async -> URL? {
+        if self.backdropsWithText[id] == nil {
             let url = await moviesManager.fetchBackdropWithText(withID: id)
-            if let url = url {
-                backdropsWithText[id] = url
-            }
-
-            fetchBackdropTextQueue.sync {
-                pendingFetchBackdropTextTasks[id] = nil
-            }
+            guard let url = url else { return nil }
+            
+            self.backdropsWithText[id] = url
         }
-
-        fetchBackdropTextQueue.sync {
-            pendingFetchBackdropTextTasks[id] = fetchTask
-        }
-
-        return nil
+        
+        return self.backdropsWithText[id]
     }
-
+    
     @MainActor
-    func credits(forMovie id: TMDb.Movie.ID) -> TMDb.ShowCredits? {
-        if let credits = self.credits[id] {
-            return credits
-        }
-
-        if pendingFetchCreditsTasks[id] != nil {
-            return nil
-        }
-
-        let fetchTask = Task {
+    func credits(forMovie id: TMDb.Movie.ID) async -> TMDb.ShowCredits? {
+        if self.credits[id] == nil {
             let credits = await moviesManager.fetchCredits(forMovie: id)
-            if let credits = credits {
-                self.credits[id] = credits
-            }
-
-            fetchCreditsQueue.sync {
-                pendingFetchCreditsTasks[id] = nil
-            }
+            guard let credits = credits else { return nil }
+            
+            self.credits[id] = credits
         }
-
-        fetchCreditsQueue.sync {
-            pendingFetchCreditsTasks[id] = fetchTask
-        }
-
-        return nil
+        
+        return self.credits[id]
     }
-
+    
     @MainActor
-    func recommendations(forMovie id: TMDb.Movie.ID) -> [TMDb.Movie]? {
-        if let movies = recommendationsIDs[id] {
-            return movies.compactMap { self.movies[$0] }
-        }
-
-        if pendingFetchRecommendationsTasks[id] != nil {
-            return nil
-        }
-
-        let fetchTask = Task {
-            let movies = await moviesManager.fetchRecommendations(forMovie: id)?.prefix(10)
-            if let movies = movies {
-                movies.forEach { movie in
-                    _ = self.movie(withID: movie.id)
+    func recommendations(forMovie id: TMDb.Movie.ID) async -> [TMDb.Movie]? {
+        if self.recommendationsIDs[id] == nil {
+            let movies = await moviesManager.fetchRecommendations(forMovie: id)
+            guard let movies = movies else { return nil }
+            
+            await withTaskGroup(of: Void.self) { taskGroup in
+                for movie in movies {
+                    taskGroup.addTask {
+                        _ = await self.movie(withID: movie.id)
+                    }
                 }
-
-                recommendationsIDs[id] = movies.compactMap { $0.id }
             }
-
-            fetchRecommendationsQueue.sync {
-                pendingFetchRecommendationsTasks[id] = nil
-            }
+            
+            self.recommendationsIDs[id] = movies.compactMap { $0.id }
         }
-
-        fetchRecommendationsQueue.sync {
-            pendingFetchRecommendationsTasks[id] = fetchTask
-        }
-
-        return nil
+        
+        return self.recommendationsIDs[id]!.compactMap { self.movies[$0] }
     }
-
+    
     @MainActor
-    func trending() -> [TMDb.Movie] {
+    func trending() async -> [TMDb.Movie] {
         if trendingPage == 1 {
             return trendingIDs.compactMap { movies[$0] }
         }
-
+        
         trendingPage = 1
-
-        if pendingFetchTrendingTask[trendingPage] != nil {
-            return trendingIDs.compactMap { movies[$0] }
-        }
-
-        let fetchTask = Task {
-            let newPage = await moviesManager.fetchTrending(page: trendingPage)
-
-            newPage?.forEach { movie in
-                _ = self.movie(withID: movie.id)
-                if !trendingIDs.contains(movie.id) { trendingIDs.append(movie.id) }
-            }
-
-            fetchTrendingQueue.sync {
-                pendingFetchRecommendationsTasks[trendingPage] = nil
+                
+        let page = await moviesManager.fetchTrending(page: trendingPage)
+        guard let page = page else { return [] }
+                
+        await withTaskGroup(of: Void.self) { taskGroup in
+            for movie in page {
+                taskGroup.addTask {
+                    _ = await self.movie(withID: movie.id)
+                }
             }
         }
-
-        fetchTrendingQueue.sync {
-            pendingFetchTrendingTask[trendingPage] = fetchTask
+        
+        page.forEach { movie in
+            if !self.trendingIDs.contains(movie.id) { self.trendingIDs.append(movie.id) }
         }
-
+        
         return trendingIDs.compactMap { movies[$0] }
     }
-
+    
     @MainActor
-    func discover() -> [TMDb.Movie] {
+    func discover() async -> [TMDb.Movie] {
         if discoverPage == 1 {
             return discoverIDs.compactMap { movies[$0] }
         }
 
         discoverPage = 1
-
-        if pendingFetchDiscoverTask[discoverPage] != nil {
-            return discoverIDs.compactMap { movies[$0] }
-        }
-
-        let fetchTask = Task {
-            let newPage = await moviesManager.fetchDiscover(page: trendingPage)
-
-            newPage?.forEach { movie in
-                _ = self.movie(withID: movie.id)
-                if !discoverIDs.contains(movie.id) { discoverIDs.append(movie.id) }
-            }
-
-            fetchDiscoverQueue.sync {
-                pendingFetchDiscoverTask[discoverPage] = nil
+                
+        let page = await moviesManager.fetchDiscover(page: trendingPage)
+        guard let page = page else { return [] }
+                
+        await withTaskGroup(of: Void.self) { taskGroup in
+            for movie in page {
+                taskGroup.addTask {
+                    _ = await self.movie(withID: movie.id)
+                }
             }
         }
-
-        fetchDiscoverQueue.sync {
-            pendingFetchDiscoverTask[discoverPage] = fetchTask
+        
+        page.forEach { movie in
+            if !self.discoverIDs.contains(movie.id) { self.discoverIDs.append(movie.id) }
         }
-
+        
         return discoverIDs.compactMap { movies[$0] }
     }
 }

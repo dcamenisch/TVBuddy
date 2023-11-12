@@ -11,7 +11,7 @@ import TMDb
 
 struct MovieHeader: View {
 
-    let movie: TMDb.Movie
+    let tmdbMovie: TMDb.Movie
     let poster: URL?
     let backdrop: URL?
 
@@ -20,7 +20,7 @@ struct MovieHeader: View {
     private var metadata: [String] {
         var items = [String]()
 
-        if let runtime = movie.runtime, runtime > 0 {
+        if let runtime = tmdbMovie.runtime, runtime > 0 {
             let time = Int(runtime)
             let hours = Int(time / 60)
             let minutes = Int(time % 60)
@@ -32,11 +32,11 @@ struct MovieHeader: View {
             }
         }
 
-        if let releaseDate = movie.releaseDate {
+        if let releaseDate = tmdbMovie.releaseDate {
             items.append(DateFormatter.year.string(from: releaseDate))
         }
 
-        if let status = movie.status {
+        if let status = tmdbMovie.status {
             items.append(status.rawValue)
         }
 
@@ -76,11 +76,11 @@ struct MovieHeader: View {
                 .frame(height: initialHeaderHeight)
 
                 VStack(alignment: .leading, spacing: 5) {
-                    if let voteAverage = movie.voteAverage, voteAverage > 0.0 {
+                    if let voteAverage = tmdbMovie.voteAverage, voteAverage > 0.0 {
                         VoteLabel(voteAverage: voteAverage)
                     }
 
-                    Text(movie.title)
+                    Text(tmdbMovie.title)
                         .font(.system(size: 25, weight: .bold))
 
                     HStack {
@@ -92,7 +92,7 @@ struct MovieHeader: View {
                 .padding(.horizontal, 15)
             }
 
-            ImageView(title: movie.title, url: poster)
+            ImageView(title: tmdbMovie.title, url: poster)
                 .posterStyle(size: .medium)
                 .padding(.horizontal)
         }

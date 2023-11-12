@@ -10,39 +10,9 @@ import TMDb
 
 struct MediaList: View {
     
-    @EnvironmentObject private var movieStore: MovieStore
-    @EnvironmentObject private var personStore: PersonStore
-    @EnvironmentObject private var tvStore: TVStore
-    
-    var media: [TMDb.Media] {
-        var result: [TMDb.Media] = []
-        
-        result.append(
-            contentsOf:
-                movies.compactMap { movieStore.movie(withID: $0.id) }
-                .map { TMDb.Media.movie($0) }
-        )
-        
-        result.append(
-            contentsOf:
-                tvShows.compactMap { tvStore.show(withID: $0.id) }
-                .map { TMDb.Media.tvShow($0) }
-        )
-        
-        result.append(contentsOf: tmdbMovies.map({TMDb.Media.movie($0)}))
-        result.append(contentsOf: tmdbTVShows.map({TMDb.Media.tvShow($0)}))
-        result.append(contentsOf: tmdbPerson.map({TMDb.Media.person($0)}))
-        
-        return result
-    }
-    
     let title: String
     
-    let movies: [Movie]
-    let tvShows: [TVShow]
-    let tmdbMovies: [TMDb.Movie]
-    let tmdbTVShows: [TMDb.TVShow]
-    let tmdbPerson: [TMDb.Person]
+    var media = [Media]()
     
     init(
         title: String = "",
@@ -53,11 +23,13 @@ struct MediaList: View {
         tmdbPerson: [TMDb.Person] = []
     ) {
         self.title = title
-        self.movies = movies
-        self.tvShows = tvShows
-        self.tmdbMovies = tmdbMovies
-        self.tmdbTVShows = tmdbTVShows
-        self.tmdbPerson = tmdbPerson
+        
+        media.append(contentsOf: movies.map({Media.movie($0)}))
+        media.append(contentsOf: tvShows.map({Media.tvShow($0)}))
+        
+        media.append(contentsOf: tmdbMovies.map({Media.tmdbMovie($0)}))
+        media.append(contentsOf: tmdbTVShows.map({Media.tmdbTVShow($0)}))
+        media.append(contentsOf: tmdbPerson.map({Media.tmdbPerson($0)}))
     }
 
     var body: some View {
@@ -68,43 +40,90 @@ struct MediaList: View {
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack {
-                    ForEach(media, id: \.id) { item in
-                        navLink(item: item)
+                    ForEach(media) { item in
+                        mediaListItem(item: item)
                     }
                 }
             }
         }
     }
-    
-    func navLink(item: TMDb.Media) -> some View {
+        
+    func mediaListItem(item: Media) -> some View {
         switch item {
-        case .movie(let movie):
-            return AnyView(NavigationLink {
-                LazyView {
-                    MovieView(id: movie.id)
-                }
-            } label: {
-                ImageView(title: movie.title, url: movieStore.poster(withID: movie.id))
-                    .posterStyle(size: .small)
-            })
+        case .movie:
+            return AnyView(MediaListMovieItem(mediaItem: item))
 
-        case .tvShow(let tvShow):
-            return AnyView(NavigationLink {
-                LazyView {
-                    TVShowView(id: tvShow.id)
-                }
-            } label: {
-                ImageView(title: tvShow.name, url: tvStore.poster(withID: tvShow.id))
-                    .posterStyle(size: .small)
-            })
+        case .tvShow:
+            return AnyView(MediaListTVShowItem(mediaItem: item))
 
-        case .person(let person):
-            return AnyView(NavigationLink {
-                Text(person.name)
-            } label: {
-                ImageView(title: person.name, url: personStore.image(forPerson: person.id))
-                    .posterStyle(size: .small)
-            })
+        case .tmdbMovie:
+            return AnyView(MediaListMovieItem(mediaItem: item))
+            
+        case .tmdbTVShow:
+            return AnyView(MediaListTVShowItem(mediaItem: item))
+            
+        case .tmdbPerson:
+            return AnyView(MediaListPersonItem(mediaItem: item))
+        }
+    }
+}
+
+struct MediaListMovieItem: View {
+    
+    @EnvironmentObject private var movieStore: MovieStore
+    @State var poster: URL?
+    
+    let mediaItem: Media
+    
+    var body: some View {
+        NavigationLink {
+            MovieView(id: mediaItem.id)
+        } label: {
+            ImageView(title: mediaItem.name, url: poster)
+                .posterStyle(size: .small)
+        }
+        .task {
+            poster = await movieStore.poster(withID: mediaItem.id)
+        }
+    }
+}
+
+struct MediaListTVShowItem: View {
+    
+    @EnvironmentObject private var tvStore: TVStore
+    @State var poster: URL?
+    
+    let mediaItem: Media
+    
+    var body: some View {
+        NavigationLink {
+            TVShowView(id: mediaItem.id)
+        } label: {
+            ImageView(title: mediaItem.name, url: poster)
+                .posterStyle(size: .small)
+        }
+        .task {
+            poster = await tvStore.poster(withID: mediaItem.id)
+        }
+    }
+}
+
+struct MediaListPersonItem: View {
+    
+    @EnvironmentObject private var personStore: PersonStore
+    @State var poster: URL?
+    
+    let mediaItem: Media
+    
+    var body: some View {
+        NavigationLink {
+            Text(mediaItem.name)
+        } label: {
+            ImageView(title: mediaItem.name, url: poster)
+                .posterStyle(size: .small)
+        }
+        .task {
+            poster = await personStore.image(forPerson: mediaItem.id)
         }
     }
 }

@@ -11,11 +11,8 @@ import TMDb
 
 struct MediaCarousel: View {
     @StateObject var page: Page = .first()
-    @EnvironmentObject private var movieStore: MovieStore
-
-    private var trendingMovies: [TMDb.Movie] {
-        movieStore.trending()
-    }
+    
+    var trendingMovies: [TMDb.Movie]
 
     var body: some View {
         content
@@ -24,18 +21,7 @@ struct MediaCarousel: View {
     @ViewBuilder private var content: some View {
         if !trendingMovies.isEmpty {
             Pager(page: page, data: trendingMovies.prefix(10)) { movie in
-                NavigationLink {
-                    LazyView {
-                        MovieView(id: movie.id)
-                    }
-                } label: {
-                    ImageView(
-                        title: movie.title, url: movieStore.backdropWithText(withID: movie.id)
-                    )
-                    .backdropStyle()
-                    .padding(5)
-                }
-                .buttonStyle(.plain)
+                MediaCarouselItem(movie: movie)
             }
             .bounces(true)
             .interactive(scale: 0.95)
@@ -55,4 +41,27 @@ struct MediaCarousel: View {
         }
     }
 
+}
+
+struct MediaCarouselItem: View {
+    
+    let movie: TMDb.Movie
+    
+    @EnvironmentObject private var movieStore: MovieStore
+    
+    @State var backdropWithText: URL?
+    
+    var body: some View {
+        NavigationLink {
+            LazyView(MovieView(id: movie.id))
+        } label: {
+            ImageView(title: movie.title, url: backdropWithText)
+                .backdropStyle()
+                .padding(5)
+        }
+        .buttonStyle(.plain)
+        .task {
+            backdropWithText = await movieStore.backdropWithText(withID: movie.id)
+        }
+    }
 }

@@ -10,9 +10,10 @@ import SwiftData
 import TMDb
 
 @Model
-final class Movie {
+public final class Movie {
     @Attribute(.unique)
-    let id: Int
+    public let id: Int
+    
     let title: String
 
     var watched: Bool
