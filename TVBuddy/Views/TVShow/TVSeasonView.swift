@@ -14,16 +14,16 @@ struct TVSeasonView: View {
     let id: TMDb.TVShow.ID
     let seasonNumber: Int
     
+    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.modelContext) private var context
+    @EnvironmentObject private var tvStore: TVStore
+    
     @State var offset: CGFloat = 0.0
     @State var visibility: Visibility = .hidden
     
     @State var tmdbSeason: TMDb.TVShowSeason?
     @State var poster: URL?
     @State var backdrop: URL?
-    
-    @Environment(\.presentationMode) var presentationMode
-    @Environment(\.modelContext) private var context
-    @EnvironmentObject private var tvStore: TVStore
     
     private var progress: CGFloat { offset / 350.0 }
     

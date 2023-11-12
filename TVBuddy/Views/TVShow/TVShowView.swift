@@ -13,27 +13,18 @@ struct TVShowView: View {
 	
 	let id: TMDb.TVShow.ID
 	
-    @State var offset: CGFloat = 0.0
-    @State var visibility: Visibility = .hidden
-    
     @Environment(\.presentationMode) var presentationMode
     @Environment(\.modelContext) private var context
     @EnvironmentObject private var tvStore: TVStore
     
+    @State var offset: CGFloat = 0.0
+    @State var visibility: Visibility = .hidden
+    
     @State var tmdbTVShow: TMDb.TVShow?
     @State var poster: URL?
     @State var backdrop: URL?
-    
-    @Query
-    private var shows: [TVShow]
-    private var _show: TVShow? { shows.first }
 
     private var progress: CGFloat { offset / 350.0 }
-	
-    init(id: TMDb.TVShow.ID) {
-        self.id = id
-        _shows = Query(filter: #Predicate<TVShow> { $0.id == id })
-    }
     
     var body: some View {
         content

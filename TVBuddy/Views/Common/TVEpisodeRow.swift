@@ -42,8 +42,7 @@ struct TVEpisodeRow: View {
     
     var body: some View {
         NavigationLink {
-            TVSeasonView(id: id, seasonNumber: seasonNumber)
-//            TVShowView(id: id)
+            TVShowView(id: id)
         } label: {
             HStack {
                 ImageView(title: tmdbEpisode?.name ?? "", url: backdrop)
