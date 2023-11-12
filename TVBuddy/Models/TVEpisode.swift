@@ -10,9 +10,9 @@ import SwiftData
 import TMDb
 
 @Model
-final class TVEpisode {
+public final class TVEpisode {
     @Attribute(.unique)
-    let id: Int
+    public let id: Int
 
     var tvShow: TVShow?
 

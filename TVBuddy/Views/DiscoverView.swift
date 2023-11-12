@@ -12,18 +12,26 @@ struct DiscoverView: View {
 
     @EnvironmentObject private var tvStore: TVStore
     @EnvironmentObject private var movieStore: MovieStore
+    
+    @State var trendingMovies = [TMDb.Movie]()
+    @State var trendingTVShows = [TMDb.TVShow]()
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
 
-            MediaCarousel()
+            MediaCarousel(trendingMovies: trendingMovies)
 
             VStack(spacing: 10) {
-                MediaList(title: "Trending Movies", tmdbMovies: movieStore.trending())
-                MediaList(title: "Trending TV Shows", tmdbTVShows: tvStore.trending())
+                MediaList(title: "Trending Movies", tmdbMovies: trendingMovies)
+                MediaList(title: "Trending TV Shows", tmdbTVShows: trendingTVShows)
             }
             .padding(.horizontal)
 
-        }.navigationTitle("Discover")
+        }
+        .navigationTitle("Discover")
+        .task {
+            trendingMovies = await movieStore.trending()
+            trendingTVShows = await tvStore.trending()
+        }
     }
 }

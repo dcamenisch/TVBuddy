@@ -10,9 +10,10 @@ import SwiftData
 import TMDb
 
 @Model
-final class TVShow {
+public final class TVShow {
     @Attribute(.unique)
-    let id: Int
+    public let id: Int
+    
     let name: String
 
     @Relationship(deleteRule: .cascade, inverse: \TVEpisode.tvShow)

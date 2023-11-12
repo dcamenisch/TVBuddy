@@ -10,9 +10,6 @@ import TMDb
 
 struct SearchView: View {
 
-    @EnvironmentObject private var movieStore: MovieStore
-    @EnvironmentObject private var tvStore: TVStore
-    @EnvironmentObject private var personStore: PersonStore
     @EnvironmentObject private var searchStore: SearchStore
 
     private var isSearching: Bool {
@@ -51,7 +48,7 @@ struct SearchView: View {
         }
     }
 
-    private func mediaItemDidAppear(currentMediaItem mediaItem: Media) {
+    private func mediaItemDidAppear(currentMediaItem mediaItem: TMDb.Media) {
         searchStore.fetchNextPage(currentMediaItem: mediaItem)
     }
 }
