@@ -58,11 +58,11 @@ struct CastItem: View {
                 Text(castMember.name)
                     .font(.title3)
                     .bold()
-                    .lineLimit(2)
+                    .lineLimit(1)
 
                 Text(castMember.character)
                     .font(.subheadline)
-                    .lineLimit(2)
+                    .lineLimit(1)
             }
         }
         .task {
@@ -87,11 +87,11 @@ struct CrewItem: View {
                 Text(crewMember.name)
                     .font(.title3)
                     .bold()
-                    .lineLimit(2)
+                    .lineLimit(1)
 
                 Text(crewMember.job)
                     .font(.subheadline)
-                    .lineLimit(2)
+                    .lineLimit(1)
             }
         }
         .task {
