@@ -46,7 +46,7 @@ public final class TVShow {
     }
     
     func checkWatching() {
-        startedWatching = episodes.contains { $0.watched }
-        finishedWatching = episodes.allSatisfy { $0.watched }
+        startedWatching = episodes.contains { $0.watched && $0.seasonNumber != 0 }
+        finishedWatching = episodes.allSatisfy { $0.watched || $0.seasonNumber == 0 }
     }
 }
