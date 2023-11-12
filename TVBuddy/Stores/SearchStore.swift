@@ -11,7 +11,7 @@ import TMDb
 enum SearchScope: String, Codable, CaseIterable, Identifiable, Hashable {
     case all = "All"
     case movies = "Movies"
-    case tvseries = "TV Series"
+    case tvShows = "TV Shows"
     case people = "People"
 
     var id: String { rawValue }

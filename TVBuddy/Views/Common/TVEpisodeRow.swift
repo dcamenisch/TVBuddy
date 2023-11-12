@@ -22,21 +22,21 @@ struct TVEpisodeRow: View {
     @State var tmdbTVShow: TMDb.TVShow?
     @State var tmdbEpisode: TMDb.TVShowEpisode?
     @State var backdrop: URL?
-    
+        
     @Query
     private var episodes: [TVEpisode]
     private var episode: TVEpisode? { episodes.first }
     
-    init(tvSeriesID: TMDb.TVShow.ID, tvSeriesSeasonNumber: Int, tvSeriesEpisodeNumber: Int, showOverview: Bool) {
-        self.id = tvSeriesID
-        self.seasonNumber = tvSeriesSeasonNumber
-        self.episodeNumber = tvSeriesEpisodeNumber
+    init(tvShowID: TMDb.TVShow.ID, seasonNumber: Int, episodeNumber: Int, showOverview: Bool) {
+        self.id = tvShowID
+        self.seasonNumber = seasonNumber
+        self.episodeNumber = episodeNumber
         self.showOverview = showOverview
-        
+                
         _episodes = Query(filter: #Predicate<TVEpisode> {
-            $0.episodeNumber == tvSeriesEpisodeNumber
-            && $0.seasonNumber == tvSeriesSeasonNumber
-            && $0.tvShow?.id == tvSeriesID
+            $0.episodeNumber == episodeNumber
+            && $0.seasonNumber == seasonNumber
+            && $0.tvShow?.id == tvShowID
         })
     }
     
@@ -87,7 +87,6 @@ struct TVEpisodeRow: View {
                 Button(action: {
                     if let episode = episode {
                         episode.toggleWatched()
-                        try? context.save()
                     } else {
                         insertTVShowWithEpisode(tmdbTVShow: tmdbTVShow!, tmdbEpisode: tmdbEpisode!, watched: false)
                     }
@@ -101,11 +100,11 @@ struct TVEpisodeRow: View {
             }
         }
         .buttonStyle(.plain)
-            .task {
-                tmdbTVShow = await tvStore.show(withID: id)
-                tmdbEpisode = await tvStore.episode(episodeNumber, season: seasonNumber, forTVShow: id)
-                backdrop = await tvStore.backdrop(withID: id)
-            }
+        .task(id: episode) {
+            tmdbTVShow = await tvStore.show(withID: id)
+            tmdbEpisode = await tvStore.episode(episodeNumber, season: seasonNumber, forTVShow: id)
+            backdrop = await tvStore.backdrop(withID: id)
+        }
     }
     
     private func insertTVShowWithEpisode(

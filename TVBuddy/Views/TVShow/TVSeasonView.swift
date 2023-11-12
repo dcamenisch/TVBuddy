@@ -82,9 +82,9 @@ struct TVSeasonView: View {
                             .bold()
                         ForEach(episodes) { episode in
                             TVEpisodeRow(
-                                tvSeriesID: id,
-                                tvSeriesSeasonNumber: episode.seasonNumber,
-                                tvSeriesEpisodeNumber: episode.episodeNumber,
+                                tvShowID: id,
+                                seasonNumber: episode.seasonNumber,
+                                episodeNumber: episode.episodeNumber,
                                 showOverview: true
                             )
                         }

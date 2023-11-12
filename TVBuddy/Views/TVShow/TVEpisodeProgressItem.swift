@@ -29,9 +29,9 @@ struct TVEpisodeProgressItem: View {
         Group {
             if let tvEpisode = tvEpisode {
                 TVEpisodeRow(
-                    tvSeriesID: tvShow.id,
-                    tvSeriesSeasonNumber: tvEpisode.seasonNumber,
-                    tvSeriesEpisodeNumber: tvEpisode.episodeNumber,
+                    tvShowID: tvShow.id,
+                    seasonNumber: tvEpisode.seasonNumber,
+                    episodeNumber: tvEpisode.episodeNumber,
                     showOverview: false
                 )
             }
