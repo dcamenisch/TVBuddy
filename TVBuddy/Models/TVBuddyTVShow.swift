@@ -10,14 +10,14 @@ import SwiftData
 import TMDb
 
 @Model
-public final class TVShow {
+public final class TVBuddyTVShow {
     @Attribute(.unique)
     public let id: Int
     
     let name: String
 
-    @Relationship(deleteRule: .cascade, inverse: \TVEpisode.tvShow)
-    var episodes: [TVEpisode] = []
+    @Relationship(deleteRule: .cascade, inverse: \TVBuddyTVEpisode.tvShow)
+    var episodes: [TVBuddyTVEpisode] = []
 
     var startedWatching: Bool
     var finishedWatching: Bool
@@ -30,7 +30,7 @@ public final class TVShow {
     }
 
     convenience init(
-        tvShow: TMDb.TVShow, startedWatching: Bool = false, finishedWatching: Bool = false
+        tvShow: TVSeries, startedWatching: Bool = false, finishedWatching: Bool = false
     ) {
         self.init(
             id: tvShow.id,

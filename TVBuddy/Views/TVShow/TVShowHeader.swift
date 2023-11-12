@@ -11,7 +11,7 @@ import TMDb
 
 struct TVShowHeader: View {
 	
-	let show: TMDb.TVShow
+	let show: TVSeries
 	let poster: URL?
 	let backdrop: URL?
 	

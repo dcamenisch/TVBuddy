@@ -17,15 +17,6 @@
         "revision" : "4ddc04c801aac143090bb14cf26603a3bf9c74cb",
         "version" : "2.5.0"
       }
-    },
-    {
-      "identity" : "tmdb",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/adamayoung/TMDb.git",
-      "state" : {
-        "revision" : "764e59eede24ea912a924663e6a068b8d3c8551b",
-        "version" : "9.0.0"
-      }
     }
   ],
   "version" : 2

@@ -8,7 +8,7 @@
 import Foundation
 import TMDb
 
-public enum Media: Identifiable, Equatable, Hashable {
+public enum TVBuddyMedia: Identifiable, Equatable, Hashable {
 
     public var id: Int {
         switch self {
@@ -48,11 +48,11 @@ public enum Media: Identifiable, Equatable, Hashable {
         }
     }
 
-    case movie(Movie)
-    case tvShow(TVShow)
+    case movie(TVBuddyMovie)
+    case tvShow(TVBuddyTVShow)
     
-    case tmdbMovie(TMDb.Movie)
-    case tmdbTVShow(TMDb.TVShow)
-    case tmdbPerson(TMDb.Person)
+    case tmdbMovie(Movie)
+    case tmdbTVShow(TVSeries)
+    case tmdbPerson(Person)
 
 }

@@ -11,16 +11,15 @@ import TMDb
 
 struct TVShowView: View {
 	
-	let id: TMDb.TVShow.ID
+	let id: TVSeries.ID
 	
     @Environment(\.presentationMode) var presentationMode
-    @Environment(\.modelContext) private var context
     @EnvironmentObject private var tvStore: TVStore
     
     @State var offset: CGFloat = 0.0
     @State var visibility: Visibility = .hidden
     
-    @State var tmdbTVShow: TMDb.TVShow?
+    @State var tmdbTVShow: TVSeries?
     @State var poster: URL?
     @State var backdrop: URL?
 

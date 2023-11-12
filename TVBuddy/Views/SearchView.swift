@@ -16,7 +16,7 @@ struct SearchView: View {
         searchStore.isSearching
     }
 
-    private var media: [TMDb.Media]? {
+    private var media: [Media]? {
         searchStore.results
     }
 
@@ -48,7 +48,7 @@ struct SearchView: View {
         }
     }
 
-    private func mediaItemDidAppear(currentMediaItem mediaItem: TMDb.Media) {
+    private func mediaItemDidAppear(currentMediaItem mediaItem: Media) {
         searchStore.fetchNextPage(currentMediaItem: mediaItem)
     }
 }

@@ -10,19 +10,19 @@ import TMDb
 
 struct MediaRow: View {
     
-    let mediaItem: TMDb.Media
+    let mediaItem: Media
 
     var body: some View {
         switch mediaItem {
         case .movie(let movie):
             NavigationLink {
-                LazyView(MovieView(id: movie.id))
+                MovieView(id: movie.id)
             } label: {
                 MovieRow(movie: movie)
             }
-        case .tvShow(let tvShow):
+        case .tvSeries(let tvShow):
             NavigationLink {
-                LazyView(TVShowView(id: tvShow.id))
+                TVShowView(id: tvShow.id)
             } label: {
                 TVShowRow(tvShow: tvShow)
             }
@@ -38,10 +38,9 @@ struct MediaRow: View {
 
 struct MovieRow: View {
     
-    @EnvironmentObject private var movieStore: MovieStore
-
-    let movie: TMDb.Movie
+    let movie: Movie
     
+    @EnvironmentObject private var movieStore: MovieStore
     @State var poster: URL?
     
     var body: some View {
@@ -68,12 +67,11 @@ struct MovieRow: View {
 
 struct TVShowRow: View {
     
+    let tvShow: TVSeries
+    
     @EnvironmentObject private var tvStore: TVStore
-    
     @State var poster: URL?
-    
-    let tvShow: TMDb.TVShow
-    
+        
     var body: some View {
         HStack(alignment: .center, spacing: 15) {
             ImageView(title: tvShow.name, url: poster)
@@ -97,12 +95,11 @@ struct TVShowRow: View {
 }
 
 struct PersonRow: View {
-    
-    @EnvironmentObject private var personStore: PersonStore
-    
-    @State var image: URL?
 
-    let person: TMDb.Person
+    let person: Person
+
+    @EnvironmentObject private var personStore: PersonStore
+    @State var image: URL?
     
     var body: some View {
         HStack(alignment: .center, spacing: 15) {

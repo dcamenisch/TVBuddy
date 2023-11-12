@@ -9,12 +9,12 @@ import SwiftUI
 import TMDb
 
 struct MovieView: View {
-    let id: TMDb.Movie.ID
+    let id: Movie.ID
 
     @State var offset: CGFloat = 0.0
     @State var visibility: Visibility = .hidden
     
-    @State var tmdbMovie: TMDb.Movie?
+    @State var tmdbMovie: Movie?
     @State var poster: URL?
     @State var backdrop: URL?
 

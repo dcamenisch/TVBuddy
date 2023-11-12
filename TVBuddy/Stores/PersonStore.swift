@@ -12,15 +12,15 @@ class PersonStore: ObservableObject {
 
     private let personManager: PersonManager
 
-    @Published var persons: [TMDb.Person.ID: TMDb.Person] = [:]
-    @Published var images: [TMDb.Person.ID: URL] = [:]
+    @Published var persons: [Person.ID: Person] = [:]
+    @Published var images: [Person.ID: URL] = [:]
 
     init() {
         self.personManager = PersonManager()
     }
     
     @MainActor
-    func person(withID id: TMDb.Person.ID) async -> Person? {
+    func person(withID id: Person.ID) async -> Person? {
         if self.persons[id] == nil {
             let person = await personManager.fetchPerson(withID: id)
             guard let person = person else { return nil }
@@ -32,7 +32,7 @@ class PersonStore: ObservableObject {
     }
     
     @MainActor
-    func image(forPerson id: TMDb.Person.ID) async -> URL? {
+    func image(forPerson id: Person.ID) async -> URL? {
         if self.images[id] == nil {
             let url = await personManager.fetchImage(withID: id)
             guard let url = url else { return nil }

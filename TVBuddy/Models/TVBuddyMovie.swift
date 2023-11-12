@@ -10,7 +10,7 @@ import SwiftData
 import TMDb
 
 @Model
-public final class Movie {
+public final class TVBuddyMovie {
     @Attribute(.unique)
     public let id: Int
     
@@ -24,7 +24,7 @@ public final class Movie {
         self.watched = watched
     }
 
-    convenience init(movie: TMDb.Movie, watched: Bool = false) {
+    convenience init(movie: Movie, watched: Bool = false) {
         self.init(id: movie.id, title: movie.title, watched: watched)
     }
 }

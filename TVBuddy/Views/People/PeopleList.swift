@@ -10,7 +10,7 @@ import TMDb
 
 struct PeopleList: View {
 
-    let credits: TMDb.ShowCredits
+    let credits: ShowCredits
     
     @State private var selected = 0
     var options = ["Cast", "Crew"]
@@ -44,7 +44,7 @@ struct PeopleList: View {
 
 struct CastItem: View {
     
-    let castMember: TMDb.CastMember
+    let castMember: CastMember
     
     @EnvironmentObject private var personStore: PersonStore
     @State var image: URL?
@@ -73,7 +73,7 @@ struct CastItem: View {
 
 struct CrewItem: View {
     
-    let crewMember: TMDb.CrewMember
+    let crewMember: CrewMember
     
     @EnvironmentObject private var personStore: PersonStore
     @State var image: URL?

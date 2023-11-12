@@ -12,7 +12,7 @@ import TMDb
 struct MediaCarousel: View {
     @StateObject var page: Page = .first()
     
-    var trendingMovies: [TMDb.Movie]
+    var trendingMovies: [Movie]
 
     var body: some View {
         content
@@ -45,7 +45,7 @@ struct MediaCarousel: View {
 
 struct MediaCarouselItem: View {
     
-    let movie: TMDb.Movie
+    let movie: Movie
     
     @EnvironmentObject private var movieStore: MovieStore
     
@@ -53,7 +53,7 @@ struct MediaCarouselItem: View {
     
     var body: some View {
         NavigationLink {
-            LazyView(MovieView(id: movie.id))
+            MovieView(id: movie.id)
         } label: {
             ImageView(title: movie.title, url: backdropWithText)
                 .backdropStyle()

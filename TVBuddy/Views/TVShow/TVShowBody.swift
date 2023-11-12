@@ -14,18 +14,18 @@ struct TVShowBody: View {
     @Environment(\.modelContext) private var context
     @EnvironmentObject private var tvStore: TVStore
     
-    @State var credits: TMDb.ShowCredits?
-    @State var recommendations: [TMDb.TVShow]?
+    @State var credits: ShowCredits?
+    @State var recommendations: [TVSeries]?
     
     @Query
-    private var shows: [TVShow]
-    private var _show: TVShow? { shows.first }
+    private var shows: [TVBuddyTVShow]
+    private var _show: TVBuddyTVShow? { shows.first }
     
-    private var tmdbTVShow: TMDb.TVShow
+    private var tmdbTVShow: TVSeries
     
-    init(tmdbTVShow: TMDb.TVShow, id: TMDb.TVShow.ID) {
+    init(tmdbTVShow: TVSeries, id: TVSeries.ID) {
         self.tmdbTVShow = tmdbTVShow
-        _shows = Query(filter: #Predicate<TVShow> { $0.id == id })
+        _shows = Query(filter: #Predicate<TVBuddyTVShow> { $0.id == id })
     }
     
     private var hasSpecials: Bool {
@@ -45,8 +45,8 @@ struct TVShowBody: View {
             similarTVShows
         }
         .task {
-            credits = await tvStore.credits(forTVShow: tmdbTVShow.id)
-            recommendations = await tvStore.recommendations(forTVShow: tmdbTVShow.id)
+            credits = await tvStore.credits(forTVSeries: tmdbTVShow.id)
+            recommendations = await tvStore.recommendations(forTVSeries: tmdbTVShow.id)
         }
     }
     
@@ -140,22 +140,22 @@ struct TVShowBody: View {
         }
     }
     
-    private func insertTVShow(tmdbTVShow: TMDb.TVShow, watched: Bool = false) {
-        let tvShow: TVShow = TVShow(
+    private func insertTVShow(tmdbTVShow: TVSeries, watched: Bool = false) {
+        let tvShow: TVBuddyTVShow = TVBuddyTVShow(
             tvShow: tmdbTVShow, startedWatching: watched, finishedWatching: watched)
         context.insert(tvShow)
         
         Task {
             let tmdbEpisodes = await withTaskGroup(
-                of: TMDb.TVShowSeason?.self, returning: [TMDb.TVShowSeason].self
+                of: TVSeason?.self, returning: [TVSeason].self
             ) { group in
                 for season in tmdbTVShow.seasons ?? [] {
                     group.addTask {
-                        await tvStore.season(season.seasonNumber, forTVShow: tmdbTVShow.id)
+                        await tvStore.season(season.seasonNumber, forTVSeries: tmdbTVShow.id)
                     }
                 }
 
-                var childTaskResults = [TMDb.TVShowSeason]()
+                var childTaskResults = [TVSeason]()
                 for await result in group {
                     if let result = result {
                         childTaskResults.append(result)
@@ -170,7 +170,7 @@ struct TVShowBody: View {
             })
 
             tvShow.episodes.append(
-                contentsOf: tmdbEpisodes.compactMap { TVEpisode(episode: $0, watched: watched) })
+                contentsOf: tmdbEpisodes.compactMap { TVBuddyTVEpisode(episode: $0, watched: watched) })
         }
     }
 }

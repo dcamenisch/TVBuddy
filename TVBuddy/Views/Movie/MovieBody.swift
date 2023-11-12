@@ -14,18 +14,18 @@ struct MovieBody: View {
     @Environment(\.modelContext) private var context
     @EnvironmentObject private var movieStore: MovieStore
     
-    @State var credits: TMDb.ShowCredits?
-    @State var recommendations: [TMDb.Movie]?
+    @State var credits: ShowCredits?
+    @State var recommendations: [Movie]?
     
     @Query
-    private var movies: [Movie]
-    private var _movie: Movie? { movies.first }
+    private var movies: [TVBuddyMovie]
+    private var _movie: TVBuddyMovie? { movies.first }
     
-    private var tmdbMovie: TMDb.Movie
+    private var tmdbMovie: Movie
     
-    init(tmdbMovie: TMDb.Movie, id: TMDb.Movie.ID) {
+    init(tmdbMovie: Movie, id: Movie.ID) {
         self.tmdbMovie = tmdbMovie
-        _movies = Query(filter: #Predicate<Movie> { $0.id == id })
+        _movies = Query(filter: #Predicate<TVBuddyMovie> { $0.id == id })
     }
     
     var body: some View {
@@ -51,7 +51,7 @@ struct MovieBody: View {
                 if let movie = _movie {
                     context.delete(movie)
                 } else {
-                    context.insert(Movie(movie: tmdbMovie, watched: false))
+                    context.insert(TVBuddyMovie(movie: tmdbMovie, watched: false))
                 }
             } label: {
                 HStack {
@@ -66,7 +66,7 @@ struct MovieBody: View {
                 if let movie = _movie {
                     movie.watched.toggle()
                 } else {
-                    context.insert(Movie(movie: tmdbMovie, watched: true))
+                    context.insert(TVBuddyMovie(movie: tmdbMovie, watched: true))
                 }
             } label: {
                 HStack {

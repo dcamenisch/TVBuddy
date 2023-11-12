@@ -13,8 +13,8 @@ struct DiscoverView: View {
     @EnvironmentObject private var tvStore: TVStore
     @EnvironmentObject private var movieStore: MovieStore
     
-    @State var trendingMovies = [TMDb.Movie]()
-    @State var trendingTVShows = [TMDb.TVShow]()
+    @State var trendingMovies = [Movie]()
+    @State var trendingTVShows = [TVSeries]()
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {

@@ -9,12 +9,11 @@ import Foundation
 import TMDb
 
 class SearchManager {
-
-    private let tmdb = AppConstants.tmdb
-
-    func search(query: String, page: Int = 1) async -> [TMDb.Media]? {
+    let searchService = SearchService()
+    
+    func search(query: String, page: Int = 1) async -> [Media]? {
         do {
-            return try await tmdb.search.searchAll(query: query, page: page).results
+            return try await searchService.searchAll(query: query, page: page).results
         } catch {
             return nil
         }

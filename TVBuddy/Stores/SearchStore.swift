@@ -20,7 +20,7 @@ enum SearchScope: String, Codable, CaseIterable, Identifiable, Hashable {
 class SearchStore: ObservableObject {
 
     @Published var searchQuery: String = ""
-    @Published var results: [TMDb.Media]?
+    @Published var results: [Media]?
     @Published var isSearching = false
     @Published var searchScope: SearchScope = .all
 
@@ -58,7 +58,7 @@ class SearchStore: ObservableObject {
     }
 
     @MainActor
-    func fetchNextPage(currentMediaItem: TMDb.Media) {
+    func fetchNextPage(currentMediaItem: Media) {
         guard !isSearching else { return }
 
         guard let res = results else { return }

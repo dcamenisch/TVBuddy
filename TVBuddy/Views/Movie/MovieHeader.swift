@@ -11,7 +11,7 @@ import TMDb
 
 struct MovieHeader: View {
 
-    let tmdbMovie: TMDb.Movie
+    let tmdbMovie: Movie
     let poster: URL?
     let backdrop: URL?
 

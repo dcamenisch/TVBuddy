@@ -10,109 +10,94 @@ import TMDb
 
 class MovieManager {
 
-    private let tmdb = AppConstants.tmdb
-
-    func fetchMovie(withID id: TMDb.Movie.ID) async -> TMDb.Movie? {
+    private let movieService = MovieService()
+    private let discoverService = AppConstants.discoverService
+    private let trendingService = AppConstants.trendingService
+    
+    private var imageService: ImagesConfiguration? {
+        AppConstants.apiConfiguration?.images
+    }
+        
+    func fetchMovie(id: Movie.ID) async -> Movie? {
         do {
-            return try await tmdb.movies.details(forMovie: id)
+            return try await movieService.details(forMovie: id)
         } catch {
+            print(error)
             return nil
         }
     }
 
-    func fetchPoster(withID id: TMDb.Movie.ID) async -> URL? {
+    func fetchPoster(id: Movie.ID) async -> URL? {
         do {
-            let images = try await tmdb.movies.images(forMovie: id)
-            return
-                try await tmdb
-                .configurations
-                .apiConfiguration()
-                .images
-                .posterURL(
-                    for: images.posters
-                        .first?.filePath, idealWidth: AppConstants.idealPosterWidth)
+            let images = try await movieService.images(forMovie: id)
+            return imageService?.posterURL(
+                for: images.posters.first?.filePath,
+                idealWidth: AppConstants.idealPosterWidth
+            )
         } catch {
+            print(error)
             return nil
         }
     }
 
-    func fetchBackdrop(withID id: TMDb.Movie.ID) async -> URL? {
+    func fetchBackdrop(id: Movie.ID) async -> URL? {
         do {
-            let images = try await tmdb.movies.images(forMovie: id)
-            return
-                try await tmdb
-                .configurations
-                .apiConfiguration()
-                .images
-                .backdropURL(
-                    for: images.backdrops
-                        .filter({ $0.languageCode == nil })
-                        .first?.filePath, idealWidth: AppConstants.idealBackdropWidth)
+            let images = try await movieService.images(forMovie: id)
+            return imageService?.backdropURL(
+                for: images.backdrops.filter({ $0.languageCode == nil }).first?.filePath,
+                idealWidth: AppConstants.idealBackdropWidth
+            )
         } catch {
+            print(error)
             return nil
         }
     }
 
-    func fetchBackdropWithText(withID id: TMDb.Movie.ID) async -> URL? {
+    func fetchBackdropWithText(id: Movie.ID) async -> URL? {
         do {
-            let images = try await tmdb.movies.images(forMovie: id)
-            return
-                try await tmdb
-                .configurations
-                .apiConfiguration()
-                .images
-                .backdropURL(
-                    for: images.backdrops
-                        .filter({ $0.languageCode == AppConstants.languageCode })
-                        .first?.filePath, idealWidth: AppConstants.idealBackdropWidth)
+            let images = try await movieService.images(forMovie: id)
+            return imageService?.backdropURL(
+                for: images.backdrops.filter({ $0.languageCode == AppConstants.languageCode }).first?.filePath,
+                idealWidth: AppConstants.idealBackdropWidth
+            )
         } catch {
+            print(error)
             return nil
         }
     }
 
-    func fetchCredits(forMovie id: TMDb.Movie.ID) async -> TMDb.ShowCredits? {
+    func fetchCredits(id: Movie.ID) async -> ShowCredits? {
         do {
-            return
-                try await tmdb
-                .movies
-                .credits(forMovie: id)
+            return try await movieService.credits(forMovie: id)
         } catch {
+            print(error)
             return nil
         }
     }
 
-    func fetchRecommendations(forMovie id: TMDb.Movie.ID) async -> [TMDb.Movie]? {
+    func fetchRecommendations(id: Movie.ID, page: Int = 1) async -> [Movie]? {
         do {
-            return
-                try await tmdb
-                .movies
-                .recommendations(forMovie: id)
-                .results
+            return try await movieService.recommendations(forMovie: id, page: page).results
         } catch {
+            print(error)
             return nil
         }
     }
 
-    func fetchDiscover(page: Int = 1) async -> [TMDb.Movie]? {
+    func fetchDiscover(page: Int = 1) async -> [Movie]? {
         do {
-            return
-                try await tmdb
-                .discover
-                .movies(sortedBy: .popularity(descending: true), page: page)
-                .results
+            return try await discoverService.movies(sortedBy: .popularity(descending: true), page: page).results
         } catch {
+            print(error)
             return nil
         }
     }
 
-    func fetchTrending(page: Int = 1) async -> [TMDb.Movie]? {
+    func fetchTrending(page: Int = 1) async -> [Movie]? {
         do {
-            return
-                try await tmdb
-                .trending
-                .movies(inTimeWindow: .week, page: page)
-                .results
+            return try await trendingService.movies(inTimeWindow: .week, page: page).results
         } catch {
+            print(error)
             return nil
         }
     }

@@ -12,15 +12,15 @@ class TVStore: ObservableObject {
 
     private let tvManager: TVManager
 
-    @Published var shows: [TMDb.TVShow.ID: TMDb.TVShow] = [:]
-    @Published var seasons: [TMDb.TVShow.ID: [Int: TMDb.TVShowSeason]] = [:]
-    @Published var posters: [TMDb.TVShow.ID: URL] = [:]
-    @Published var backdrops: [TMDb.TVShow.ID: URL] = [:]
-    @Published var backdropsWithText: [TMDb.TVShow.ID: URL] = [:]
-    @Published var credits: [TMDb.TVShow.ID: TMDb.ShowCredits] = [:]
-    @Published var recommendationsIDs: [TMDb.TVShow.ID: [TMDb.TVShow.ID]] = [:]
-    @Published var discoverIDs: [TMDb.TVShow.ID] = []
-    @Published var trendingIDs: [TMDb.TVShow.ID] = []
+    @Published var shows: [TVSeries.ID: TVSeries] = [:]
+    @Published var seasons: [TVSeries.ID: [Int: TVSeason]] = [:]
+    @Published var posters: [[Int?]: URL] = [:]
+    @Published var backdrops: [[Int?]: URL] = [:]
+    @Published var backdropsWithText: [TVSeries.ID: URL] = [:]
+    @Published var credits: [TVSeries.ID: ShowCredits] = [:]
+    @Published var recommendationsIDs: [TVSeries.ID: [TVSeries.ID]] = [:]
+    @Published var discoverIDs: [TVSeries.ID] = []
+    @Published var trendingIDs: [TVSeries.ID] = []
 
     private var discoverPage: Int = 0
     private var trendingPage: Int = 0
@@ -30,9 +30,9 @@ class TVStore: ObservableObject {
     }
     
     @MainActor
-    func show(withID id: TMDb.TVShow.ID) async -> TMDb.TVShow? {
+    func show(withID id: TVSeries.ID) async -> TVSeries? {
         if self.shows[id] == nil {
-            let show = await tvManager.fetchShow(withID: id)
+            let show = await tvManager.fetchShow(id: id)
             guard let show = show else { return nil }
             
             self.shows[id] = show
@@ -42,9 +42,9 @@ class TVStore: ObservableObject {
     }
     
     @MainActor
-    func season(_ season: Int, forTVShow id: TMDb.TVShow.ID) async -> TMDb.TVShowSeason? {
+    func season(_ season: Int, forTVSeries id: TVSeries.ID) async -> TVSeason? {
         if self.seasons[id]?[season] == nil {
-            let result = await tvManager.fetchSeason(season, forTVShow: id)
+            let result = await tvManager.fetchSeason(season: season, id: id)
             guard let result = result else { return nil }
             
             var tmpSeasons = self.seasons[id] ?? [:]
@@ -56,40 +56,40 @@ class TVStore: ObservableObject {
     }
     
     @MainActor
-    func episode(_ episode: Int, season: Int, forTVShow id: TMDb.TVShow.ID) async -> TMDb.TVShowEpisode? {
-        return await self.season(season, forTVShow: id)?.episodes?.first(where: { tvEpisode in
+    func episode(_ episode: Int, season: Int, forTVSeries id: TVSeries.ID) async -> TVEpisode? {
+        return await self.season(season, forTVSeries: id)?.episodes?.first(where: { tvEpisode in
             tvEpisode.episodeNumber == episode
         })
     }
 
     @MainActor
-    func poster(withID id: TMDb.TVShow.ID) async -> URL? {
-        if self.posters[id] == nil {
-            let url = await tvManager.fetchPoster(withID: id)
+    func poster(withID id: TVSeries.ID, season: Int? = nil) async -> URL? {
+        if self.posters[[id, season]] == nil {
+            let url = await tvManager.fetchPoster(id: id, season: season)
             guard let url = url else { return nil }
             
-            self.posters[id] = url
+            self.posters[[id, season]] = url
         }
         
-        return self.posters[id]
+        return self.posters[[id, season]]
     }
     
     @MainActor
-    func backdrop(withID id: TMDb.TVShow.ID) async -> URL? {
-        if self.backdrops[id] == nil {
-            let url = await tvManager.fetchBackdrop(withID: id)
+    func backdrop(withID id: TVSeries.ID, season: Int? = nil, episode: Int? = nil) async -> URL? {
+        if self.backdrops[[id, season, episode]] == nil {
+            let url = await tvManager.fetchBackdrop(id: id, season: season, episode: episode)
             guard let url = url else { return nil }
             
-            self.backdrops[id] = url
+            self.backdrops[[id, season, episode]] = url
         }
         
-        return self.backdrops[id]
+        return self.backdrops[[id, season, episode]]
     }
     
     @MainActor
-    func backdropWithText(withID id: TMDb.TVShow.ID) async -> URL? {
+    func backdropWithText(withID id: TVSeries.ID) async -> URL? {
         if self.backdropsWithText[id] == nil {
-            let url = await tvManager.fetchBackdropWithText(withID: id)
+            let url = await tvManager.fetchBackdropWithText(id: id)
             guard let url = url else { return nil }
             
             self.backdropsWithText[id] = url
@@ -99,9 +99,9 @@ class TVStore: ObservableObject {
     }
 
     @MainActor
-    func credits(forTVShow id: TMDb.TVShow.ID) async -> TMDb.ShowCredits? {
+    func credits(forTVSeries id: TVSeries.ID) async -> ShowCredits? {
         if self.credits[id] == nil {
-            let credits = await tvManager.fetchCredits(forTVShow: id)
+            let credits = await tvManager.fetchCredits(id: id)
             guard let credits = credits else { return nil }
             
             self.credits[id] = credits
@@ -111,9 +111,9 @@ class TVStore: ObservableObject {
     }
     
     @MainActor
-    func recommendations(forTVShow id: TMDb.TVShow.ID) async -> [TMDb.TVShow]? {
+    func recommendations(forTVSeries id: TVSeries.ID) async -> [TVSeries]? {
         if self.recommendationsIDs[id] == nil {
-            let shows = await tvManager.fetchRecommendations(forTVShow: id)
+            let shows = await tvManager.fetchRecommendations(id: id)
             guard let shows = shows else { return nil }
             
             await withTaskGroup(of: Void.self) { taskGroup in
@@ -131,7 +131,7 @@ class TVStore: ObservableObject {
     }
     
     @MainActor
-    func trending() async -> [TMDb.TVShow] {
+    func trending() async -> [TVSeries] {
         if trendingPage == 1 {
             return trendingIDs.compactMap { shows[$0] }
         }
@@ -157,7 +157,7 @@ class TVStore: ObservableObject {
     }
     
     @MainActor
-    func discover() async -> [TMDb.TVShow] {
+    func discover() async -> [TVSeries] {
         if discoverPage == 1 {
             return discoverIDs.compactMap { shows[$0] }
         }
@@ -186,13 +186,13 @@ class TVStore: ObservableObject {
 extension TVStore {
 
     //    @MainActor
-    //    func fetchRecommendations(forTVShow id: TMDb.TVShow.ID) {
-    //        guard recommendations(forTVShow: id) == nil else {
+    //    func fetchRecommendations(forTVSeries id: TVSeries.ID) {
+    //        guard recommendations(forTVSeries: id) == nil else {
     //            return
     //        }
     //
     //        Task {
-    //            let shows = await tvManager.fetchRecommendations(forTVShow: id)
+    //            let shows = await tvManager.fetchRecommendations(forTVSeries: id)
     //
     //            guard let shows = shows else {
     //                return
@@ -228,8 +228,8 @@ extension TVStore {
     //    }
     //
     //    @MainActor
-    //    func fetchNextDiscover(currentTVShow: TMDb.TVShow, offset: Int = AppConstants.nextPageOffset) {
-    //        let index = discoverIDs.firstIndex(where: { $0 == currentTVShow.id })
+    //    func fetchNextDiscover(currentTVSeries: TVSeries, offset: Int = AppConstants.nextPageOffset) {
+    //        let index = discoverIDs.firstIndex(where: { $0 == currentTVSeries.id })
     //        let thresholdIndex = discoverIDs.endIndex - offset
     //        guard index == thresholdIndex else {
     //            return
@@ -258,8 +258,8 @@ extension TVStore {
     //    }
     //
     //    @MainActor
-    //    func fetchNextTrending(currentTVShow: TMDb.TVShow, offset: Int = AppConstants.nextPageOffset) {
-    //        let index = trendingIDs.firstIndex(where: { $0 == currentTVShow.id })
+    //    func fetchNextTrending(currentTVSeries: TVSeries, offset: Int = AppConstants.nextPageOffset) {
+    //        let index = trendingIDs.firstIndex(where: { $0 == currentTVSeries.id })
     //        let thresholdIndex = trendingIDs.endIndex - offset
     //        guard index == thresholdIndex else {
     //            return
