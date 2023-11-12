@@ -32,7 +32,11 @@ struct MovieBody: View {
         VStack(alignment: .leading, spacing: 10) {
             watchButtons
             overview
-            cast
+            
+            if let credits = credits, !credits.cast.isEmpty {
+                PeopleList(credits: credits)
+            }
+            
             similarMovies
         }
         .task {
@@ -87,19 +91,6 @@ struct MovieBody: View {
                     .font(.title2)
                     .bold()
                 Text(tmdbMovie.overview ?? "")
-            }
-        }
-    }
-    
-    private var cast: some View {
-        Group {
-            if let credits = credits, !credits.cast.isEmpty {
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("Cast")
-                        .font(.title2)
-                        .bold()
-                    PeopleList(credits: credits)
-                }
             }
         }
     }

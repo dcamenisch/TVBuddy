@@ -10,50 +10,92 @@ import TMDb
 
 struct PeopleList: View {
 
-    let credits: TMDb.ShowCredits    
+    let credits: TMDb.ShowCredits
+    
+    @State private var selected = 0
+    var options = ["Cast", "Crew"]
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack {
-                ForEach(credits.cast) { cast in
-                    PeopleItem(cast: cast)
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Cast and Crew")
+                .font(.title2)
+                .bold()
+            
+            Picker("", selection: $selected) {
+                ForEach(0..<options.count, id: \.self) { option in
+                    Text(options[option])
+                        .tag(option)
+                }
+            }
+            .pickerStyle(.segmented)
+            
+            if selected == 0 {
+                ForEach(credits.cast) { castMember in
+                    CastItem(castMember: castMember)
+                }
+            } else {
+                ForEach(credits.crew) { crewMember in
+                    CrewItem(crewMember: crewMember)
                 }
             }
         }
     }
 }
 
-struct PeopleItem: View {
+struct CastItem: View {
+    
+    let castMember: TMDb.CastMember
     
     @EnvironmentObject private var personStore: PersonStore
-    
     @State var image: URL?
     
-    let cast: TMDb.CastMember
+    var body: some View {
+        HStack {
+            ImageView(title: castMember.name, url: image)
+                .posterStyle(size: .tiny)
+            
+            VStack(alignment: .leading) {
+                Text(castMember.name)
+                    .font(.title3)
+                    .bold()
+                    .lineLimit(2)
+
+                Text(castMember.character)
+                    .font(.subheadline)
+                    .lineLimit(2)
+            }
+        }
+        .task {
+            image = await personStore.image(forPerson: castMember.id)
+        }
+    }
+}
+
+struct CrewItem: View {
+    
+    let crewMember: TMDb.CrewMember
+    
+    @EnvironmentObject private var personStore: PersonStore
+    @State var image: URL?
     
     var body: some View {
-        VStack(spacing: 5) {
-            ImageView(title: cast.name, url: image)
-                .posterStyle(size: .medium)
+        HStack {
+            ImageView(title: crewMember.name, url: image)
+                .posterStyle(size: .tiny)
+            
+            VStack(alignment: .leading) {
+                Text(crewMember.name)
+                    .font(.title3)
+                    .bold()
+                    .lineLimit(2)
 
-            Text(cast.name)
-                .font(.system(size: 15, weight: .semibold))
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .lineLimit(2)
-
-            Text(cast.character)
-                .font(.system(size: 15, weight: .regular))
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .lineLimit(2)
-
-            Spacer()
+                Text(crewMember.job)
+                    .font(.subheadline)
+                    .lineLimit(2)
+            }
         }
-        .padding(.top, 10)
-        .frame(width: PosterStyle.Size.medium.width() + 10)
         .task {
-            image = await personStore.image(forPerson: cast.id)
+            image = await personStore.image(forPerson: crewMember.id)
         }
     }
 }

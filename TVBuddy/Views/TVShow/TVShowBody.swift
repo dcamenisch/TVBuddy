@@ -37,7 +37,11 @@ struct TVShowBody: View {
             watchButtons
             overview
             seasons
-            cast
+            
+            if let credits = credits, !credits.cast.isEmpty {
+                PeopleList(credits: credits)
+            }
+            
             similarTVShows
         }
         .task {
@@ -124,19 +128,6 @@ struct TVShowBody: View {
                     }
                 }
                 
-            }
-        }
-    }
-    
-    private var cast: some View {
-        Group {
-            if let credits = credits, !credits.cast.isEmpty {
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("Cast")
-                        .font(.title2)
-                        .bold()
-                    PeopleList(credits: credits)
-                }
             }
         }
     }
