@@ -10,7 +10,6 @@ import SwiftUI
 import TMDb
 
 struct FeedView: View {
-    
     @Query(filter: #Predicate<TVBuddyMovie> { !$0.watched })
     private var movies: [TVBuddyMovie]
 
@@ -19,7 +18,7 @@ struct FeedView: View {
 
     @Query(filter: #Predicate<TVBuddyTVShow> { !$0.startedWatching })
     private var tvShows: [TVBuddyTVShow]
-    
+
     @Query(filter: #Predicate<TVBuddyTVShow> { $0.finishedWatching })
     private var watchedTVShows: [TVBuddyTVShow]
 

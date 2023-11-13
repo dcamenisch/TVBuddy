@@ -9,27 +9,24 @@ import SwiftUI
 import TMDb
 
 struct MediaRow: View {
-    
     let mediaItem: Media
 
     var body: some View {
         switch mediaItem {
-        case .movie(let movie):
+        case let .movie(movie):
             NavigationLink {
                 MovieView(id: movie.id)
             } label: {
                 MovieRow(movie: movie)
             }
-        case .tvSeries(let tvShow):
+        case let .tvSeries(tvShow):
             NavigationLink {
                 TVShowView(id: tvShow.id)
             } label: {
                 TVShowRow(tvShow: tvShow)
             }
-        case .person(let person):
-            NavigationLink {
-                
-            } label: {
+        case let .person(person):
+            NavigationLink {} label: {
                 PersonRow(person: person)
             }
         }
@@ -37,12 +34,11 @@ struct MediaRow: View {
 }
 
 struct MovieRow: View {
-    
     let movie: Movie
-    
+
     @EnvironmentObject private var movieStore: MovieStore
     @State var poster: URL?
-    
+
     var body: some View {
         HStack(alignment: .center, spacing: 15) {
             ImageView(title: movie.title, url: poster)
@@ -53,7 +49,7 @@ struct MovieRow: View {
                     Text(DateFormatter.year.string(from: releaseDate))
                         .foregroundColor(.gray)
                 }
-                
+
                 Text(movie.title)
                     .font(.system(size: 22, weight: .bold))
                     .lineLimit(2)
@@ -66,12 +62,11 @@ struct MovieRow: View {
 }
 
 struct TVShowRow: View {
-    
     let tvShow: TVSeries
-    
+
     @EnvironmentObject private var tvStore: TVStore
     @State var poster: URL?
-        
+
     var body: some View {
         HStack(alignment: .center, spacing: 15) {
             ImageView(title: tvShow.name, url: poster)
@@ -82,7 +77,7 @@ struct TVShowRow: View {
                     Text(DateFormatter.year.string(from: firstAirDate))
                         .foregroundColor(.gray)
                 }
-                
+
                 Text(tvShow.name)
                     .font(.system(size: 22, weight: .bold))
                     .lineLimit(2)
@@ -95,12 +90,11 @@ struct TVShowRow: View {
 }
 
 struct PersonRow: View {
-
     let person: Person
 
     @EnvironmentObject private var personStore: PersonStore
     @State var image: URL?
-    
+
     var body: some View {
         HStack(alignment: .center, spacing: 15) {
             ImageView(title: person.name, url: image)

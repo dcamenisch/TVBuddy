@@ -10,38 +10,37 @@ import SwiftUI
 import TMDb
 
 struct TVShowBody: View {
-    
     @Environment(\.modelContext) private var context
     @EnvironmentObject private var tvStore: TVStore
-    
+
     @State var credits: ShowCredits?
     @State var recommendations: [TVSeries]?
-    
+
     @Query
     private var shows: [TVBuddyTVShow]
     private var _show: TVBuddyTVShow? { shows.first }
-    
+
     private var tmdbTVShow: TVSeries
-    
+
     init(tmdbTVShow: TVSeries, id: TVSeries.ID) {
         self.tmdbTVShow = tmdbTVShow
         _shows = Query(filter: #Predicate<TVBuddyTVShow> { $0.id == id })
     }
-    
+
     private var hasSpecials: Bool {
         return tmdbTVShow.seasons?.count != tmdbTVShow.numberOfSeasons
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             watchButtons
             overview
             seasons
-            
+
             if let credits = credits, !credits.cast.isEmpty {
                 PeopleList(credits: credits)
             }
-            
+
             similarTVShows
         }
         .task {
@@ -49,7 +48,7 @@ struct TVShowBody: View {
             recommendations = await tvStore.recommendations(forTVSeries: tmdbTVShow.id)
         }
     }
-    
+
     private var watchButtons: some View {
         HStack {
             Button {
@@ -81,12 +80,11 @@ struct TVShowBody: View {
                 .frame(height: 30)
                 .frame(maxWidth: .infinity)
             }
-            
         }
         .bold()
         .buttonStyle(.bordered)
     }
-    
+
     private var overview: some View {
         Group {
             if tmdbTVShow.overview != nil {
@@ -105,10 +103,10 @@ struct TVShowBody: View {
                     Text("Seasons")
                         .font(.title2)
                         .bold()
-                    
+
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack {
-                            ForEach((hasSpecials ? 0 : 1)...numberOfSeasons, id: \.self) { season in
+                            ForEach((hasSpecials ? 0 : 1) ... numberOfSeasons, id: \.self) { season in
                                 NavigationLink {
                                     TVSeasonView(id: tmdbTVShow.id, seasonNumber: season)
                                 } label: {
@@ -127,11 +125,10 @@ struct TVShowBody: View {
                         }
                     }
                 }
-                
             }
         }
     }
-    
+
     private var similarTVShows: some View {
         Group {
             if let tmdbTVShows = recommendations, !tmdbTVShows.isEmpty {
@@ -139,12 +136,13 @@ struct TVShowBody: View {
             }
         }
     }
-    
+
     private func insertTVShow(tmdbTVShow: TVSeries, watched: Bool = false) {
-        let tvShow: TVBuddyTVShow = TVBuddyTVShow(
-            tvShow: tmdbTVShow, startedWatching: watched, finishedWatching: watched)
+        let tvShow = TVBuddyTVShow(
+            tvShow: tmdbTVShow, startedWatching: watched, finishedWatching: watched
+        )
         context.insert(tvShow)
-        
+
         Task {
             let tmdbEpisodes = await withTaskGroup(
                 of: TVSeason?.self, returning: [TVSeason].self
@@ -163,11 +161,11 @@ struct TVShowBody: View {
                 }
 
                 return childTaskResults
-            }.compactMap({ season in
+            }.compactMap { season in
                 season.episodes
-            }).flatMap({
+            }.flatMap {
                 $0
-            })
+            }
 
             tvShow.episodes.append(
                 contentsOf: tmdbEpisodes.compactMap { TVBuddyTVEpisode(episode: $0, watched: watched) })

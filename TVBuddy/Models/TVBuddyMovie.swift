@@ -1,5 +1,5 @@
 //
-//  Movie.swift
+//  TVBuddyMovie.swift
 //  TVBuddy
 //
 //  Created by Danny on 24.09.2023.
@@ -13,7 +13,7 @@ import TMDb
 public final class TVBuddyMovie {
     @Attribute(.unique)
     public let id: Int
-    
+
     let title: String
 
     var watched: Bool

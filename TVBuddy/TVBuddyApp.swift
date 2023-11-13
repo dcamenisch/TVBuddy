@@ -15,11 +15,11 @@ struct TVBuddyApp: App {
     @StateObject private var personStore = PersonStore()
     @StateObject private var searchStore = SearchStore()
     @StateObject private var tvStore = TVStore()
-    
+
     init() {
         let tmdbConfiguration = TMDbConfiguration(apiKey: AppConstants.apiKey)
         TMDb.configure(tmdbConfiguration)
-        
+
         Task {
             AppConstants.apiConfiguration = try await AppConstants.configurationService.apiConfiguration()
         }

@@ -9,17 +9,16 @@ import Foundation
 import TMDb
 
 class TVManager {
-    
     private let tvSeriesService = TVSeriesService()
     private let tvSeasonService = TVSeasonService()
     private let tvEpisodeService = TVEpisodeService()
     private let discoverService = AppConstants.discoverService
     private let trendingService = AppConstants.trendingService
-    
+
     private var imageService: ImagesConfiguration? {
         AppConstants.apiConfiguration?.images
     }
-    
+
     func fetchShow(id: TVSeries.ID) async -> TVSeries? {
         do {
             return try await tvSeriesService.details(forTVSeries: id)
@@ -28,7 +27,7 @@ class TVManager {
             return nil
         }
     }
-    
+
     func fetchSeason(season: Int, id: TVSeries.ID) async -> TVSeason? {
         do {
             return try await tvSeasonService.details(forSeason: season, inTVSeries: id)
@@ -37,7 +36,7 @@ class TVManager {
             return nil
         }
     }
-    
+
     func fetchEpisode(episode: Int, season: Int, id: TVSeries.ID) async -> TVEpisode? {
         do {
             return try await tvEpisodeService.details(forEpisode: episode, inSeason: season, inTVSeries: id)
@@ -46,17 +45,16 @@ class TVManager {
             return nil
         }
     }
-    
+
     func fetchPoster(id: TVSeries.ID, season: Int?) async -> URL? {
         do {
-            
             let images: [ImageMetadata]
             if let season = season {
                 images = try await tvSeasonService.images(forSeason: season, inTVSeries: id).posters
             } else {
                 images = try await tvSeriesService.images(forTVSeries: id).posters
             }
-            
+
             return imageService?.posterURL(
                 for: images.first?.filePath,
                 idealWidth: AppConstants.idealPosterWidth
@@ -66,12 +64,12 @@ class TVManager {
             return nil
         }
     }
-    
+
     func fetchBackdrop(id: TVSeries.ID) async -> URL? {
         do {
             let images = try await tvSeriesService.images(forTVSeries: id).backdrops
             return imageService?.backdropURL(
-                for: images.filter({ $0.languageCode == nil }).first?.filePath,
+                for: images.filter { $0.languageCode == nil }.first?.filePath,
                 idealWidth: AppConstants.idealBackdropWidth
             )
         } catch {
@@ -79,12 +77,12 @@ class TVManager {
             return nil
         }
     }
-    
+
     func fetchBackdrop(id: TVSeries.ID, season: Int, episode: Int) async -> URL? {
         do {
             let images = try await tvEpisodeService.images(forEpisode: episode, inSeason: season, inTVSeries: id).stills
             return imageService?.stillURL(
-                for: images.filter({ $0.languageCode == nil }).first?.filePath,
+                for: images.filter { $0.languageCode == nil }.first?.filePath,
                 idealWidth: AppConstants.idealBackdropWidth
             )
         } catch {
@@ -92,7 +90,7 @@ class TVManager {
             return await fetchBackdrop(id: id, season: season)
         }
     }
-    
+
     func fetchBackdrop(id: TVSeries.ID, season: Int? = nil, episode: Int? = nil) async -> URL? {
         if let season = season, let episode = episode {
             return await fetchBackdrop(id: id, season: season, episode: episode)
@@ -100,12 +98,12 @@ class TVManager {
             return await fetchBackdrop(id: id)
         }
     }
-    
+
     func fetchBackdropWithText(id: TVSeries.ID) async -> URL? {
         do {
             let images = try await tvSeriesService.images(forTVSeries: id).backdrops
             return imageService?.backdropURL(
-                for: images.filter({ $0.languageCode == AppConstants.languageCode }).first?.filePath,
+                for: images.filter { $0.languageCode == AppConstants.languageCode }.first?.filePath,
                 idealWidth: AppConstants.idealBackdropWidth
             )
         } catch {
@@ -113,7 +111,7 @@ class TVManager {
             return nil
         }
     }
-    
+
     func fetchCredits(id: TVSeries.ID) async -> ShowCredits? {
         do {
             return try await tvSeriesService.credits(forTVSeries: id)
@@ -122,7 +120,7 @@ class TVManager {
             return nil
         }
     }
-    
+
     func fetchRecommendations(id: TVSeries.ID, page: Int = 1) async -> [TVSeries]? {
         do {
             return try await tvSeriesService.recommendations(forTVSeries: id, page: page).results
@@ -131,7 +129,7 @@ class TVManager {
             return nil
         }
     }
-    
+
     func fetchDiscover(page: Int = 1) async -> [TVSeries]? {
         do {
             return try await discoverService.tvSeries(sortedBy: .popularity(descending: true), page: page).results
@@ -140,7 +138,7 @@ class TVManager {
             return nil
         }
     }
-    
+
     func fetchTrending(page: Int = 1) async -> [TVSeries]? {
         do {
             return try await trendingService.tvSeries(inTimeWindow: .week, page: page).results
@@ -149,5 +147,4 @@ class TVManager {
             return nil
         }
     }
-    
 }

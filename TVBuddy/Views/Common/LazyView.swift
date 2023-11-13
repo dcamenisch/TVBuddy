@@ -13,6 +13,7 @@ struct LazyView<Content: View>: View {
     init(_ build: @autoclosure @escaping () -> Content) {
         self.build = build
     }
+
     var body: Content {
         build()
     }

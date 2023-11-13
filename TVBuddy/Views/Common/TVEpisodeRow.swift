@@ -10,36 +10,35 @@ import SwiftUI
 import TMDb
 
 struct TVEpisodeRow: View {
-    
     let id: TVSeries.ID
     let seasonNumber: Int
     let episodeNumber: Int
     let showOverview: Bool
-    
+
     @Environment(\.modelContext) private var context
     @EnvironmentObject private var tvStore: TVStore
-    
+
     @State var tmdbTVShow: TVSeries?
     @State var tmdbEpisode: TVEpisode?
     @State var backdrop: URL?
-        
+
     @Query
     private var episodes: [TVBuddyTVEpisode]
     private var episode: TVBuddyTVEpisode? { episodes.first }
-    
+
     init(tvShowID: TVSeries.ID, seasonNumber: Int, episodeNumber: Int, showOverview: Bool) {
-        self.id = tvShowID
+        id = tvShowID
         self.seasonNumber = seasonNumber
         self.episodeNumber = episodeNumber
         self.showOverview = showOverview
-                
+
         _episodes = Query(filter: #Predicate<TVBuddyTVEpisode> {
             $0.episodeNumber == episodeNumber
-            && $0.seasonNumber == seasonNumber
-            && $0.tvShow?.id == tvShowID
+                && $0.seasonNumber == seasonNumber
+                && $0.tvShow?.id == tvShowID
         })
     }
-    
+
     var body: some View {
         NavigationLink {
             TVShowView(id: id)
@@ -49,14 +48,14 @@ struct TVEpisodeRow: View {
                     .frame(width: 130)
                     .aspectRatio(1.77, contentMode: .fit)
                     .cornerRadius(5.0)
-                
+
                 VStack(alignment: .leading) {
                     if showOverview {
                         Text(tmdbEpisode?.name ?? "")
                             .font(.headline)
                             .lineLimit(1)
                             .bold()
-                        
+
                         Text(tmdbEpisode?.overview ?? "")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
@@ -68,21 +67,21 @@ struct TVEpisodeRow: View {
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
                             .bold()
-                        
+
                         Text(tmdbEpisode?.name ?? "")
                             .font(.headline)
                             .lineLimit(1)
                             .bold()
-                        
+
                         Text("S\(String(format: "%02d", tmdbEpisode?.seasonNumber ?? 0))E\(String(format: "%02d", tmdbEpisode?.episodeNumber ?? 0))")
                             .font(.subheadline)
                             .lineLimit(1)
                             .bold()
                     }
                 }
-                
+
                 Spacer()
-                
+
                 Button(action: {
                     if let episode = episode {
                         episode.toggleWatched()
@@ -105,12 +104,13 @@ struct TVEpisodeRow: View {
             backdrop = await tvStore.backdrop(withID: id, season: seasonNumber, episode: episodeNumber)
         }
     }
-    
+
     private func insertTVShowWithEpisode(
         tmdbTVShow: TVSeries, tmdbEpisode: TVEpisode, watched: Bool = false
     ) {
-        let tvShow: TVBuddyTVShow = TVBuddyTVShow(
-            tvShow: tmdbTVShow, startedWatching: watched, finishedWatching: watched)
+        let tvShow = TVBuddyTVShow(
+            tvShow: tmdbTVShow, startedWatching: watched, finishedWatching: watched
+        )
         context.insert(tvShow)
 
         Task {
@@ -131,16 +131,15 @@ struct TVEpisodeRow: View {
                 }
 
                 return childTaskResults
-            }.compactMap({ season in
+            }.compactMap { season in
                 season.episodes
-            }).flatMap({
+            }.flatMap {
                 $0
-            })
+            }
 
             tvShow.episodes.append(
                 contentsOf: tmdbEpisodes.compactMap { TVBuddyTVEpisode(episode: $0, watched: watched) })
             tvShow.episodes.first { $0.id == tmdbEpisode.id }?.toggleWatched()
         }
     }
-
 }

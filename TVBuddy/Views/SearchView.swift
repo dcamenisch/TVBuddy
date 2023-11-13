@@ -9,7 +9,6 @@ import SwiftUI
 import TMDb
 
 struct SearchView: View {
-
     @EnvironmentObject private var searchStore: SearchStore
 
     private var isSearching: Bool {
@@ -31,7 +30,7 @@ struct SearchView: View {
         .searchable(text: $searchStore.searchQuery)
         .searchScopes($searchStore.searchScope) {
             ForEach(SearchScope.allCases) { category in
-                Text(category.rawValue).tag(SearchScope.init(rawValue: category.rawValue))
+                Text(category.rawValue).tag(SearchScope(rawValue: category.rawValue))
             }
         }
         .onReceive(searchStore.$searchQuery) { _ in

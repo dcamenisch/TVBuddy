@@ -9,8 +9,7 @@ import SwiftData
 import SwiftUI
 
 struct TVEpisodeProgressView: View {
-    
-    @Query(filter: #Predicate<TVBuddyTVShow> {$0.startedWatching && !$0.finishedWatching})
+    @Query(filter: #Predicate<TVBuddyTVShow> { $0.startedWatching && !$0.finishedWatching })
     private var tvShows: [TVBuddyTVShow]
 
     var body: some View {

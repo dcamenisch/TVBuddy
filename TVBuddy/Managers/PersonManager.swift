@@ -9,9 +9,8 @@ import Foundation
 import TMDb
 
 class PersonManager {
-
     private let personService = PersonService()
-    
+
     private var imageService: ImagesConfiguration? {
         AppConstants.apiConfiguration?.images
     }
@@ -35,5 +34,4 @@ class PersonManager {
             return nil
         }
     }
-
 }

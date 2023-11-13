@@ -10,33 +10,32 @@ import SwiftUI
 import TMDb
 
 struct MovieBody: View {
-    
     @Environment(\.modelContext) private var context
     @EnvironmentObject private var movieStore: MovieStore
-    
+
     @State var credits: ShowCredits?
     @State var recommendations: [Movie]?
-    
+
     @Query
     private var movies: [TVBuddyMovie]
     private var _movie: TVBuddyMovie? { movies.first }
-    
+
     private var tmdbMovie: Movie
-    
+
     init(tmdbMovie: Movie, id: Movie.ID) {
         self.tmdbMovie = tmdbMovie
         _movies = Query(filter: #Predicate<TVBuddyMovie> { $0.id == id })
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             watchButtons
             overview
-            
+
             if let credits = credits, !credits.cast.isEmpty {
                 PeopleList(credits: credits)
             }
-            
+
             similarMovies
         }
         .task {
@@ -44,7 +43,7 @@ struct MovieBody: View {
             recommendations = await movieStore.recommendations(forMovie: tmdbMovie.id)
         }
     }
-    
+
     private var watchButtons: some View {
         HStack {
             Button {
@@ -78,12 +77,11 @@ struct MovieBody: View {
                 .frame(height: 30)
                 .frame(maxWidth: .infinity)
             }
-            
         }
         .bold()
         .buttonStyle(.bordered)
     }
-    
+
     private var overview: some View {
         Group {
             if tmdbMovie.overview != nil {
@@ -94,7 +92,7 @@ struct MovieBody: View {
             }
         }
     }
-    
+
     private var similarMovies: some View {
         Group {
             if let movies = recommendations, !movies.isEmpty {

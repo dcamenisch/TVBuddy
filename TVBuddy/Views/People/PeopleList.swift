@@ -9,9 +9,8 @@ import SwiftUI
 import TMDb
 
 struct PeopleList: View {
-
     let credits: ShowCredits
-    
+
     @State private var selected = 0
     var options = ["Cast", "Crew"]
 
@@ -20,15 +19,15 @@ struct PeopleList: View {
             Text("Cast and Crew")
                 .font(.title2)
                 .bold()
-            
+
             Picker("", selection: $selected) {
-                ForEach(0..<options.count, id: \.self) { option in
+                ForEach(0 ..< options.count, id: \.self) { option in
                     Text(options[option])
                         .tag(option)
                 }
             }
             .pickerStyle(.segmented)
-            
+
             if selected == 0 {
                 ForEach(credits.cast) { castMember in
                     CastItem(castMember: castMember)
@@ -43,17 +42,16 @@ struct PeopleList: View {
 }
 
 struct CastItem: View {
-    
     let castMember: CastMember
-    
+
     @EnvironmentObject private var personStore: PersonStore
     @State var image: URL?
-    
+
     var body: some View {
         HStack {
             ImageView(title: castMember.name, url: image)
                 .posterStyle(size: .tiny)
-            
+
             VStack(alignment: .leading) {
                 Text(castMember.name)
                     .font(.title3)
@@ -72,17 +70,16 @@ struct CastItem: View {
 }
 
 struct CrewItem: View {
-    
     let crewMember: CrewMember
-    
+
     @EnvironmentObject private var personStore: PersonStore
     @State var image: URL?
-    
+
     var body: some View {
         HStack {
             ImageView(title: crewMember.name, url: image)
                 .posterStyle(size: .tiny)
-            
+
             VStack(alignment: .leading) {
                 Text(crewMember.name)
                     .font(.title3)

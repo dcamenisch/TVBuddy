@@ -14,7 +14,7 @@ enum AppConstants {
     static let idealBackdropWidth = 400
     static let nextPageOffset = 10
     static let topLimit = 10
-    
+
     static var apiKey: String {
         guard let filePath = Bundle.main.path(forResource: "TMDB-Info", ofType: "plist") else {
             fatalError("Couldn't find file 'TMDB-Info.plist'.")
@@ -26,10 +26,10 @@ enum AppConstants {
         }
         return value
     }
-    
+
     static let configurationService = ConfigurationService()
     static var apiConfiguration: APIConfiguration?
-    
+
     static let discoverService = DiscoverService()
     static let trendingService = TrendingService()
 }

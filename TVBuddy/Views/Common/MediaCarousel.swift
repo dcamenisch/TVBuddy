@@ -11,7 +11,7 @@ import TMDb
 
 struct MediaCarousel: View {
     @StateObject var page: Page = .first()
-    
+
     var trendingMovies: [Movie]
 
     var body: some View {
@@ -40,17 +40,15 @@ struct MediaCarousel: View {
                 }
         }
     }
-
 }
 
 struct MediaCarouselItem: View {
-    
     let movie: Movie
-    
+
     @EnvironmentObject private var movieStore: MovieStore
-    
+
     @State var backdropWithText: URL?
-    
+
     var body: some View {
         NavigationLink {
             MovieView(id: movie.id)

@@ -9,7 +9,6 @@ import Foundation
 import TMDb
 
 class MovieStore: ObservableObject {
-
     private let moviesManager: MovieManager
 
     @Published var movies: [Movie.ID: Movie] = [:]
@@ -27,73 +26,73 @@ class MovieStore: ObservableObject {
     init(moviesManager: MovieManager = MovieManager()) {
         self.moviesManager = moviesManager
     }
-    
+
     @MainActor
     func movie(withID id: Movie.ID) async -> Movie? {
-        if self.movies[id] == nil {
+        if movies[id] == nil {
             let movie = await moviesManager.fetchMovie(id: id)
             guard let movie = movie else { return nil }
-            
-            self.movies[id] = movie
+
+            movies[id] = movie
         }
-        
-        return self.movies[id]
+
+        return movies[id]
     }
-    
+
     @MainActor
     func poster(withID id: Movie.ID) async -> URL? {
-        if self.posters[id] == nil {
+        if posters[id] == nil {
             let url = await moviesManager.fetchPoster(id: id)
             guard let url = url else { return nil }
-            
-            self.posters[id] = url
+
+            posters[id] = url
         }
-        
-        return self.posters[id]
+
+        return posters[id]
     }
-    
+
     @MainActor
     func backdrop(withID id: Movie.ID) async -> URL? {
-        if self.backdrops[id] == nil {
+        if backdrops[id] == nil {
             let url = await moviesManager.fetchBackdrop(id: id)
             guard let url = url else { return nil }
-            
-            self.backdrops[id] = url
+
+            backdrops[id] = url
         }
-        
-        return self.backdrops[id]
+
+        return backdrops[id]
     }
-    
+
     @MainActor
     func backdropWithText(withID id: Movie.ID) async -> URL? {
-        if self.backdropsWithText[id] == nil {
+        if backdropsWithText[id] == nil {
             let url = await moviesManager.fetchBackdropWithText(id: id)
             guard let url = url else { return nil }
-            
-            self.backdropsWithText[id] = url
+
+            backdropsWithText[id] = url
         }
-        
-        return self.backdropsWithText[id]
+
+        return backdropsWithText[id]
     }
-    
+
     @MainActor
     func credits(forMovie id: Movie.ID) async -> ShowCredits? {
-        if self.credits[id] == nil {
+        if credits[id] == nil {
             let credits = await moviesManager.fetchCredits(id: id)
             guard let credits = credits else { return nil }
-            
+
             self.credits[id] = credits
         }
-        
-        return self.credits[id]
+
+        return credits[id]
     }
-    
+
     @MainActor
     func recommendations(forMovie id: Movie.ID) async -> [Movie]? {
-        if self.recommendationsIDs[id] == nil {
+        if recommendationsIDs[id] == nil {
             let movies = await moviesManager.fetchRecommendations(id: id)
             guard let movies = movies else { return nil }
-            
+
             await withTaskGroup(of: Void.self) { taskGroup in
                 for movie in movies {
                     taskGroup.addTask {
@@ -101,24 +100,24 @@ class MovieStore: ObservableObject {
                     }
                 }
             }
-            
-            self.recommendationsIDs[id] = movies.compactMap { $0.id }
+
+            recommendationsIDs[id] = movies.compactMap { $0.id }
         }
-        
-        return self.recommendationsIDs[id]!.compactMap { self.movies[$0] }
+
+        return recommendationsIDs[id]!.compactMap { self.movies[$0] }
     }
-    
+
     @MainActor
     func trending() async -> [Movie] {
         if trendingPage == 1 {
             return trendingIDs.compactMap { movies[$0] }
         }
-        
+
         trendingPage = 1
-                
+
         let page = await moviesManager.fetchTrending(page: trendingPage)
         guard let page = page else { return [] }
-                
+
         await withTaskGroup(of: Void.self) { taskGroup in
             for movie in page {
                 taskGroup.addTask {
@@ -126,14 +125,14 @@ class MovieStore: ObservableObject {
                 }
             }
         }
-        
+
         page.forEach { movie in
             if !self.trendingIDs.contains(movie.id) { self.trendingIDs.append(movie.id) }
         }
-        
+
         return trendingIDs.compactMap { movies[$0] }
     }
-    
+
     @MainActor
     func discover() async -> [Movie] {
         if discoverPage == 1 {
@@ -141,10 +140,10 @@ class MovieStore: ObservableObject {
         }
 
         discoverPage = 1
-                
+
         let page = await moviesManager.fetchDiscover(page: trendingPage)
         guard let page = page else { return [] }
-                
+
         await withTaskGroup(of: Void.self) { taskGroup in
             for movie in page {
                 taskGroup.addTask {
@@ -152,17 +151,16 @@ class MovieStore: ObservableObject {
                 }
             }
         }
-        
+
         page.forEach { movie in
             if !self.discoverIDs.contains(movie.id) { self.discoverIDs.append(movie.id) }
         }
-        
+
         return discoverIDs.compactMap { movies[$0] }
     }
 }
 
 extension MovieStore {
-
     //    @MainActor
     //    func fetchDiscover() {
     //        discoverPage += 1
@@ -222,5 +220,4 @@ extension MovieStore {
     //
     //        fetchTrending()
     //    }
-
 }

@@ -13,7 +13,7 @@ struct MovieView: View {
 
     @State var offset: CGFloat = 0.0
     @State var visibility: Visibility = .hidden
-    
+
     @State var tmdbMovie: Movie?
     @State var poster: URL?
     @State var backdrop: URL?

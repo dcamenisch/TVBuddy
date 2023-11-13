@@ -9,7 +9,6 @@ import Foundation
 import TMDb
 
 class TVStore: ObservableObject {
-
     private let tvManager: TVManager
 
     @Published var shows: [TVSeries.ID: TVSeries] = [:]
@@ -28,33 +27,33 @@ class TVStore: ObservableObject {
     init(tvManager: TVManager = TVManager()) {
         self.tvManager = tvManager
     }
-    
+
     @MainActor
     func show(withID id: TVSeries.ID) async -> TVSeries? {
-        if self.shows[id] == nil {
+        if shows[id] == nil {
             let show = await tvManager.fetchShow(id: id)
             guard let show = show else { return nil }
-            
-            self.shows[id] = show
+
+            shows[id] = show
         }
-        
-        return self.shows[id]
+
+        return shows[id]
     }
-    
+
     @MainActor
     func season(_ season: Int, forTVSeries id: TVSeries.ID) async -> TVSeason? {
-        if self.seasons[id]?[season] == nil {
+        if seasons[id]?[season] == nil {
             let result = await tvManager.fetchSeason(season: season, id: id)
             guard let result = result else { return nil }
-            
-            var tmpSeasons = self.seasons[id] ?? [:]
+
+            var tmpSeasons = seasons[id] ?? [:]
             tmpSeasons[season] = result
-            self.seasons[id] = tmpSeasons
+            seasons[id] = tmpSeasons
         }
-        
-        return self.seasons[id]?[season]
+
+        return seasons[id]?[season]
     }
-    
+
     @MainActor
     func episode(_ episode: Int, season: Int, forTVSeries id: TVSeries.ID) async -> TVEpisode? {
         return await self.season(season, forTVSeries: id)?.episodes?.first(where: { tvEpisode in
@@ -64,58 +63,58 @@ class TVStore: ObservableObject {
 
     @MainActor
     func poster(withID id: TVSeries.ID, season: Int? = nil) async -> URL? {
-        if self.posters[[id, season]] == nil {
+        if posters[[id, season]] == nil {
             let url = await tvManager.fetchPoster(id: id, season: season)
             guard let url = url else { return nil }
-            
-            self.posters[[id, season]] = url
+
+            posters[[id, season]] = url
         }
-        
-        return self.posters[[id, season]]
+
+        return posters[[id, season]]
     }
-    
+
     @MainActor
     func backdrop(withID id: TVSeries.ID, season: Int? = nil, episode: Int? = nil) async -> URL? {
-        if self.backdrops[[id, season, episode]] == nil {
+        if backdrops[[id, season, episode]] == nil {
             let url = await tvManager.fetchBackdrop(id: id, season: season, episode: episode)
             guard let url = url else { return nil }
-            
-            self.backdrops[[id, season, episode]] = url
+
+            backdrops[[id, season, episode]] = url
         }
-        
-        return self.backdrops[[id, season, episode]]
+
+        return backdrops[[id, season, episode]]
     }
-    
+
     @MainActor
     func backdropWithText(withID id: TVSeries.ID) async -> URL? {
-        if self.backdropsWithText[id] == nil {
+        if backdropsWithText[id] == nil {
             let url = await tvManager.fetchBackdropWithText(id: id)
             guard let url = url else { return nil }
-            
-            self.backdropsWithText[id] = url
+
+            backdropsWithText[id] = url
         }
-        
-        return self.backdropsWithText[id]
+
+        return backdropsWithText[id]
     }
 
     @MainActor
     func credits(forTVSeries id: TVSeries.ID) async -> ShowCredits? {
-        if self.credits[id] == nil {
+        if credits[id] == nil {
             let credits = await tvManager.fetchCredits(id: id)
             guard let credits = credits else { return nil }
-            
+
             self.credits[id] = credits
         }
-        
-        return self.credits[id]
+
+        return credits[id]
     }
-    
+
     @MainActor
     func recommendations(forTVSeries id: TVSeries.ID) async -> [TVSeries]? {
-        if self.recommendationsIDs[id] == nil {
+        if recommendationsIDs[id] == nil {
             let shows = await tvManager.fetchRecommendations(id: id)
             guard let shows = shows else { return nil }
-            
+
             await withTaskGroup(of: Void.self) { taskGroup in
                 for show in shows {
                     taskGroup.addTask {
@@ -123,24 +122,24 @@ class TVStore: ObservableObject {
                     }
                 }
             }
-            
-            self.recommendationsIDs[id] = shows.compactMap { $0.id }
+
+            recommendationsIDs[id] = shows.compactMap { $0.id }
         }
-        
-        return self.recommendationsIDs[id]!.compactMap { self.shows[$0] }
+
+        return recommendationsIDs[id]!.compactMap { self.shows[$0] }
     }
-    
+
     @MainActor
     func trending() async -> [TVSeries] {
         if trendingPage == 1 {
             return trendingIDs.compactMap { shows[$0] }
         }
-        
+
         trendingPage = 1
-                
+
         let page = await tvManager.fetchTrending(page: trendingPage)
         guard let page = page else { return [] }
-                
+
         await withTaskGroup(of: Void.self) { taskGroup in
             for show in page {
                 taskGroup.addTask {
@@ -148,25 +147,25 @@ class TVStore: ObservableObject {
                 }
             }
         }
-        
+
         page.forEach { show in
             if !self.trendingIDs.contains(show.id) { self.trendingIDs.append(show.id) }
         }
-        
+
         return trendingIDs.compactMap { shows[$0] }
     }
-    
+
     @MainActor
     func discover() async -> [TVSeries] {
         if discoverPage == 1 {
             return discoverIDs.compactMap { shows[$0] }
         }
-        
+
         discoverPage = 1
-                
+
         let page = await tvManager.fetchDiscover(page: trendingPage)
         guard let page = page else { return [] }
-                
+
         await withTaskGroup(of: Void.self) { taskGroup in
             for show in page {
                 taskGroup.addTask {
@@ -174,17 +173,16 @@ class TVStore: ObservableObject {
                 }
             }
         }
-        
+
         page.forEach { show in
             if !self.discoverIDs.contains(show.id) { self.discoverIDs.append(show.id) }
         }
-        
+
         return discoverIDs.compactMap { shows[$0] }
     }
 }
 
 extension TVStore {
-
     //    @MainActor
     //    func fetchRecommendations(forTVSeries id: TVSeries.ID) {
     //        guard recommendations(forTVSeries: id) == nil else {
@@ -267,5 +265,4 @@ extension TVStore {
     //
     //        fetchTrending()
     //    }
-
 }

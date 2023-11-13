@@ -19,6 +19,7 @@ struct PosterStyle: ViewModifier {
             case .large: return 250
             }
         }
+
         func height() -> CGFloat {
             switch self {
             case .tiny: return 90
@@ -34,8 +35,8 @@ struct PosterStyle: ViewModifier {
     func body(content: Content) -> some View {
         return
             content
-            .frame(width: size.width(), height: size.height())
-            .cornerRadius(6)
+                .frame(width: size.width(), height: size.height())
+                .cornerRadius(6)
     }
 }
 

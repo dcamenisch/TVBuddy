@@ -18,7 +18,6 @@ enum SearchScope: String, Codable, CaseIterable, Identifiable, Hashable {
 }
 
 class SearchStore: ObservableObject {
-
     @Published var searchQuery: String = ""
     @Published var results: [Media]?
     @Published var isSearching = false
@@ -31,7 +30,7 @@ class SearchStore: ObservableObject {
     private var newPageTask: Task<Void, Never>?
 
     init() {
-        self.searchManager = SearchManager()
+        searchManager = SearchManager()
     }
 
     @MainActor
@@ -82,5 +81,4 @@ class SearchStore: ObservableObject {
             }
         }
     }
-
 }

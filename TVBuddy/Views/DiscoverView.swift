@@ -9,16 +9,14 @@ import SwiftUI
 import TMDb
 
 struct DiscoverView: View {
-
     @EnvironmentObject private var tvStore: TVStore
     @EnvironmentObject private var movieStore: MovieStore
-    
+
     @State var trendingMovies = [Movie]()
     @State var trendingTVShows = [TVSeries]()
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
-
             MediaCarousel(trendingMovies: trendingMovies)
 
             VStack(spacing: 10) {
@@ -26,7 +24,6 @@ struct DiscoverView: View {
                 MediaList(title: "Trending TV Shows", tmdbTVShows: trendingTVShows)
             }
             .padding(.horizontal)
-
         }
         .navigationTitle("Discover")
         .task {

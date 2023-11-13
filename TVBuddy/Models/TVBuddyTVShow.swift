@@ -1,5 +1,5 @@
 //
-//  TVShow.swift
+//  TVBuddyTVShow.swift
 //  TVBuddy
 //
 //  Created by Danny on 24.09.2023.
@@ -13,7 +13,7 @@ import TMDb
 public final class TVBuddyTVShow {
     @Attribute(.unique)
     public let id: Int
-    
+
     let name: String
 
     @Relationship(deleteRule: .cascade, inverse: \TVBuddyTVEpisode.tvShow)
@@ -39,12 +39,12 @@ public final class TVBuddyTVShow {
             finishedWatching: finishedWatching
         )
     }
-    
+
     func toggleWatched() {
         episodes.forEach { $0.watched = !finishedWatching }
         checkWatching()
     }
-    
+
     func checkWatching() {
         startedWatching = episodes.contains { $0.watched && $0.seasonNumber != 0 }
         finishedWatching = episodes.allSatisfy { $0.watched || $0.seasonNumber == 0 }

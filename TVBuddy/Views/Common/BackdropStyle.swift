@@ -11,7 +11,7 @@ struct BackdropStyle: ViewModifier {
     func body(content: Content) -> some View {
         return
             content
-            .cornerRadius(15)
+                .cornerRadius(15)
     }
 }
 

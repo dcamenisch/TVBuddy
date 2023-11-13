@@ -9,15 +9,14 @@ import Foundation
 import TMDb
 
 class MovieManager {
-
     private let movieService = MovieService()
     private let discoverService = AppConstants.discoverService
     private let trendingService = AppConstants.trendingService
-    
+
     private var imageService: ImagesConfiguration? {
         AppConstants.apiConfiguration?.images
     }
-        
+
     func fetchMovie(id: Movie.ID) async -> Movie? {
         do {
             return try await movieService.details(forMovie: id)
@@ -44,7 +43,7 @@ class MovieManager {
         do {
             let images = try await movieService.images(forMovie: id)
             return imageService?.backdropURL(
-                for: images.backdrops.filter({ $0.languageCode == nil }).first?.filePath,
+                for: images.backdrops.filter { $0.languageCode == nil }.first?.filePath,
                 idealWidth: AppConstants.idealBackdropWidth
             )
         } catch {
@@ -57,7 +56,7 @@ class MovieManager {
         do {
             let images = try await movieService.images(forMovie: id)
             return imageService?.backdropURL(
-                for: images.backdrops.filter({ $0.languageCode == AppConstants.languageCode }).first?.filePath,
+                for: images.backdrops.filter { $0.languageCode == AppConstants.languageCode }.first?.filePath,
                 idealWidth: AppConstants.idealBackdropWidth
             )
         } catch {
@@ -101,5 +100,4 @@ class MovieManager {
             return nil
         }
     }
-
 }

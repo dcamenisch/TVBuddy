@@ -1,5 +1,5 @@
 //
-//  TVEpisode.swift
+//  TVBuddyTVEpisode.swift
 //  TVBuddy
 //
 //  Created by Danny on 24.09.2023.
@@ -36,7 +36,7 @@ public final class TVBuddyTVEpisode {
             watched: watched
         )
     }
-    
+
     func toggleWatched() {
         watched.toggle()
         tvShow?.checkWatching()

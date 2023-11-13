@@ -10,7 +10,6 @@ import SwiftUI
 import TMDb
 
 struct MovieHeader: View {
-
     let tmdbMovie: Movie
     let poster: URL?
     let backdrop: URL?
@@ -66,12 +65,14 @@ struct MovieHeader: View {
                             .mask(
                                 LinearGradient(
                                     gradient: Gradient(colors: [.white, .clear]),
-                                    startPoint: .bottom, endPoint: .top))
+                                    startPoint: .bottom, endPoint: .top
+                                ))
                     }
                     .offset(y: minY > 0 ? -minY : 0)
                     .frame(
                         width: UIScreen.main.bounds.width,
-                        height: minY > 0 ? initialHeaderHeight + minY : initialHeaderHeight)
+                        height: minY > 0 ? initialHeaderHeight + minY : initialHeaderHeight
+                    )
                 }
                 .frame(height: initialHeaderHeight)
 
