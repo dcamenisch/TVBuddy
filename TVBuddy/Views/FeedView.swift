@@ -24,7 +24,7 @@ struct FeedView: View {
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
-            VStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 10) {
                 TVEpisodeProgressView()
                 MediaList(title: "TV Show Watchlist (\(tvShows.count))", tvShows: tvShows)
                 MediaList(title: "Watched TV Shows (\(watchedTVShows.count))", tvShows: watchedTVShows)
