@@ -19,6 +19,7 @@ struct TVSeasonView: View {
     @State var offset: CGFloat = 0.0
     @State var visibility: Visibility = .hidden
 
+    @State var tmdbTVShow: TVSeries?
     @State var tmdbSeason: TVSeason?
     @State var poster: URL?
     @State var backdrop: URL?
@@ -51,6 +52,7 @@ struct TVSeasonView: View {
                 }
             }
             .task {
+                tmdbTVShow = await tvStore.show(withID: id)
                 tmdbSeason = await tvStore.season(seasonNumber, forTVSeries: id)
                 poster = await tvStore.poster(withID: id, season: seasonNumber)
                 backdrop = await tvStore.backdrop(withID: id, season: seasonNumber)
@@ -58,14 +60,14 @@ struct TVSeasonView: View {
     }
 
     @ViewBuilder private var content: some View {
-        if let tmdbSeason = tmdbSeason {
+        if let tmdbSeason = tmdbSeason, let tmdbTVShow = tmdbTVShow {
             OffsettableScrollView(showsIndicators: false) { point in
                 offset = -point.y
                 visibility = offset > 290 ? .visible : .hidden
             } content: {
                 TVSeasonHeader(season: tmdbSeason, poster: poster, backdrop: backdrop)
                     .padding(.bottom, 10)
-                TVSeasonBody(id: id, tmdbSeason: tmdbSeason)
+                TVSeasonBody(tmdbTVShow: tmdbTVShow, tmdbSeason: tmdbSeason)
                     .padding(.horizontal)
             }
         } else {
