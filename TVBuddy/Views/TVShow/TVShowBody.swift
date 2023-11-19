@@ -58,12 +58,9 @@ struct TVShowBody: View {
                     insertTVShow(tmdbTVShow: tmdbTVShow, watched: false)
                 }
             } label: {
-                HStack {
-                    Image(systemName: _show == nil ? "plus" : "checkmark")
-                    Text("Watchlist")
-                }
-                .frame(height: 30)
-                .frame(maxWidth: .infinity)
+                Label("Watchlist", systemImage: _show == nil ? "plus" : "checkmark")
+                    .frame(height: 30)
+                    .frame(maxWidth: .infinity)
             }
 
             Button {
@@ -73,12 +70,9 @@ struct TVShowBody: View {
                     insertTVShow(tmdbTVShow: tmdbTVShow, watched: true)
                 }
             } label: {
-                HStack {
-                    Image(systemName: _show == nil ? "eye" : _show?.finishedWatching ?? false ? "eye.fill" : "eye")
-                    Text("Watched")
-                }
-                .frame(height: 30)
-                .frame(maxWidth: .infinity)
+                Label("Watched", systemImage: _show == nil ? "eye" : _show?.finishedWatching ?? false ? "eye.fill" : "eye")
+                    .frame(height: 30)
+                    .frame(maxWidth: .infinity)
             }
         }
         .bold()

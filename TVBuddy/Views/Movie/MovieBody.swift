@@ -53,12 +53,9 @@ struct MovieBody: View {
                     context.insert(TVBuddyMovie(movie: tmdbMovie, watched: false))
                 }
             } label: {
-                HStack {
-                    Image(systemName: _movie == nil ? "plus" : "checkmark")
-                    Text("Watchlist")
-                }
-                .frame(height: 30)
-                .frame(maxWidth: .infinity)
+                Label("Watchlist", systemImage: _movie == nil ? "plus" : "checkmark")
+                    .frame(height: 30)
+                    .frame(maxWidth: .infinity)
             }
 
             Button {
@@ -68,14 +65,10 @@ struct MovieBody: View {
                     context.insert(TVBuddyMovie(movie: tmdbMovie, watched: true))
                 }
             } label: {
-                HStack {
-                    Image(
-                        systemName: _movie == nil
-                            ? "eye" : _movie?.watched ?? false ? "eye.fill" : "eye")
-                    Text("Watched")
-                }
-                .frame(height: 30)
-                .frame(maxWidth: .infinity)
+                Label("Watched", systemImage: _movie == nil
+                      ? "eye" : _movie?.watched ?? false ? "eye.fill" : "eye")
+                    .frame(height: 30)
+                    .frame(maxWidth: .infinity)
             }
         }
         .bold()
