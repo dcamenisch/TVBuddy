@@ -11,6 +11,7 @@ import TMDb
 struct PeopleList: View {
     let credits: ShowCredits
 
+    @State private var showMore = false
     @State private var selected = 0
     var options = ["Cast", "Crew"]
 
@@ -29,12 +30,50 @@ struct PeopleList: View {
             .pickerStyle(.segmented)
 
             if selected == 0 {
-                ForEach(credits.cast) { castMember in
-                    CastItem(castMember: castMember)
+                if credits.cast.count == 0 {
+                    ContentUnavailableView("No Cast Information Available", systemImage: "person.fill")
+                }
+                
+                if showMore {
+                    ForEach(credits.cast) { castMember in
+                        CastItem(castMember: castMember)
+                    }
+                } else {
+                    ForEach(credits.cast.prefix(4)) { castMember in
+                        CastItem(castMember: castMember)
+                    }
+                }
+                
+                if credits.cast.count > 4 {
+                    Button(action: { showMore.toggle() }, label: {
+                        Text(showMore ? "Show less" : "Show more")
+                            .frame(height: 30)
+                            .frame(maxWidth: .infinity)
+                    })
+                    .buttonStyle(.bordered)
                 }
             } else {
-                ForEach(credits.crew) { crewMember in
-                    CrewItem(crewMember: crewMember)
+                if credits.crew.count == 0 {
+                    ContentUnavailableView("No Crew Information Available", systemImage: "person.fill")
+                }
+                
+                if showMore {
+                    ForEach(credits.crew) { crewMember in
+                        CrewItem(crewMember: crewMember)
+                    }
+                } else {
+                    ForEach(credits.crew.prefix(4)) { crewMember in
+                        CrewItem(crewMember: crewMember)
+                    }
+                }
+                
+                if credits.crew.count > 4 {
+                    Button(action: { showMore.toggle() }, label: {
+                        Text(showMore ? "Show less" : "Show more")
+                            .frame(height: 30)
+                            .frame(maxWidth: .infinity)
+                    })
+                    .buttonStyle(.bordered)
                 }
             }
         }

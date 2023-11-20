@@ -8,7 +8,7 @@
 import Foundation
 import TMDb
 
-public enum TVBuddyMedia: Identifiable, Equatable, Hashable {
+enum TVBuddyMedia: Identifiable, Equatable, Hashable {
     public var id: Int {
         switch self {
         case let .movie(movie):
