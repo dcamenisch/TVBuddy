@@ -20,7 +20,6 @@ struct PageableMovieList: View {
                 Text(title)
                     .font(.title2)
                     .bold()
-                
             }
             
             ScrollView(.horizontal, showsIndicators: false) {

@@ -28,9 +28,9 @@ class MovieManager {
 
     func fetchPoster(id: Movie.ID) async -> URL? {
         do {
-            let images = try await movieService.images(forMovie: id)
+            let images = try await movieService.images(forMovie: id).posters
             return imageService?.posterURL(
-                for: images.posters.first?.filePath,
+                for: images.first?.filePath,
                 idealWidth: AppConstants.idealPosterWidth
             )
         } catch {
@@ -41,9 +41,9 @@ class MovieManager {
 
     func fetchBackdrop(id: Movie.ID) async -> URL? {
         do {
-            let images = try await movieService.images(forMovie: id)
+            let images = try await movieService.images(forMovie: id).backdrops
             return imageService?.backdropURL(
-                for: images.backdrops.filter { $0.languageCode == nil }.first?.filePath,
+                for: images.filter { $0.languageCode == nil }.first?.filePath,
                 idealWidth: AppConstants.idealBackdropWidth
             )
         } catch {
@@ -54,9 +54,14 @@ class MovieManager {
 
     func fetchBackdropWithText(id: Movie.ID) async -> URL? {
         do {
-            let images = try await movieService.images(forMovie: id)
+            let images = try await movieService.images(forMovie: id).backdrops
+            
+            if images.isEmpty {
+                return await fetchBackdrop(id: id)
+            }
+            
             return imageService?.backdropURL(
-                for: images.backdrops.filter { $0.languageCode == AppConstants.languageCode }.first?.filePath,
+                for: images.filter { $0.languageCode == AppConstants.languageCode }.first?.filePath,
                 idealWidth: AppConstants.idealBackdropWidth
             )
         } catch {

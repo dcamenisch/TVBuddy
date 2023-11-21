@@ -107,6 +107,11 @@ class TVManager {
     func fetchBackdropWithText(id: TVSeries.ID) async -> URL? {
         do {
             let images = try await tvSeriesService.images(forTVSeries: id).backdrops
+            
+            if images.isEmpty {
+                return await fetchBackdrop(id: id)
+            }
+            
             return imageService?.backdropURL(
                 for: images.filter { $0.languageCode == AppConstants.languageCode }.first?.filePath,
                 idealWidth: AppConstants.idealBackdropWidth
