@@ -108,12 +108,12 @@ class MovieStore: ObservableObject {
     }
 
     @MainActor
-    func trending() async -> [Movie] {
-        if trendingPage == 1 {
+    func trending(newPage: Bool = false) async -> [Movie] {
+        if !newPage && trendingPage != 0 {
             return trendingIDs.compactMap { movies[$0] }
         }
 
-        trendingPage = 1
+        trendingPage += 1
 
         let page = await moviesManager.fetchTrending(page: trendingPage)
         guard let page = page else { return [] }
@@ -134,14 +134,14 @@ class MovieStore: ObservableObject {
     }
 
     @MainActor
-    func discover() async -> [Movie] {
-        if discoverPage == 1 {
+    func discover(newPage: Bool = false) async -> [Movie] {
+        if !newPage && discoverPage != 0 {
             return discoverIDs.compactMap { movies[$0] }
         }
 
-        discoverPage = 1
+        discoverPage += 1
 
-        let page = await moviesManager.fetchDiscover(page: trendingPage)
+        let page = await moviesManager.fetchDiscover(page: discoverPage)
         guard let page = page else { return [] }
 
         await withTaskGroup(of: Void.self) { taskGroup in
@@ -158,66 +158,4 @@ class MovieStore: ObservableObject {
 
         return discoverIDs.compactMap { movies[$0] }
     }
-}
-
-extension MovieStore {
-    //    @MainActor
-    //    func fetchDiscover() {
-    //        discoverPage += 1
-    //
-    //        Task {
-    //            let newPage = await moviesManager.fetchDiscover(page: discoverPage)
-    //
-    //            newPage?.forEach { movie in
-    //                if movies[movie.id] == nil {
-    //                    movies[movie.id] = movie
-    //                }
-    //
-    //                if !discoverIDs.contains(movie.id) {
-    //                    discoverIDs.append(movie.id)
-    //                }
-    //            }
-    //        }
-    //    }
-    //
-    //    @MainActor
-    //    func fetchNextDiscover(currentMovie: Movie, offset: Int = AppConstants.nextPageOffset) {
-    //        let index = discoverIDs.firstIndex(where: { $0 == currentMovie.id })
-    //        let thresholdIndex = discoverIDs.endIndex - offset
-    //        guard index == thresholdIndex else {
-    //            return
-    //        }
-    //
-    //        fetchDiscover()
-    //    }
-
-    //    @MainActor
-    //    func fetchTrending() {
-    //        trendingPage += 1
-    //
-    //        Task {
-    //            let newPage = await moviesManager.fetchTrending(page: trendingPage)
-    //
-    //            newPage?.forEach { movie in
-    //                if movies[movie.id] == nil {
-    //                    movies[movie.id] = movie
-    //                }
-    //
-    //                if !trendingIDs.contains(movie.id) {
-    //                    trendingIDs.append(movie.id)
-    //                }
-    //            }
-    //        }
-    //    }
-    //
-    //    @MainActor
-    //    func fetchNextTrending(currentMovie: Movie, offset: Int = AppConstants.nextPageOffset) {
-    //        let index = trendingIDs.firstIndex(where: { $0 == currentMovie.id })
-    //        let thresholdIndex = trendingIDs.endIndex - offset
-    //        guard index == thresholdIndex else {
-    //            return
-    //        }
-    //
-    //        fetchTrending()
-    //    }
 }

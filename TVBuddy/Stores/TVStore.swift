@@ -130,12 +130,12 @@ class TVStore: ObservableObject {
     }
 
     @MainActor
-    func trending() async -> [TVSeries] {
-        if trendingPage == 1 {
+    func trending(newPage: Bool = false) async -> [TVSeries] {
+        if !newPage && trendingPage != 0 {
             return trendingIDs.compactMap { shows[$0] }
         }
 
-        trendingPage = 1
+        trendingPage += 1
 
         let page = await tvManager.fetchTrending(page: trendingPage)
         guard let page = page else { return [] }
@@ -156,14 +156,14 @@ class TVStore: ObservableObject {
     }
 
     @MainActor
-    func discover() async -> [TVSeries] {
-        if discoverPage == 1 {
+    func discover(newPage: Bool = false) async -> [TVSeries] {
+        if !newPage && discoverPage != 0 {
             return discoverIDs.compactMap { shows[$0] }
         }
 
-        discoverPage = 1
+        discoverPage += 1
 
-        let page = await tvManager.fetchDiscover(page: trendingPage)
+        let page = await tvManager.fetchDiscover(page: discoverPage)
         guard let page = page else { return [] }
 
         await withTaskGroup(of: Void.self) { taskGroup in
@@ -180,89 +180,4 @@ class TVStore: ObservableObject {
 
         return discoverIDs.compactMap { shows[$0] }
     }
-}
-
-extension TVStore {
-    //    @MainActor
-    //    func fetchRecommendations(forTVSeries id: TVSeries.ID) {
-    //        guard recommendations(forTVSeries: id) == nil else {
-    //            return
-    //        }
-    //
-    //        Task {
-    //            let shows = await tvManager.fetchRecommendations(forTVSeries: id)
-    //
-    //            guard let shows = shows else {
-    //                return
-    //            }
-    //
-    //            shows.forEach {
-    //                if self.shows[$0.id] == nil {
-    //                    self.shows[$0.id] = $0
-    //                }
-    //            }
-    //
-    //            recommendationsIDs[id] = shows.compactMap { $0.id }
-    //        }
-    //    }
-    //
-    //    @MainActor
-    //    func fetchDiscover() {
-    //        discoverPage += 1
-    //
-    //        Task {
-    //            let newPage = await tvManager.fetchDiscover(page: discoverPage)
-    //
-    //            newPage?.forEach { show in
-    //                if shows[show.id] == nil {
-    //                    shows[show.id] = show
-    //                }
-    //
-    //                if !discoverIDs.contains(show.id) {
-    //                    discoverIDs.append(show.id)
-    //                }
-    //            }
-    //        }
-    //    }
-    //
-    //    @MainActor
-    //    func fetchNextDiscover(currentTVSeries: TVSeries, offset: Int = AppConstants.nextPageOffset) {
-    //        let index = discoverIDs.firstIndex(where: { $0 == currentTVSeries.id })
-    //        let thresholdIndex = discoverIDs.endIndex - offset
-    //        guard index == thresholdIndex else {
-    //            return
-    //        }
-    //
-    //        fetchDiscover()
-    //    }
-    //
-    //    @MainActor
-    //    func fetchTrending() {
-    //        trendingPage += 1
-    //
-    //        Task {
-    //            let newPage = await tvManager.fetchTrending(page: trendingPage)
-    //
-    //            newPage?.forEach { show in
-    //                if shows[show.id] == nil {
-    //                    shows[show.id] = show
-    //                }
-    //
-    //                if !trendingIDs.contains(show.id) {
-    //                    trendingIDs.append(show.id)
-    //                }
-    //            }
-    //        }
-    //    }
-    //
-    //    @MainActor
-    //    func fetchNextTrending(currentTVSeries: TVSeries, offset: Int = AppConstants.nextPageOffset) {
-    //        let index = trendingIDs.firstIndex(where: { $0 == currentTVSeries.id })
-    //        let thresholdIndex = trendingIDs.endIndex - offset
-    //        guard index == thresholdIndex else {
-    //            return
-    //        }
-    //
-    //        fetchTrending()
-    //    }
 }
