@@ -31,6 +31,8 @@ struct MovieBody: View {
         VStack(alignment: .leading, spacing: 10) {
             watchButtons
             overview
+            
+            genres
 
             if let credits = credits, !credits.cast.isEmpty {
                 PeopleList(credits: credits)
@@ -82,6 +84,23 @@ struct MovieBody: View {
                     .font(.title2)
                     .bold()
                 Text(tmdbMovie.overview ?? "")
+            }
+        }
+    }
+    
+    private var genres: some View {
+        Group {
+            if let genres = tmdbMovie.genres {
+                WrappingHStack(models: genres) { genre in
+                    Text(genre.name)
+                        .font(.headline)
+                        .padding(.horizontal, 10.0)
+                        .padding(.vertical, 8.0)
+                        .background {
+                            RoundedRectangle(cornerRadius: 15.0, style: .circular)
+                                .foregroundStyle(.quaternary)
+                        }
+                }
             }
         }
     }

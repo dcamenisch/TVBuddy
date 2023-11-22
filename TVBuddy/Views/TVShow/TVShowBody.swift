@@ -35,6 +35,7 @@ struct TVShowBody: View {
         VStack(alignment: .leading, spacing: 10) {
             watchButtons
             overview
+            genres
             seasons
 
             if let credits = credits, !credits.cast.isEmpty {
@@ -86,6 +87,23 @@ struct TVShowBody: View {
                     .font(.title2)
                     .bold()
                 Text(tmdbTVShow.overview ?? "")
+            }
+        }
+    }
+    
+    private var genres: some View {
+        Group {
+            if let genres = tmdbTVShow.genres {
+                WrappingHStack(models: genres) { genre in
+                    Text(genre.name)
+                        .font(.headline)
+                        .padding(.horizontal, 10.0)
+                        .padding(.vertical, 8.0)
+                        .background {
+                            RoundedRectangle(cornerRadius: 15.0, style: .circular)
+                                .foregroundStyle(.quaternary)
+                        }
+                }
             }
         }
     }
