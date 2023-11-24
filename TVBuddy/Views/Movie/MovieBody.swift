@@ -16,15 +16,12 @@ struct MovieBody: View {
     @State var credits: ShowCredits?
     @State var similar: [Movie]?
 
-    @Query
-    private var movies: [TVBuddyMovie]
-    private var _movie: TVBuddyMovie? { movies.first }
-
     private var tmdbMovie: Movie
-
-    init(tmdbMovie: Movie, id: Movie.ID) {
+    private var tvBuddyMovie: TVBuddyMovie?
+    
+    init(tmdbMovie: Movie, tvBuddyMovie: TVBuddyMovie?) {
         self.tmdbMovie = tmdbMovie
-        _movies = Query(filter: #Predicate<TVBuddyMovie> { $0.id == id })
+        self.tvBuddyMovie = tvBuddyMovie
     }
 
     var body: some View {
@@ -49,26 +46,25 @@ struct MovieBody: View {
     private var watchButtons: some View {
         HStack {
             Button {
-                if let movie = _movie {
+                if let movie = tvBuddyMovie {
                     context.delete(movie)
                 } else {
                     context.insert(TVBuddyMovie(movie: tmdbMovie, watched: false))
                 }
             } label: {
-                Label("Watchlist", systemImage: _movie == nil ? "plus" : "checkmark")
+                Label("Watchlist", systemImage: tvBuddyMovie == nil ? "plus" : "checkmark")
                     .frame(height: 30)
                     .frame(maxWidth: .infinity)
             }
 
             Button {
-                if let movie = _movie {
+                if let movie = tvBuddyMovie {
                     movie.watched.toggle()
                 } else {
                     context.insert(TVBuddyMovie(movie: tmdbMovie, watched: true))
                 }
             } label: {
-                Label("Watched", systemImage: _movie == nil
-                      ? "eye" : _movie?.watched ?? false ? "eye.fill" : "eye")
+                Label("Watched", systemImage: tvBuddyMovie?.watched ?? false ? "eye.fill" : "eye")
                     .frame(height: 30)
                     .frame(maxWidth: .infinity)
             }

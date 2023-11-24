@@ -16,15 +16,12 @@ struct TVShowBody: View {
     @State var credits: ShowCredits?
     @State var similar: [TVSeries]?
 
-    @Query
-    private var shows: [TVBuddyTVShow]
-    private var _show: TVBuddyTVShow? { shows.first }
-
     private var tmdbTVShow: TVSeries
-
-    init(tmdbTVShow: TVSeries, id: TVSeries.ID) {
+    private var tvBuddyTVShow: TVBuddyTVShow?
+    
+    init(tmdbTVShow: TVSeries, tvBuddyTVShow: TVBuddyTVShow?) {
         self.tmdbTVShow = tmdbTVShow
-        _shows = Query(filter: #Predicate<TVBuddyTVShow> { $0.id == id })
+        self.tvBuddyTVShow = tvBuddyTVShow
     }
 
     private var hasSpecials: Bool {
@@ -53,25 +50,25 @@ struct TVShowBody: View {
     private var watchButtons: some View {
         HStack {
             Button {
-                if let show = _show {
+                if let show = tvBuddyTVShow {
                     context.delete(show)
                 } else {
                     insertTVShow(tmdbTVShow: tmdbTVShow, watched: false)
                 }
             } label: {
-                Label("Watchlist", systemImage: _show == nil ? "plus" : "checkmark")
+                Label("Watchlist", systemImage: tvBuddyTVShow == nil ? "plus" : "checkmark")
                     .frame(height: 30)
                     .frame(maxWidth: .infinity)
             }
 
             Button {
-                if let show = _show {
+                if let show = tvBuddyTVShow {
                     show.toggleWatched()
                 } else {
                     insertTVShow(tmdbTVShow: tmdbTVShow, watched: true)
                 }
             } label: {
-                Label("Watched", systemImage: _show == nil ? "eye" : _show?.finishedWatching ?? false ? "eye.fill" : "eye")
+                Label("Watched", systemImage: tvBuddyTVShow?.finishedWatching ?? false ? "eye.fill" : "eye")
                     .frame(height: 30)
                     .frame(maxWidth: .infinity)
             }
