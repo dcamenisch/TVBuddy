@@ -80,14 +80,16 @@ class TVManager {
 
     func fetchBackdrop(id: TVSeries.ID, season: Int, episode: Int) async -> URL? {
         do {
-            let images = try await tvEpisodeService.images(forEpisode: episode, inSeason: season, inTVSeries: id).stills
+            let images = try await tvEpisodeService.images(forEpisode: episode, inSeason: season, inTVSeries: id)
+                .stills
+                .filter { $0.languageCode == nil }
             
             if images.isEmpty {
                 return await fetchBackdrop(id: id, season: season)
             }
             
             return imageService?.stillURL(
-                for: images.filter { $0.languageCode == nil }.first?.filePath,
+                for: images.first?.filePath,
                 idealWidth: AppConstants.idealBackdropWidth
             )
         } catch {
@@ -106,14 +108,16 @@ class TVManager {
 
     func fetchBackdropWithText(id: TVSeries.ID) async -> URL? {
         do {
-            let images = try await tvSeriesService.images(forTVSeries: id).backdrops
-            
+            let images = try await tvSeriesService.images(forTVSeries: id)
+                .backdrops
+                .filter { $0.languageCode == AppConstants.languageCode }
+                        
             if images.isEmpty {
                 return await fetchBackdrop(id: id)
             }
             
             return imageService?.backdropURL(
-                for: images.filter { $0.languageCode == AppConstants.languageCode }.first?.filePath,
+                for: images.first?.filePath,
                 idealWidth: AppConstants.idealBackdropWidth
             )
         } catch {
@@ -134,6 +138,15 @@ class TVManager {
     func fetchRecommendations(id: TVSeries.ID, page: Int = 1) async -> [TVSeries]? {
         do {
             return try await tvSeriesService.recommendations(forTVSeries: id, page: page).results
+        } catch {
+            print(error)
+            return nil
+        }
+    }
+    
+    func fetchSimilar(id: TVSeries.ID, page: Int = 1) async -> [TVSeries]? {
+        do {
+            return try await tvSeriesService.similar(toTVSeries: id, page: page).results
         } catch {
             print(error)
             return nil

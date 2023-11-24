@@ -17,6 +17,7 @@ class MovieStore: ObservableObject {
     @Published var backdropsWithText: [Movie.ID: URL] = [:]
     @Published var credits: [Movie.ID: ShowCredits] = [:]
     @Published var recommendationsIDs: [Movie.ID: [Movie.ID]] = [:]
+    @Published var similarIDs: [Movie.ID: [Movie.ID]] = [:]
     @Published var discoverIDs: [Movie.ID] = []
     @Published var trendingIDs: [Movie.ID] = []
 
@@ -106,16 +107,36 @@ class MovieStore: ObservableObject {
 
         return recommendationsIDs[id]!.compactMap { self.movies[$0] }
     }
+    
+    @MainActor
+    func similar(toMovie id: Movie.ID) async -> [Movie]? {
+        if similarIDs[id] == nil {
+            let movies = await moviesManager.fetchSimilar(id: id)
+            guard let movies = movies else { return nil }
+
+            await withTaskGroup(of: Void.self) { taskGroup in
+                for movie in movies {
+                    taskGroup.addTask {
+                        _ = await self.movie(withID: movie.id)
+                    }
+                }
+            }
+
+            similarIDs[id] = movies.compactMap { $0.id }
+        }
+
+        return similarIDs[id]!.compactMap { self.movies[$0] }
+    }
 
     @MainActor
     func trending(newPage: Bool = false) async -> [Movie] {
         if !newPage && trendingPage != 0 {
             return trendingIDs.compactMap { movies[$0] }
         }
+        
+        let nextPageNumber = trendingPage + 1
 
-        trendingPage += 1
-
-        let page = await moviesManager.fetchTrending(page: trendingPage)
+        let page = await moviesManager.fetchTrending(page: nextPageNumber)
         guard let page = page else { return [] }
 
         await withTaskGroup(of: Void.self) { taskGroup in
@@ -129,7 +150,8 @@ class MovieStore: ObservableObject {
         page.forEach { movie in
             if !self.trendingIDs.contains(movie.id) { self.trendingIDs.append(movie.id) }
         }
-
+        
+        trendingPage = max(nextPageNumber, trendingPage)
         return trendingIDs.compactMap { movies[$0] }
     }
 
@@ -139,9 +161,9 @@ class MovieStore: ObservableObject {
             return discoverIDs.compactMap { movies[$0] }
         }
 
-        discoverPage += 1
+        let nextPageNumber = discoverPage + 1
 
-        let page = await moviesManager.fetchDiscover(page: discoverPage)
+        let page = await moviesManager.fetchDiscover(page: nextPageNumber)
         guard let page = page else { return [] }
 
         await withTaskGroup(of: Void.self) { taskGroup in
@@ -155,7 +177,8 @@ class MovieStore: ObservableObject {
         page.forEach { movie in
             if !self.discoverIDs.contains(movie.id) { self.discoverIDs.append(movie.id) }
         }
-
+        
+        discoverPage = max(nextPageNumber, discoverPage)
         return discoverIDs.compactMap { movies[$0] }
     }
 }

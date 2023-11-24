@@ -18,6 +18,7 @@ class TVStore: ObservableObject {
     @Published var backdropsWithText: [TVSeries.ID: URL] = [:]
     @Published var credits: [TVSeries.ID: ShowCredits] = [:]
     @Published var recommendationsIDs: [TVSeries.ID: [TVSeries.ID]] = [:]
+    @Published var similarIDs: [TVSeries.ID: [TVSeries.ID]] = [:]
     @Published var discoverIDs: [TVSeries.ID] = []
     @Published var trendingIDs: [TVSeries.ID] = []
 
@@ -128,6 +129,26 @@ class TVStore: ObservableObject {
 
         return recommendationsIDs[id]!.compactMap { self.shows[$0] }
     }
+    
+    @MainActor
+    func similar(toTVSeries id: TVSeries.ID) async -> [TVSeries]? {
+        if similarIDs[id] == nil {
+            let shows = await tvManager.fetchSimilar(id: id)
+            guard let shows = shows else { return nil }
+
+            await withTaskGroup(of: Void.self) { taskGroup in
+                for show in shows {
+                    taskGroup.addTask {
+                        _ = await self.show(withID: show.id)
+                    }
+                }
+            }
+
+            similarIDs[id] = shows.compactMap { $0.id }
+        }
+
+        return similarIDs[id]!.compactMap { self.shows[$0] }
+    }
 
     @MainActor
     func trending(newPage: Bool = false) async -> [TVSeries] {
@@ -135,9 +156,9 @@ class TVStore: ObservableObject {
             return trendingIDs.compactMap { shows[$0] }
         }
 
-        trendingPage += 1
+        let nextPageNumber = trendingPage + 1
 
-        let page = await tvManager.fetchTrending(page: trendingPage)
+        let page = await tvManager.fetchTrending(page: nextPageNumber)
         guard let page = page else { return [] }
 
         await withTaskGroup(of: Void.self) { taskGroup in
@@ -151,7 +172,8 @@ class TVStore: ObservableObject {
         page.forEach { show in
             if !self.trendingIDs.contains(show.id) { self.trendingIDs.append(show.id) }
         }
-
+        
+        trendingPage = max(nextPageNumber, trendingPage)
         return trendingIDs.compactMap { shows[$0] }
     }
 
@@ -161,9 +183,9 @@ class TVStore: ObservableObject {
             return discoverIDs.compactMap { shows[$0] }
         }
 
-        discoverPage += 1
+        let nextPageNumber = discoverPage + 1
 
-        let page = await tvManager.fetchDiscover(page: discoverPage)
+        let page = await tvManager.fetchDiscover(page: nextPageNumber)
         guard let page = page else { return [] }
 
         await withTaskGroup(of: Void.self) { taskGroup in
@@ -177,7 +199,8 @@ class TVStore: ObservableObject {
         page.forEach { show in
             if !self.discoverIDs.contains(show.id) { self.discoverIDs.append(show.id) }
         }
-
+        
+        discoverPage = max(nextPageNumber, discoverPage)
         return discoverIDs.compactMap { shows[$0] }
     }
 }

@@ -14,7 +14,7 @@ struct MovieBody: View {
     @EnvironmentObject private var movieStore: MovieStore
 
     @State var credits: ShowCredits?
-    @State var recommendations: [Movie]?
+    @State var similar: [Movie]?
 
     @Query
     private var movies: [TVBuddyMovie]
@@ -42,7 +42,7 @@ struct MovieBody: View {
         }
         .task {
             credits = await movieStore.credits(forMovie: tmdbMovie.id)
-            recommendations = await movieStore.recommendations(forMovie: tmdbMovie.id)
+            similar = await movieStore.similar(toMovie: tmdbMovie.id)
         }
     }
 
@@ -107,7 +107,7 @@ struct MovieBody: View {
 
     private var similarMovies: some View {
         Group {
-            if let movies = recommendations, !movies.isEmpty {
+            if let movies = similar, !movies.isEmpty {
                 MediaList(title: "Similar Movies", tmdbMovies: movies)
             }
         }

@@ -54,14 +54,16 @@ class MovieManager {
 
     func fetchBackdropWithText(id: Movie.ID) async -> URL? {
         do {
-            let images = try await movieService.images(forMovie: id).backdrops
+            let images = try await movieService.images(forMovie: id)
+                .backdrops
+                .filter { $0.languageCode == AppConstants.languageCode }
             
             if images.isEmpty {
                 return await fetchBackdrop(id: id)
             }
             
             return imageService?.backdropURL(
-                for: images.filter { $0.languageCode == AppConstants.languageCode }.first?.filePath,
+                for: images.first?.filePath,
                 idealWidth: AppConstants.idealBackdropWidth
             )
         } catch {
@@ -82,6 +84,15 @@ class MovieManager {
     func fetchRecommendations(id: Movie.ID, page: Int = 1) async -> [Movie]? {
         do {
             return try await movieService.recommendations(forMovie: id, page: page).results
+        } catch {
+            print(error)
+            return nil
+        }
+    }
+    
+    func fetchSimilar(id: Movie.ID, page: Int = 1) async -> [Movie]? {
+        do {
+            return try await movieService.similar(toMovie: id, page: page).results
         } catch {
             print(error)
             return nil
