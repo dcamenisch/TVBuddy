@@ -15,6 +15,8 @@ struct TVBuddyApp: App {
     @StateObject private var personStore = PersonStore()
     @StateObject private var searchStore = SearchStore()
     @StateObject private var tvStore = TVStore()
+    
+    var container: ModelContainer
 
     init() {
         let tmdbConfiguration = TMDbConfiguration(apiKey: AppConstants.apiKey)
@@ -22,6 +24,18 @@ struct TVBuddyApp: App {
 
         Task {
             AppConstants.apiConfiguration = try await AppConstants.configurationService.apiConfiguration()
+        }
+        
+        do {
+            let schema = Schema(TVBuddyMediaSchema.models)
+            let config = ModelConfiguration(schema: schema)
+            container = try ModelContainer(
+                for: schema,
+                migrationPlan: TVBuddyMediaMigrationPlan.self,
+                configurations: config
+            )
+        } catch {
+            fatalError("Failed to configure SwiftData container.")
         }
     }
 
@@ -34,6 +48,6 @@ struct TVBuddyApp: App {
                 .environmentObject(searchStore)
                 .environmentObject(tvStore)
         }
-        .modelContainer(for: [TVBuddyMovie.self, TVBuddyTVShow.self, TVBuddyTVEpisode.self])
+        .modelContainer(container)
     }
 }

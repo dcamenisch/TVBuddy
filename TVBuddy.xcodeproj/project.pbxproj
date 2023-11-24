@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		6F21624A2AFFDFF000DBD6CB /* TVEpisodeProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F2162492AFFDFF000DBD6CB /* TVEpisodeProgressView.swift */; };
 		6F21624C2AFFE00100DBD6CB /* TVEpisodeProgressItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F21624B2AFFE00100DBD6CB /* TVEpisodeProgressItem.swift */; };
-		6F21624E2AFFF0B300DBD6CB /* TVBuddyMedia.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F21624D2AFFF0B300DBD6CB /* TVBuddyMedia.swift */; };
+		6F21624E2AFFF0B300DBD6CB /* TVBuddyMediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F21624D2AFFF0B300DBD6CB /* TVBuddyMediaItem.swift */; };
 		6F2162502AFFF99F00DBD6CB /* TVShowBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F21624F2AFFF99F00DBD6CB /* TVShowBody.swift */; };
 		6F2A07B82B015F7C00F31FFB /* MediaCollection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F2A07B72B015F7C00F31FFB /* MediaCollection.swift */; };
 		6F4781502AB5C217006846C9 /* TabBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F47814F2AB5C217006846C9 /* TabBarView.swift */; };
@@ -58,6 +58,8 @@
 		6FC3DB3A2AC0690C00A724A8 /* TVBuddyMovie.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FC3DB392AC0690C00A724A8 /* TVBuddyMovie.swift */; };
 		6FD6BA832AB73714000B73C1 /* MediaList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FD6BA822AB73714000B73C1 /* MediaList.swift */; };
 		6FD6BA852AB74E4A000B73C1 /* MediaRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FD6BA842AB74E4A000B73C1 /* MediaRow.swift */; };
+		6FD8B4C62B10F20600F19FE9 /* TVBuddyMediaMigrationPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FD8B4C52B10F20600F19FE9 /* TVBuddyMediaMigrationPlan.swift */; };
+		6FD8B4C82B10F27C00F19FE9 /* TVBuddyMediaSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FD8B4C72B10F27C00F19FE9 /* TVBuddyMediaSchema.swift */; };
 		6FDA18CD2AFF8E9C006C89D7 /* MovieBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FDA18CC2AFF8E9C006C89D7 /* MovieBody.swift */; };
 		6FE148AD2AB5BA5C00D007B6 /* TVBuddyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FE148AC2AB5BA5C00D007B6 /* TVBuddyApp.swift */; };
 		6FE148AF2AB5BA5C00D007B6 /* FeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FE148AE2AB5BA5C00D007B6 /* FeedView.swift */; };
@@ -70,7 +72,7 @@
 /* Begin PBXFileReference section */
 		6F2162492AFFDFF000DBD6CB /* TVEpisodeProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVEpisodeProgressView.swift; sourceTree = "<group>"; };
 		6F21624B2AFFE00100DBD6CB /* TVEpisodeProgressItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVEpisodeProgressItem.swift; sourceTree = "<group>"; };
-		6F21624D2AFFF0B300DBD6CB /* TVBuddyMedia.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVBuddyMedia.swift; sourceTree = "<group>"; };
+		6F21624D2AFFF0B300DBD6CB /* TVBuddyMediaItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVBuddyMediaItem.swift; sourceTree = "<group>"; };
 		6F21624F2AFFF99F00DBD6CB /* TVShowBody.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVShowBody.swift; sourceTree = "<group>"; };
 		6F2A07B72B015F7C00F31FFB /* MediaCollection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaCollection.swift; sourceTree = "<group>"; };
 		6F47814F2AB5C217006846C9 /* TabBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarView.swift; sourceTree = "<group>"; };
@@ -113,6 +115,8 @@
 		6FC3DB392AC0690C00A724A8 /* TVBuddyMovie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVBuddyMovie.swift; sourceTree = "<group>"; };
 		6FD6BA822AB73714000B73C1 /* MediaList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaList.swift; sourceTree = "<group>"; };
 		6FD6BA842AB74E4A000B73C1 /* MediaRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaRow.swift; sourceTree = "<group>"; };
+		6FD8B4C52B10F20600F19FE9 /* TVBuddyMediaMigrationPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVBuddyMediaMigrationPlan.swift; sourceTree = "<group>"; };
+		6FD8B4C72B10F27C00F19FE9 /* TVBuddyMediaSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVBuddyMediaSchema.swift; sourceTree = "<group>"; };
 		6FDA18CC2AFF8E9C006C89D7 /* MovieBody.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieBody.swift; sourceTree = "<group>"; };
 		6FE148A92AB5BA5C00D007B6 /* TVBuddy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TVBuddy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6FE148AC2AB5BA5C00D007B6 /* TVBuddyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVBuddyApp.swift; sourceTree = "<group>"; };
@@ -178,10 +182,12 @@
 		6FBBBB9A2AB5D3A500D081FE /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				6F21624D2AFFF0B300DBD6CB /* TVBuddyMedia.swift */,
+				6FD8B4C72B10F27C00F19FE9 /* TVBuddyMediaSchema.swift */,
+				6FD8B4C52B10F20600F19FE9 /* TVBuddyMediaMigrationPlan.swift */,
+				6F21624D2AFFF0B300DBD6CB /* TVBuddyMediaItem.swift */,
 				6FC3DB392AC0690C00A724A8 /* TVBuddyMovie.swift */,
-				6FC3DB372AC068F900A724A8 /* TVBuddyTVEpisode.swift */,
 				6FC3DB352AC068D700A724A8 /* TVBuddyTVShow.swift */,
+				6FC3DB372AC068F900A724A8 /* TVBuddyTVEpisode.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -394,6 +400,7 @@
 				6FBBBBB82AB5EF0500D081FE /* OffsettableScrollView.swift in Sources */,
 				6FBBBBAA2AB5E46A00D081FE /* TVManager.swift in Sources */,
 				6FBBBB972AB5D15F00D081FE /* PosterStyle.swift in Sources */,
+				6FD8B4C82B10F27C00F19FE9 /* TVBuddyMediaSchema.swift in Sources */,
 				6FBBBBA82AB5E46A00D081FE /* MovieStore.swift in Sources */,
 				6FBFDA0B2B0D365D00C3EAFF /* PageableMovieList.swift in Sources */,
 				6F4C370C2B0E8D09003408BB /* WrappingHStack.swift in Sources */,
@@ -404,7 +411,7 @@
 				6FC3DB3A2AC0690C00A724A8 /* TVBuddyMovie.swift in Sources */,
 				6FE148AD2AB5BA5C00D007B6 /* TVBuddyApp.swift in Sources */,
 				6F73906E2AB70E0C00BC4212 /* MovieView.swift in Sources */,
-				6F21624E2AFFF0B300DBD6CB /* TVBuddyMedia.swift in Sources */,
+				6F21624E2AFFF0B300DBD6CB /* TVBuddyMediaItem.swift in Sources */,
 				6FBFDA092B0D360F00C3EAFF /* PageableTVShowList.swift in Sources */,
 				6F21624A2AFFDFF000DBD6CB /* TVEpisodeProgressView.swift in Sources */,
 				6FD6BA832AB73714000B73C1 /* MediaList.swift in Sources */,
@@ -415,6 +422,7 @@
 				6FBBBBB12AB5E61F00D081FE /* BackdropStyle.swift in Sources */,
 				6FBBBBB62AB5EBB400D081FE /* MediaCarousel.swift in Sources */,
 				6FBBBBDB2AB5F02A00D081FE /* TVShowHeader.swift in Sources */,
+				6FD8B4C62B10F20600F19FE9 /* TVBuddyMediaMigrationPlan.swift in Sources */,
 				6FBBBBAF2AB5E5FC00D081FE /* DateFormatter+year.swift in Sources */,
 				6F21624C2AFFE00100DBD6CB /* TVEpisodeProgressItem.swift in Sources */,
 				6FDA18CD2AFF8E9C006C89D7 /* MovieBody.swift in Sources */,

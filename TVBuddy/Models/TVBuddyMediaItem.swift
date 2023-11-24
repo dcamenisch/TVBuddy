@@ -1,5 +1,5 @@
 //
-//  TVBuddyMedia.swift
+//  TVBuddyMediaItem.swift
 //  TVBuddy
 //
 //  Created by Danny on 11.11.2023.
@@ -8,7 +8,7 @@
 import Foundation
 import TMDb
 
-enum TVBuddyMedia: Identifiable, Equatable, Hashable {
+enum TVBuddyMediaItem: Identifiable, Equatable, Hashable {
     public var id: Int {
         switch self {
         case let .movie(movie):

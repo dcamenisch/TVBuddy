@@ -9,36 +9,40 @@ import Foundation
 import SwiftData
 import TMDb
 
-@Model
-public final class TVBuddyTVEpisode {
-    @Attribute(.unique)
-    public let id: Int
+typealias TVBuddyTVEpisode = TVBuddyMediaSchemaV1.TVBuddyTVEpisode
 
-    var tvShow: TVBuddyTVShow?
+extension TVBuddyMediaSchemaV1 {
+    @Model
+    public final class TVBuddyTVEpisode {
+        @Attribute(.unique)
+        public let id: Int
 
-    let episodeNumber: Int
-    let seasonNumber: Int
+        var tvShow: TVBuddyTVShow?
 
-    var watched: Bool
+        let episodeNumber: Int
+        let seasonNumber: Int
 
-    init(id: Int, episodeNumber: Int, seasonNumber: Int, watched: Bool) {
-        self.id = id
-        self.episodeNumber = episodeNumber
-        self.seasonNumber = seasonNumber
-        self.watched = watched
-    }
+        var watched: Bool
 
-    convenience init(episode: TVEpisode, watched: Bool = false) {
-        self.init(
-            id: episode.id,
-            episodeNumber: episode.episodeNumber,
-            seasonNumber: episode.seasonNumber,
-            watched: watched
-        )
-    }
+        init(id: Int, episodeNumber: Int, seasonNumber: Int, watched: Bool) {
+            self.id = id
+            self.episodeNumber = episodeNumber
+            self.seasonNumber = seasonNumber
+            self.watched = watched
+        }
 
-    func toggleWatched() {
-        watched.toggle()
-        tvShow?.checkWatching()
+        convenience init(episode: TVEpisode, watched: Bool = false) {
+            self.init(
+                id: episode.id,
+                episodeNumber: episode.episodeNumber,
+                seasonNumber: episode.seasonNumber,
+                watched: watched
+            )
+        }
+
+        func toggleWatched() {
+            watched.toggle()
+            tvShow?.checkWatching()
+        }
     }
 }
