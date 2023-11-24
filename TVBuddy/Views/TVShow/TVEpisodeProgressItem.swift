@@ -32,7 +32,8 @@ struct TVEpisodeProgressItem: View {
                     tvShowID: tvShow.id,
                     seasonNumber: tvEpisode.seasonNumber,
                     episodeNumber: tvEpisode.episodeNumber,
-                    showOverview: false
+                    showOverview: false,
+                    clickable: true
                 )
             }
         }

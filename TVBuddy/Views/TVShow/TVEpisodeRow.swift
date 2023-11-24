@@ -14,6 +14,7 @@ struct TVEpisodeRow: View {
     let seasonNumber: Int
     let episodeNumber: Int
     let showOverview: Bool
+    let clickable: Bool
 
     @Environment(\.modelContext) private var context
     @EnvironmentObject private var tvStore: TVStore
@@ -26,11 +27,12 @@ struct TVEpisodeRow: View {
     private var episodes: [TVBuddyTVEpisode]
     private var episode: TVBuddyTVEpisode? { episodes.first }
 
-    init(tvShowID: TVSeries.ID, seasonNumber: Int, episodeNumber: Int, showOverview: Bool) {
+    init(tvShowID: TVSeries.ID, seasonNumber: Int, episodeNumber: Int, showOverview: Bool, clickable: Bool = false) {
         id = tvShowID
         self.seasonNumber = seasonNumber
         self.episodeNumber = episodeNumber
         self.showOverview = showOverview
+        self.clickable = clickable
 
         _episodes = Query(filter: #Predicate<TVBuddyTVEpisode> {
             $0.episodeNumber == episodeNumber
@@ -40,68 +42,78 @@ struct TVEpisodeRow: View {
     }
 
     var body: some View {
-        NavigationLink {
-            TVShowView(id: id)
-        } label: {
-            HStack {
-                ImageView(title: tmdbEpisode?.name ?? "", url: backdrop)
-                    .frame(width: 130)
-                    .aspectRatio(1.77, contentMode: .fit)
-                    .cornerRadius(5.0)
-
-                VStack(alignment: .leading) {
-                    if showOverview {
-                        Text(tmdbEpisode?.name ?? "")
-                            .font(.headline)
-                            .lineLimit(1)
-                            .bold()
-
-                        Text(tmdbEpisode?.overview ?? "")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(3)
-                            .bold()
-                    } else {
-                        Text(tmdbTVShow?.name ?? "")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                            .bold()
-
-                        Text(tmdbEpisode?.name ?? "")
-                            .font(.headline)
-                            .lineLimit(1)
-                            .bold()
-
-                        Text("S\(String(format: "%02d", tmdbEpisode?.seasonNumber ?? 0))E\(String(format: "%02d", tmdbEpisode?.episodeNumber ?? 0))")
-                            .font(.subheadline)
-                            .lineLimit(1)
-                            .bold()
-                    }
+        Group {
+            if clickable {
+                NavigationLink {
+                    TVShowView(id: id)
+                } label: {
+                    episodeRow
                 }
-
-                Spacer()
-
-                Button(action: {
-                    if let episode = episode {
-                        episode.toggleWatched()
-                    } else {
-                        insertTVShowWithEpisode(tmdbTVShow: tmdbTVShow!, tmdbEpisode: tmdbEpisode!, watched: false)
-                    }
-                }, label: {
-                    Image(systemName: episode?.watched ?? false ? "checkmark.circle" : "plus.circle")
-                        .font(.title)
-                        .bold()
-                        .foregroundStyle(.gray)
-                        .padding(8)
-                })
+                .buttonStyle(.plain)
+            } else {
+                episodeRow
             }
         }
-        .buttonStyle(.plain)
         .task(id: episode) {
             tmdbTVShow = await tvStore.show(withID: id)
             tmdbEpisode = await tvStore.episode(episodeNumber, season: seasonNumber, forTVSeries: id)
             backdrop = await tvStore.backdrop(withID: id, season: seasonNumber, episode: episodeNumber)
+        }
+    }
+    
+    var episodeRow: some View {
+        HStack {
+            ImageView(title: tmdbEpisode?.name ?? "", url: backdrop)
+                .frame(width: 130)
+                .aspectRatio(1.77, contentMode: .fit)
+                .cornerRadius(5.0)
+
+            VStack(alignment: .leading) {
+                if showOverview {
+                    Text(tmdbEpisode?.name ?? "")
+                        .font(.headline)
+                        .lineLimit(1)
+                        .bold()
+
+                    Text(tmdbEpisode?.overview ?? "")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(3)
+                        .bold()
+                } else {
+                    Text(tmdbTVShow?.name ?? "")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .bold()
+
+                    Text(tmdbEpisode?.name ?? "")
+                        .font(.headline)
+                        .lineLimit(1)
+                        .bold()
+
+                    Text("S\(String(format: "%02d", tmdbEpisode?.seasonNumber ?? 0))E\(String(format: "%02d", tmdbEpisode?.episodeNumber ?? 0))")
+                        .font(.subheadline)
+                        .lineLimit(1)
+                        .bold()
+                }
+            }
+
+            Spacer()
+
+            Button(action: {
+                if let episode = episode {
+                    episode.toggleWatched()
+                } else {
+                    insertTVShowWithEpisode(tmdbTVShow: tmdbTVShow!, tmdbEpisode: tmdbEpisode!, watched: false)
+                }
+            }, label: {
+                Image(systemName: episode?.watched ?? false ? "checkmark.circle" : "plus.circle")
+                    .font(.title)
+                    .bold()
+                    .foregroundStyle(.gray)
+                    .padding(8)
+            })
         }
     }
 
