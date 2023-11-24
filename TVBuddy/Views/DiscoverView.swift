@@ -12,11 +12,9 @@ struct DiscoverView: View {
     @EnvironmentObject private var tvStore: TVStore
     @EnvironmentObject private var movieStore: MovieStore
 
-    @State var trendingMovies = [Movie]()
-
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
-            MediaCarousel(trendingMovies: trendingMovies)
+            MediaCarousel()
 
             VStack(spacing: 10) {
                 PageableMovieList(title: "Trending Movies", fetchMethod: movieStore.trending)
@@ -25,8 +23,5 @@ struct DiscoverView: View {
             .padding(.horizontal)
         }
         .navigationTitle("Discover")
-        .task {
-            trendingMovies = await movieStore.trending()
-        }
     }
 }

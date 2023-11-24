@@ -169,7 +169,6 @@
 				6FD6BA842AB74E4A000B73C1 /* MediaRow.swift */,
 				6FBBBBB72AB5EF0500D081FE /* OffsettableScrollView.swift */,
 				6FBBBB962AB5D15F00D081FE /* PosterStyle.swift */,
-				6F9776D82AC9B9AF00CF31AA /* TVEpisodeRow.swift */,
 				6FBBBBB92AB5EF1300D081FE /* VoteLabel.swift */,
 				6F4C370B2B0E8D09003408BB /* WrappingHStack.swift */,
 			);
@@ -248,6 +247,7 @@
 				6F9BF6972AC993AA004523B4 /* TVSeasonHeader.swift */,
 				6F2162492AFFDFF000DBD6CB /* TVEpisodeProgressView.swift */,
 				6F21624B2AFFE00100DBD6CB /* TVEpisodeProgressItem.swift */,
+				6F9776D82AC9B9AF00CF31AA /* TVEpisodeRow.swift */,
 				6FBFDA082B0D360F00C3EAFF /* PageableTVShowList.swift */,
 			);
 			path = TVShow;
