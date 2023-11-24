@@ -19,12 +19,15 @@ extension TVBuddyMediaSchemaV1 {
 
         let title: String
 
+        let releaseDate: Date?
+        
         var watched: Bool
         var isFavorite: Bool
 
-        init(id: Int, title: String, watched: Bool, isFavorite: Bool) {
+        init(id: Int, title: String, releaseDate: Date?, watched: Bool, isFavorite: Bool) {
             self.id = id
             self.title = title
+            self.releaseDate = releaseDate
             self.watched = watched
             self.isFavorite = isFavorite
         }
@@ -33,6 +36,7 @@ extension TVBuddyMediaSchemaV1 {
             self.init(
                 id: movie.id,
                 title: movie.title,
+                releaseDate: movie.releaseDate,
                 watched: watched,
                 isFavorite: isFavorite
             )

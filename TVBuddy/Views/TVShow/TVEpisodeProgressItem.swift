@@ -19,8 +19,11 @@ struct TVEpisodeProgressItem: View {
         self.tvShow = tvShow
 
         let id = tvShow.id
+        let now = Date.now
+        let future = Date.distantFuture
+        
         _tvEpisodes = Query(
-            filter: #Predicate<TVBuddyTVEpisode> { $0.tvShow?.id == id && $0.seasonNumber > 0 && !$0.watched },
+            filter: #Predicate<TVBuddyTVEpisode> { $0.tvShow?.id == id && $0.seasonNumber > 0 && !$0.watched && $0.airDate ?? future <= now},
             sort: [SortDescriptor(\TVBuddyTVEpisode.seasonNumber), SortDescriptor(\TVBuddyTVEpisode.episodeNumber)]
         )
     }

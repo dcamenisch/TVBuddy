@@ -21,13 +21,16 @@ extension TVBuddyMediaSchemaV1 {
 
         let episodeNumber: Int
         let seasonNumber: Int
+        
+        let airDate: Date?
 
         var watched: Bool
 
-        init(id: Int, episodeNumber: Int, seasonNumber: Int, watched: Bool) {
+        init(id: Int, episodeNumber: Int, seasonNumber: Int, airDate: Date?, watched: Bool) {
             self.id = id
             self.episodeNumber = episodeNumber
             self.seasonNumber = seasonNumber
+            self.airDate = airDate
             self.watched = watched
         }
 
@@ -36,6 +39,7 @@ extension TVBuddyMediaSchemaV1 {
                 id: episode.id,
                 episodeNumber: episode.episodeNumber,
                 seasonNumber: episode.seasonNumber,
+                airDate: episode.airDate,
                 watched: watched
             )
         }
