@@ -9,133 +9,165 @@ import Foundation
 import TMDb
 
 class TVManager {
+    private let tvSeriesService = TVSeriesService()
+    private let tvSeasonService = TVSeasonService()
+    private let tvEpisodeService = TVEpisodeService()
+    private let discoverService = AppConstants.discoverService
+    private let trendingService = AppConstants.trendingService
 
-    private let tmdb = AppConstants.tmdb
+    private var imageService: ImagesConfiguration? {
+        AppConstants.apiConfiguration?.images
+    }
 
-    func fetchShow(withID id: TMDb.TVShow.ID) async -> TMDb.TVShow? {
+    func fetchShow(id: TVSeries.ID) async -> TVSeries? {
         do {
-            return try await tmdb
-                .tvShows
-                .details(forTVShow: id)
+            return try await tvSeriesService.details(forTVSeries: id)
         } catch {
+            print(error)
             return nil
         }
     }
 
-    func fetchSeason(_ season: Int, forTVShow id: TMDb.TVShow.ID) async -> TMDb.TVShowSeason? {
+    func fetchSeason(season: Int, id: TVSeries.ID) async -> TVSeason? {
         do {
-            return try await tmdb
-                .tvShowSeasons
-                .details(forSeason: season, inTVShow: id)
+            return try await tvSeasonService.details(forSeason: season, inTVSeries: id)
         } catch {
+            print(error)
             return nil
         }
     }
 
-    func fetchEpisode(_ episode: Int, forSeason season: Int, forTVShow id: TMDb.TVShow.ID) async
-        -> TMDb.TVShowEpisode? {
+    func fetchEpisode(episode: Int, season: Int, id: TVSeries.ID) async -> TVEpisode? {
         do {
-            return try await tmdb
-                .tvShowEpisodes
-                .details(forEpisode: episode, inSeason: season, inTVShow: id)
+            return try await tvEpisodeService.details(forEpisode: episode, inSeason: season, inTVSeries: id)
         } catch {
+            print(error)
             return nil
         }
     }
 
-    func fetchPoster(withID id: TMDb.TVShow.ID) async -> URL? {
+    func fetchPoster(id: TVSeries.ID, season: Int?) async -> URL? {
         do {
-            let images = try await tmdb.tvShows.images(forTVShow: id)
-            return
-                try await tmdb
-                .configurations
-                .apiConfiguration()
-                .images
-                .posterURL(
-                    for: images.posters.first?.filePath, 
-                    idealWidth: AppConstants.idealPosterWidth
-                )
+            let images: [ImageMetadata]
+            if let season = season {
+                images = try await tvSeasonService.images(forSeason: season, inTVSeries: id).posters
+            } else {
+                images = try await tvSeriesService.images(forTVSeries: id).posters
+            }
+
+            return imageService?.posterURL(
+                for: images.first?.filePath,
+                idealWidth: AppConstants.idealPosterWidth
+            )
         } catch {
+            print(error)
             return nil
         }
     }
 
-    func fetchBackdrop(withID id: TMDb.TVShow.ID) async -> URL? {
+    func fetchBackdrop(id: TVSeries.ID) async -> URL? {
         do {
-            let images = try await tmdb.tvShows.images(forTVShow: id)
-            return
-                try await tmdb
-                .configurations
-                .apiConfiguration()
-                .images
-                .backdropURL(
-                    for: images.backdrops.filter({ $0.languageCode == nil }).first?.filePath,
-                    idealWidth: AppConstants.idealBackdropWidth
-                )
+            let images = try await tvSeriesService.images(forTVSeries: id).backdrops
+            return imageService?.backdropURL(
+                for: images.filter { $0.languageCode == nil }.first?.filePath,
+                idealWidth: AppConstants.idealBackdropWidth
+            )
         } catch {
+            print(error)
             return nil
         }
     }
 
-    func fetchBackdropWithText(withID id: TMDb.TVShow.ID) async -> URL? {
+    func fetchBackdrop(id: TVSeries.ID, season: Int, episode: Int) async -> URL? {
         do {
-            let images = try await tmdb.tvShows.images(forTVShow: id)
-            return
-                try await tmdb
-                .configurations
-                .apiConfiguration()
-                .images
-                .backdropURL(
-                    for: images.backdrops.filter({ $0.languageCode == AppConstants.languageCode })
-                        .first?.filePath,
-                    idealWidth: AppConstants.idealBackdropWidth
-                )
+            let images = try await tvEpisodeService.images(forEpisode: episode, inSeason: season, inTVSeries: id)
+                .stills
+                .filter { $0.languageCode == nil }
+            
+            if images.isEmpty {
+                return await fetchBackdrop(id: id, season: season)
+            }
+            
+            return imageService?.stillURL(
+                for: images.first?.filePath,
+                idealWidth: AppConstants.idealBackdropWidth
+            )
         } catch {
+            print(error)
+            return await fetchBackdrop(id: id, season: season)
+        }
+    }
+
+    func fetchBackdrop(id: TVSeries.ID, season: Int? = nil, episode: Int? = nil) async -> URL? {
+        if let season = season, let episode = episode {
+            return await fetchBackdrop(id: id, season: season, episode: episode)
+        } else {
+            return await fetchBackdrop(id: id)
+        }
+    }
+
+    func fetchBackdropWithText(id: TVSeries.ID) async -> URL? {
+        do {
+            let images = try await tvSeriesService.images(forTVSeries: id)
+                .backdrops
+                .filter { $0.languageCode == AppConstants.languageCode }
+                        
+            if images.isEmpty {
+                return await fetchBackdrop(id: id)
+            }
+            
+            return imageService?.backdropURL(
+                for: images.first?.filePath,
+                idealWidth: AppConstants.idealBackdropWidth
+            )
+        } catch {
+            print(error)
             return nil
         }
     }
 
-    func fetchCredits(forTVShow id: TMDb.TVShow.ID) async -> TMDb.ShowCredits? {
+    func fetchCredits(id: TVSeries.ID) async -> ShowCredits? {
         do {
-            return try await tmdb
-                .tvShows
-                .credits(forTVShow: id)
+            return try await tvSeriesService.credits(forTVSeries: id)
         } catch {
+            print(error)
             return nil
         }
     }
 
-    func fetchRecommendations(forTVShow id: TMDb.TVShow.ID) async -> [TMDb.TVShow]? {
+    func fetchRecommendations(id: TVSeries.ID, page: Int = 1) async -> [TVSeries]? {
         do {
-            return try await tmdb
-                .tvShows
-                .recommendations(forTVShow: id)
-                .results
+            return try await tvSeriesService.recommendations(forTVSeries: id, page: page).results
         } catch {
+            print(error)
+            return nil
+        }
+    }
+    
+    func fetchSimilar(id: TVSeries.ID, page: Int = 1) async -> [TVSeries]? {
+        do {
+            return try await tvSeriesService.similar(toTVSeries: id, page: page).results
+        } catch {
+            print(error)
             return nil
         }
     }
 
-    func fetchDiscover(page: Int = 1) async -> [TMDb.TVShow]? {
+    func fetchDiscover(page: Int = 1) async -> [TVSeries]? {
         do {
-            return try await tmdb
-                .discover
-                .tvShows(sortedBy: .popularity(descending: true), page: page)
-                .results
+            return try await discoverService.tvSeries(sortedBy: .popularity(descending: true), page: page).results
         } catch {
+            print(error)
             return nil
         }
     }
 
-    func fetchTrending(page: Int = 1) async -> [TMDb.TVShow]? {
+    func fetchTrending(page: Int = 1) async -> [TVSeries]? {
         do {
-            return try await tmdb
-                .trending
-                .tvShows(inTimeWindow: .week, page: page)
-                .results
+            return try await trendingService.tvSeries(inTimeWindow: .week, page: page).results
         } catch {
+            print(error)
             return nil
         }
     }
-
 }

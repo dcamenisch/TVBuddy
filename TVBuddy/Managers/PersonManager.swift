@@ -9,32 +9,29 @@ import Foundation
 import TMDb
 
 class PersonManager {
+    private let personService = PersonService()
 
-    private let tmdb = AppConstants.tmdb
+    private var imageService: ImagesConfiguration? {
+        AppConstants.apiConfiguration?.images
+    }
 
-    func fetchPerson(withID id: TMDb.Person.ID) async -> TMDb.Person? {
+    func fetchPerson(withID id: Person.ID) async -> Person? {
         do {
-            return try await tmdb.people.details(forPerson: id)
+            return try await personService.details(forPerson: id)
         } catch {
             return nil
         }
     }
 
-    func fetchImage(withID id: TMDb.Person.ID) async -> URL? {
+    func fetchImage(withID id: Person.ID) async -> URL? {
         do {
-            let images = try await tmdb.people.images(forPerson: id)
-            return
-                try await tmdb
-                .configurations
-                .apiConfiguration()
-                .images
-                .profileURL(
-                    for: images.profiles.first?.filePath,
-                    idealWidth: AppConstants.idealPosterWidth
-                )
+            let images = try await personService.images(forPerson: id)
+            return imageService?.profileURL(
+                for: images.profiles.first?.filePath,
+                idealWidth: AppConstants.idealPosterWidth
+            )
         } catch {
             return nil
         }
     }
-
 }

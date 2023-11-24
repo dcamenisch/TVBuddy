@@ -9,22 +9,22 @@ import SwiftData
 import SwiftUI
 
 struct TVEpisodeProgressItem: View {
-    let tvShow: TVShow
-        
+    let tvShow: TVBuddyTVShow
+
     @Query
-    private var tvEpisodes: [TVEpisode]
-    private var tvEpisode: TVEpisode? { tvEpisodes.first }
-    
-    init(tvShow: TVShow) {
+    private var tvEpisodes: [TVBuddyTVEpisode]
+    private var tvEpisode: TVBuddyTVEpisode? { tvEpisodes.first }
+
+    init(tvShow: TVBuddyTVShow) {
         self.tvShow = tvShow
-        
+
         let id = tvShow.id
         _tvEpisodes = Query(
-            filter: #Predicate<TVEpisode> { $0.tvShow?.id == id && $0.seasonNumber > 0 && !$0.watched},
-            sort: [SortDescriptor(\TVEpisode.seasonNumber), SortDescriptor(\TVEpisode.episodeNumber)]
+            filter: #Predicate<TVBuddyTVEpisode> { $0.tvShow?.id == id && $0.seasonNumber > 0 && !$0.watched },
+            sort: [SortDescriptor(\TVBuddyTVEpisode.seasonNumber), SortDescriptor(\TVBuddyTVEpisode.episodeNumber)]
         )
     }
-    
+
     var body: some View {
         Group {
             if let tvEpisode = tvEpisode {
@@ -32,7 +32,8 @@ struct TVEpisodeProgressItem: View {
                     tvShowID: tvShow.id,
                     seasonNumber: tvEpisode.seasonNumber,
                     episodeNumber: tvEpisode.episodeNumber,
-                    showOverview: false
+                    showOverview: false,
+                    clickable: true
                 )
             }
         }

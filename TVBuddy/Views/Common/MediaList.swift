@@ -9,27 +9,26 @@ import SwiftUI
 import TMDb
 
 struct MediaList: View {
-    
     let title: String
-    
-    var media = [Media]()
-    
+
+    var media = [TVBuddyMedia]()
+
     init(
         title: String = "",
-        movies: [Movie] = [],
-        tvShows: [TVShow] = [],
-        tmdbMovies: [TMDb.Movie] = [],
-        tmdbTVShows: [TMDb.TVShow] = [],
-        tmdbPerson: [TMDb.Person] = []
+        movies: [TVBuddyMovie] = [],
+        tvShows: [TVBuddyTVShow] = [],
+        tmdbMovies: [Movie] = [],
+        tmdbTVShows: [TVSeries] = [],
+        tmdbPerson: [Person] = []
     ) {
         self.title = title
-        
-        media.append(contentsOf: movies.map({Media.movie($0)}))
-        media.append(contentsOf: tvShows.map({Media.tvShow($0)}))
-        
-        media.append(contentsOf: tmdbMovies.map({Media.tmdbMovie($0)}))
-        media.append(contentsOf: tmdbTVShows.map({Media.tmdbTVShow($0)}))
-        media.append(contentsOf: tmdbPerson.map({Media.tmdbPerson($0)}))
+
+        media.append(contentsOf: movies.map { TVBuddyMedia.movie($0) })
+        media.append(contentsOf: tvShows.map { TVBuddyMedia.tvShow($0) })
+
+        media.append(contentsOf: tmdbMovies.map { TVBuddyMedia.tmdbMovie($0) })
+        media.append(contentsOf: tmdbTVShows.map { TVBuddyMedia.tmdbTVShow($0) })
+        media.append(contentsOf: tmdbPerson.map { TVBuddyMedia.tmdbPerson($0) })
     }
 
     var body: some View {
@@ -37,7 +36,7 @@ struct MediaList: View {
             Text(title)
                 .font(.title2)
                 .bold()
-            
+
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack {
                     ForEach(media) { item in
@@ -47,8 +46,8 @@ struct MediaList: View {
             }
         }
     }
-        
-    func mediaListItem(item: Media) -> some View {
+
+    func mediaListItem(item: TVBuddyMedia) -> some View {
         switch item {
         case .movie:
             return AnyView(MediaListMovieItem(mediaItem: item))
@@ -58,10 +57,10 @@ struct MediaList: View {
 
         case .tmdbMovie:
             return AnyView(MediaListMovieItem(mediaItem: item))
-            
+
         case .tmdbTVShow:
             return AnyView(MediaListTVShowItem(mediaItem: item))
-            
+
         case .tmdbPerson:
             return AnyView(MediaListPersonItem(mediaItem: item))
         }
@@ -69,12 +68,11 @@ struct MediaList: View {
 }
 
 struct MediaListMovieItem: View {
-    
     @EnvironmentObject private var movieStore: MovieStore
     @State var poster: URL?
-    
-    let mediaItem: Media
-    
+
+    let mediaItem: TVBuddyMedia
+
     var body: some View {
         NavigationLink {
             MovieView(id: mediaItem.id)
@@ -89,12 +87,11 @@ struct MediaListMovieItem: View {
 }
 
 struct MediaListTVShowItem: View {
-    
     @EnvironmentObject private var tvStore: TVStore
     @State var poster: URL?
-    
-    let mediaItem: Media
-    
+
+    let mediaItem: TVBuddyMedia
+
     var body: some View {
         NavigationLink {
             TVShowView(id: mediaItem.id)
@@ -109,12 +106,11 @@ struct MediaListTVShowItem: View {
 }
 
 struct MediaListPersonItem: View {
-    
     @EnvironmentObject private var personStore: PersonStore
     @State var poster: URL?
-    
-    let mediaItem: Media
-    
+
+    let mediaItem: TVBuddyMedia
+
     var body: some View {
         NavigationLink {
             Text(mediaItem.name)

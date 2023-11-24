@@ -10,23 +10,22 @@ import SwiftUI
 import TMDb
 
 struct TVSeasonView: View {
-    
-    let id: TMDb.TVShow.ID
+    let id: TVSeries.ID
     let seasonNumber: Int
-    
+
     @Environment(\.presentationMode) var presentationMode
-    @Environment(\.modelContext) private var context
     @EnvironmentObject private var tvStore: TVStore
-    
+
     @State var offset: CGFloat = 0.0
     @State var visibility: Visibility = .hidden
-    
-    @State var tmdbSeason: TMDb.TVShowSeason?
+
+    @State var tmdbTVShow: TVSeries?
+    @State var tmdbSeason: TVSeason?
     @State var poster: URL?
     @State var backdrop: URL?
-    
+
     private var progress: CGFloat { offset / 350.0 }
-    
+
     var body: some View {
         content
             .toolbarBackground(.black)
@@ -43,9 +42,9 @@ struct TVSeasonView: View {
                             .foregroundStyle(.accent)
                     }
                 }
-                
+
                 ToolbarItem(placement: .principal) {
-                    Text(tmdbSeason?.name ?? "")
+                    Text(tmdbSeason?.name ?? "Season \(seasonNumber)")
                         .font(.system(size: 18, weight: .semibold))
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
@@ -53,45 +52,23 @@ struct TVSeasonView: View {
                 }
             }
             .task {
-                tmdbSeason = await tvStore.season(seasonNumber, forTVShow: id)
-                poster = await tvStore.poster(withID: id)
-                backdrop = await tvStore.backdrop(withID: id)
+                tmdbTVShow = await tvStore.show(withID: id)
+                tmdbSeason = await tvStore.season(seasonNumber, forTVSeries: id)
+                poster = await tvStore.poster(withID: id, season: seasonNumber)
+                backdrop = await tvStore.backdrop(withID: id, season: seasonNumber)
             }
     }
-    
+
     @ViewBuilder private var content: some View {
-        if let tmdbSeason = tmdbSeason {
+        if let tmdbSeason = tmdbSeason, let tmdbTVShow = tmdbTVShow {
             OffsettableScrollView(showsIndicators: false) { point in
                 offset = -point.y
                 visibility = offset > 290 ? .visible : .hidden
             } content: {
                 TVSeasonHeader(season: tmdbSeason, poster: poster, backdrop: backdrop)
                     .padding(.bottom, 10)
-                
-                VStack(alignment: .leading, spacing: 10) {
-                    if let overview = tmdbSeason.overview, !overview.isEmpty {
-                        Text("Storyline")
-                            .font(.title2)
-                            .bold()
-                        Text(overview)
-                    }
-                    
-                    if let episodes = tmdbSeason.episodes {
-                        Text("Episodes")
-                            .font(.title2)
-                            .bold()
-                        ForEach(episodes) { episode in
-                            TVEpisodeRow(
-                                tvShowID: id,
-                                seasonNumber: episode.seasonNumber,
-                                episodeNumber: episode.episodeNumber,
-                                showOverview: true
-                            )
-                        }
-                    }
-                    
-                }
-                .padding(.horizontal)
+                TVSeasonBody(tmdbTVShow: tmdbTVShow, tmdbSeason: tmdbSeason)
+                    .padding(.horizontal)
             }
         } else {
             ProgressView()

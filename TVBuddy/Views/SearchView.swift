@@ -9,14 +9,13 @@ import SwiftUI
 import TMDb
 
 struct SearchView: View {
-
     @EnvironmentObject private var searchStore: SearchStore
 
     private var isSearching: Bool {
         searchStore.isSearching
     }
 
-    private var media: [TMDb.Media]? {
+    private var media: [Media]? {
         searchStore.results
     }
 
@@ -31,7 +30,7 @@ struct SearchView: View {
         .searchable(text: $searchStore.searchQuery)
         .searchScopes($searchStore.searchScope) {
             ForEach(SearchScope.allCases) { category in
-                Text(category.rawValue).tag(SearchScope.init(rawValue: category.rawValue))
+                Text(category.rawValue).tag(SearchScope(rawValue: category.rawValue))
             }
         }
         .onReceive(searchStore.$searchQuery) { _ in
@@ -48,7 +47,7 @@ struct SearchView: View {
         }
     }
 
-    private func mediaItemDidAppear(currentMediaItem mediaItem: TMDb.Media) {
+    private func mediaItemDidAppear(currentMediaItem mediaItem: Media) {
         searchStore.fetchNextPage(currentMediaItem: mediaItem)
     }
 }

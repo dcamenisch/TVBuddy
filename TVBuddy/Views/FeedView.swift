@@ -10,22 +10,21 @@ import SwiftUI
 import TMDb
 
 struct FeedView: View {
-    
-    @Query(filter: #Predicate<Movie> { !$0.watched })
-    private var movies: [Movie]
+    @Query(filter: #Predicate<TVBuddyMovie> { !$0.watched })
+    private var movies: [TVBuddyMovie]
 
-    @Query(filter: #Predicate<Movie> { $0.watched })
-    private var watchedMovies: [Movie]
+    @Query(filter: #Predicate<TVBuddyMovie> { $0.watched })
+    private var watchedMovies: [TVBuddyMovie]
 
-    @Query(filter: #Predicate<TVShow> { !$0.startedWatching })
-    private var tvShows: [TVShow]
-    
-    @Query(filter: #Predicate<TVShow> { $0.finishedWatching })
-    private var watchedTVShows: [TVShow]
+    @Query(filter: #Predicate<TVBuddyTVShow> { !$0.startedWatching })
+    private var tvShows: [TVBuddyTVShow]
+
+    @Query(filter: #Predicate<TVBuddyTVShow> { $0.finishedWatching })
+    private var watchedTVShows: [TVBuddyTVShow]
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
-            VStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 10) {
                 TVEpisodeProgressView()
                 MediaList(title: "TV Show Watchlist (\(tvShows.count))", tvShows: tvShows)
                 MediaList(title: "Watched TV Shows (\(watchedTVShows.count))", tvShows: watchedTVShows)

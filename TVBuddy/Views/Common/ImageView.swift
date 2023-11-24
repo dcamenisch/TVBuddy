@@ -25,7 +25,7 @@ struct ImageView: View {
                         .multilineTextAlignment(.center)
                         .foregroundColor(.white)
                 )
-                .foregroundColor(.gray)
+                .foregroundColor(.secondary)
             }
         }
     }

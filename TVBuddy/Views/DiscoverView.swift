@@ -9,29 +9,19 @@ import SwiftUI
 import TMDb
 
 struct DiscoverView: View {
-
     @EnvironmentObject private var tvStore: TVStore
     @EnvironmentObject private var movieStore: MovieStore
-    
-    @State var trendingMovies = [TMDb.Movie]()
-    @State var trendingTVShows = [TMDb.TVShow]()
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
-
-            MediaCarousel(trendingMovies: trendingMovies)
+            MediaCarousel()
 
             VStack(spacing: 10) {
-                MediaList(title: "Trending Movies", tmdbMovies: trendingMovies)
-                MediaList(title: "Trending TV Shows", tmdbTVShows: trendingTVShows)
+                PageableMovieList(title: "Trending Movies", fetchMethod: movieStore.trending)
+                PageableTVShowList(title: "Trending TV Shows", fetchMethod: tvStore.trending)
             }
             .padding(.horizontal)
-
         }
         .navigationTitle("Discover")
-        .task {
-            trendingMovies = await movieStore.trending()
-            trendingTVShows = await tvStore.trending()
-        }
     }
 }

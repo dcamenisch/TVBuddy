@@ -9,17 +9,17 @@ import Foundation
 import TMDb
 
 class MovieStore: ObservableObject {
-
     private let moviesManager: MovieManager
 
-    @Published var movies: [TMDb.Movie.ID: TMDb.Movie] = [:]
-    @Published var posters: [TMDb.Movie.ID: URL] = [:]
-    @Published var backdrops: [TMDb.Movie.ID: URL] = [:]
-    @Published var backdropsWithText: [TMDb.Movie.ID: URL] = [:]
-    @Published var credits: [TMDb.Movie.ID: TMDb.ShowCredits] = [:]
-    @Published var recommendationsIDs: [TMDb.Movie.ID: [TMDb.Movie.ID]] = [:]
-    @Published var discoverIDs: [TMDb.Movie.ID] = []
-    @Published var trendingIDs: [TMDb.Movie.ID] = []
+    @Published var movies: [Movie.ID: Movie] = [:]
+    @Published var posters: [Movie.ID: URL] = [:]
+    @Published var backdrops: [Movie.ID: URL] = [:]
+    @Published var backdropsWithText: [Movie.ID: URL] = [:]
+    @Published var credits: [Movie.ID: ShowCredits] = [:]
+    @Published var recommendationsIDs: [Movie.ID: [Movie.ID]] = [:]
+    @Published var similarIDs: [Movie.ID: [Movie.ID]] = [:]
+    @Published var discoverIDs: [Movie.ID] = []
+    @Published var trendingIDs: [Movie.ID] = []
 
     private var discoverPage: Int = 0
     private var trendingPage: Int = 0
@@ -27,73 +27,73 @@ class MovieStore: ObservableObject {
     init(moviesManager: MovieManager = MovieManager()) {
         self.moviesManager = moviesManager
     }
-    
+
     @MainActor
-    func movie(withID id: TMDb.Movie.ID) async -> TMDb.Movie? {
-        if self.movies[id] == nil {
-            let movie = await moviesManager.fetchMovie(withID: id)
+    func movie(withID id: Movie.ID) async -> Movie? {
+        if movies[id] == nil {
+            let movie = await moviesManager.fetchMovie(id: id)
             guard let movie = movie else { return nil }
-            
-            self.movies[id] = movie
+
+            movies[id] = movie
         }
-        
-        return self.movies[id]
+
+        return movies[id]
     }
-    
+
     @MainActor
-    func poster(withID id: TMDb.Movie.ID) async -> URL? {
-        if self.posters[id] == nil {
-            let url = await moviesManager.fetchPoster(withID: id)
+    func poster(withID id: Movie.ID) async -> URL? {
+        if posters[id] == nil {
+            let url = await moviesManager.fetchPoster(id: id)
             guard let url = url else { return nil }
-            
-            self.posters[id] = url
+
+            posters[id] = url
         }
-        
-        return self.posters[id]
+
+        return posters[id]
     }
-    
+
     @MainActor
-    func backdrop(withID id: TMDb.Movie.ID) async -> URL? {
-        if self.backdrops[id] == nil {
-            let url = await moviesManager.fetchBackdrop(withID: id)
+    func backdrop(withID id: Movie.ID) async -> URL? {
+        if backdrops[id] == nil {
+            let url = await moviesManager.fetchBackdrop(id: id)
             guard let url = url else { return nil }
-            
-            self.backdrops[id] = url
+
+            backdrops[id] = url
         }
-        
-        return self.backdrops[id]
+
+        return backdrops[id]
     }
-    
+
     @MainActor
-    func backdropWithText(withID id: TMDb.Movie.ID) async -> URL? {
-        if self.backdropsWithText[id] == nil {
-            let url = await moviesManager.fetchBackdropWithText(withID: id)
+    func backdropWithText(withID id: Movie.ID) async -> URL? {
+        if backdropsWithText[id] == nil {
+            let url = await moviesManager.fetchBackdropWithText(id: id)
             guard let url = url else { return nil }
-            
-            self.backdropsWithText[id] = url
+
+            backdropsWithText[id] = url
         }
-        
-        return self.backdropsWithText[id]
+
+        return backdropsWithText[id]
     }
-    
+
     @MainActor
-    func credits(forMovie id: TMDb.Movie.ID) async -> TMDb.ShowCredits? {
-        if self.credits[id] == nil {
-            let credits = await moviesManager.fetchCredits(forMovie: id)
+    func credits(forMovie id: Movie.ID) async -> ShowCredits? {
+        if credits[id] == nil {
+            let credits = await moviesManager.fetchCredits(id: id)
             guard let credits = credits else { return nil }
-            
+
             self.credits[id] = credits
         }
-        
-        return self.credits[id]
+
+        return credits[id]
     }
-    
+
     @MainActor
-    func recommendations(forMovie id: TMDb.Movie.ID) async -> [TMDb.Movie]? {
-        if self.recommendationsIDs[id] == nil {
-            let movies = await moviesManager.fetchRecommendations(forMovie: id)
+    func recommendations(forMovie id: Movie.ID) async -> [Movie]? {
+        if recommendationsIDs[id] == nil {
+            let movies = await moviesManager.fetchRecommendations(id: id)
             guard let movies = movies else { return nil }
-            
+
             await withTaskGroup(of: Void.self) { taskGroup in
                 for movie in movies {
                     taskGroup.addTask {
@@ -101,24 +101,44 @@ class MovieStore: ObservableObject {
                     }
                 }
             }
-            
-            self.recommendationsIDs[id] = movies.compactMap { $0.id }
+
+            recommendationsIDs[id] = movies.compactMap { $0.id }
         }
-        
-        return self.recommendationsIDs[id]!.compactMap { self.movies[$0] }
+
+        return recommendationsIDs[id]!.compactMap { self.movies[$0] }
     }
     
     @MainActor
-    func trending() async -> [TMDb.Movie] {
-        if trendingPage == 1 {
+    func similar(toMovie id: Movie.ID) async -> [Movie]? {
+        if similarIDs[id] == nil {
+            let movies = await moviesManager.fetchSimilar(id: id)
+            guard let movies = movies else { return nil }
+
+            await withTaskGroup(of: Void.self) { taskGroup in
+                for movie in movies {
+                    taskGroup.addTask {
+                        _ = await self.movie(withID: movie.id)
+                    }
+                }
+            }
+
+            similarIDs[id] = movies.compactMap { $0.id }
+        }
+
+        return similarIDs[id]!.compactMap { self.movies[$0] }
+    }
+
+    @MainActor
+    func trending(newPage: Bool = false) async -> [Movie] {
+        if !newPage && trendingPage != 0 {
             return trendingIDs.compactMap { movies[$0] }
         }
         
-        trendingPage = 1
-                
-        let page = await moviesManager.fetchTrending(page: trendingPage)
+        let nextPageNumber = trendingPage + 1
+
+        let page = await moviesManager.fetchTrending(page: nextPageNumber)
         guard let page = page else { return [] }
-                
+
         await withTaskGroup(of: Void.self) { taskGroup in
             for movie in page {
                 taskGroup.addTask {
@@ -126,25 +146,26 @@ class MovieStore: ObservableObject {
                 }
             }
         }
-        
+
         page.forEach { movie in
             if !self.trendingIDs.contains(movie.id) { self.trendingIDs.append(movie.id) }
         }
         
+        trendingPage = max(nextPageNumber, trendingPage)
         return trendingIDs.compactMap { movies[$0] }
     }
-    
+
     @MainActor
-    func discover() async -> [TMDb.Movie] {
-        if discoverPage == 1 {
+    func discover(newPage: Bool = false) async -> [Movie] {
+        if !newPage && discoverPage != 0 {
             return discoverIDs.compactMap { movies[$0] }
         }
 
-        discoverPage = 1
-                
-        let page = await moviesManager.fetchDiscover(page: trendingPage)
+        let nextPageNumber = discoverPage + 1
+
+        let page = await moviesManager.fetchDiscover(page: nextPageNumber)
         guard let page = page else { return [] }
-                
+
         await withTaskGroup(of: Void.self) { taskGroup in
             for movie in page {
                 taskGroup.addTask {
@@ -152,75 +173,12 @@ class MovieStore: ObservableObject {
                 }
             }
         }
-        
+
         page.forEach { movie in
             if !self.discoverIDs.contains(movie.id) { self.discoverIDs.append(movie.id) }
         }
         
+        discoverPage = max(nextPageNumber, discoverPage)
         return discoverIDs.compactMap { movies[$0] }
     }
-}
-
-extension MovieStore {
-
-    //    @MainActor
-    //    func fetchDiscover() {
-    //        discoverPage += 1
-    //
-    //        Task {
-    //            let newPage = await moviesManager.fetchDiscover(page: discoverPage)
-    //
-    //            newPage?.forEach { movie in
-    //                if movies[movie.id] == nil {
-    //                    movies[movie.id] = movie
-    //                }
-    //
-    //                if !discoverIDs.contains(movie.id) {
-    //                    discoverIDs.append(movie.id)
-    //                }
-    //            }
-    //        }
-    //    }
-    //
-    //    @MainActor
-    //    func fetchNextDiscover(currentMovie: TMDb.Movie, offset: Int = AppConstants.nextPageOffset) {
-    //        let index = discoverIDs.firstIndex(where: { $0 == currentMovie.id })
-    //        let thresholdIndex = discoverIDs.endIndex - offset
-    //        guard index == thresholdIndex else {
-    //            return
-    //        }
-    //
-    //        fetchDiscover()
-    //    }
-
-    //    @MainActor
-    //    func fetchTrending() {
-    //        trendingPage += 1
-    //
-    //        Task {
-    //            let newPage = await moviesManager.fetchTrending(page: trendingPage)
-    //
-    //            newPage?.forEach { movie in
-    //                if movies[movie.id] == nil {
-    //                    movies[movie.id] = movie
-    //                }
-    //
-    //                if !trendingIDs.contains(movie.id) {
-    //                    trendingIDs.append(movie.id)
-    //                }
-    //            }
-    //        }
-    //    }
-    //
-    //    @MainActor
-    //    func fetchNextTrending(currentMovie: TMDb.Movie, offset: Int = AppConstants.nextPageOffset) {
-    //        let index = trendingIDs.firstIndex(where: { $0 == currentMovie.id })
-    //        let thresholdIndex = trendingIDs.endIndex - offset
-    //        guard index == thresholdIndex else {
-    //            return
-    //        }
-    //
-    //        fetchTrending()
-    //    }
-
 }

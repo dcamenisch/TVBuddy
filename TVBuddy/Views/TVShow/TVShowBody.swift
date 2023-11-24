@@ -10,42 +10,46 @@ import SwiftUI
 import TMDb
 
 struct TVShowBody: View {
-    
     @Environment(\.modelContext) private var context
     @EnvironmentObject private var tvStore: TVStore
-    
-    @State var credits: TMDb.ShowCredits?
-    @State var recommendations: [TMDb.TVShow]?
-    
+
+    @State var credits: ShowCredits?
+    @State var similar: [TVSeries]?
+
     @Query
-    private var shows: [TVShow]
-    private var _show: TVShow? { shows.first }
-    
-    private var tmdbTVShow: TMDb.TVShow
-    
-    init(tmdbTVShow: TMDb.TVShow, id: TMDb.TVShow.ID) {
+    private var shows: [TVBuddyTVShow]
+    private var _show: TVBuddyTVShow? { shows.first }
+
+    private var tmdbTVShow: TVSeries
+
+    init(tmdbTVShow: TVSeries, id: TVSeries.ID) {
         self.tmdbTVShow = tmdbTVShow
-        _shows = Query(filter: #Predicate<TVShow> { $0.id == id })
+        _shows = Query(filter: #Predicate<TVBuddyTVShow> { $0.id == id })
     }
-    
+
     private var hasSpecials: Bool {
         return tmdbTVShow.seasons?.count != tmdbTVShow.numberOfSeasons
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             watchButtons
             overview
+            genres
             seasons
-            cast
+
+            if let credits = credits, !credits.cast.isEmpty {
+                PeopleList(credits: credits)
+            }
+
             similarTVShows
         }
         .task {
-            credits = await tvStore.credits(forTVShow: tmdbTVShow.id)
-            recommendations = await tvStore.recommendations(forTVShow: tmdbTVShow.id)
+            credits = await tvStore.credits(forTVSeries: tmdbTVShow.id)
+            similar = await tvStore.similar(toTVSeries: tmdbTVShow.id)
         }
     }
-    
+
     private var watchButtons: some View {
         HStack {
             Button {
@@ -55,12 +59,9 @@ struct TVShowBody: View {
                     insertTVShow(tmdbTVShow: tmdbTVShow, watched: false)
                 }
             } label: {
-                HStack {
-                    Image(systemName: _show == nil ? "plus" : "checkmark")
-                    Text("Watchlist")
-                }
-                .frame(height: 30)
-                .frame(maxWidth: .infinity)
+                Label("Watchlist", systemImage: _show == nil ? "plus" : "checkmark")
+                    .frame(height: 30)
+                    .frame(maxWidth: .infinity)
             }
 
             Button {
@@ -70,19 +71,15 @@ struct TVShowBody: View {
                     insertTVShow(tmdbTVShow: tmdbTVShow, watched: true)
                 }
             } label: {
-                HStack {
-                    Image(systemName: _show == nil ? "eye" : _show?.finishedWatching ?? false ? "eye.fill" : "eye")
-                    Text("Watched")
-                }
-                .frame(height: 30)
-                .frame(maxWidth: .infinity)
+                Label("Watched", systemImage: _show == nil ? "eye" : _show?.finishedWatching ?? false ? "eye.fill" : "eye")
+                    .frame(height: 30)
+                    .frame(maxWidth: .infinity)
             }
-            
         }
         .bold()
         .buttonStyle(.bordered)
     }
-    
+
     private var overview: some View {
         Group {
             if tmdbTVShow.overview != nil {
@@ -90,6 +87,23 @@ struct TVShowBody: View {
                     .font(.title2)
                     .bold()
                 Text(tmdbTVShow.overview ?? "")
+            }
+        }
+    }
+    
+    private var genres: some View {
+        Group {
+            if let genres = tmdbTVShow.genres {
+                WrappingHStack(models: genres) { genre in
+                    Text(genre.name)
+                        .font(.headline)
+                        .padding(.horizontal, 10.0)
+                        .padding(.vertical, 8.0)
+                        .background {
+                            RoundedRectangle(cornerRadius: 15.0, style: .circular)
+                                .foregroundStyle(.quaternary)
+                        }
+                }
             }
         }
     }
@@ -101,10 +115,10 @@ struct TVShowBody: View {
                     Text("Seasons")
                         .font(.title2)
                         .bold()
-                    
+
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack {
-                            ForEach((hasSpecials ? 0 : 1)...numberOfSeasons, id: \.self) { season in
+                            ForEach((hasSpecials ? 0 : 1) ... numberOfSeasons, id: \.self) { season in
                                 NavigationLink {
                                     TVSeasonView(id: tmdbTVShow.id, seasonNumber: season)
                                 } label: {
@@ -123,48 +137,35 @@ struct TVShowBody: View {
                         }
                     }
                 }
-                
             }
         }
     }
-    
-    private var cast: some View {
-        Group {
-            if let credits = credits, !credits.cast.isEmpty {
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("Cast")
-                        .font(.title2)
-                        .bold()
-                    PeopleList(credits: credits)
-                }
-            }
-        }
-    }
-    
+
     private var similarTVShows: some View {
         Group {
-            if let tmdbTVShows = recommendations, !tmdbTVShows.isEmpty {
+            if let tmdbTVShows = similar, !tmdbTVShows.isEmpty {
                 MediaList(title: "Similar TV Shows", tmdbTVShows: tmdbTVShows)
             }
         }
     }
-    
-    private func insertTVShow(tmdbTVShow: TMDb.TVShow, watched: Bool = false) {
-        let tvShow: TVShow = TVShow(
-            tvShow: tmdbTVShow, startedWatching: watched, finishedWatching: watched)
+
+    private func insertTVShow(tmdbTVShow: TVSeries, watched: Bool = false) {
+        let tvShow = TVBuddyTVShow(
+            tvShow: tmdbTVShow, startedWatching: watched, finishedWatching: watched
+        )
         context.insert(tvShow)
-        
+
         Task {
             let tmdbEpisodes = await withTaskGroup(
-                of: TMDb.TVShowSeason?.self, returning: [TMDb.TVShowSeason].self
+                of: TVSeason?.self, returning: [TVSeason].self
             ) { group in
                 for season in tmdbTVShow.seasons ?? [] {
                     group.addTask {
-                        await tvStore.season(season.seasonNumber, forTVShow: tmdbTVShow.id)
+                        await tvStore.season(season.seasonNumber, forTVSeries: tmdbTVShow.id)
                     }
                 }
 
-                var childTaskResults = [TMDb.TVShowSeason]()
+                var childTaskResults = [TVSeason]()
                 for await result in group {
                     if let result = result {
                         childTaskResults.append(result)
@@ -172,14 +173,14 @@ struct TVShowBody: View {
                 }
 
                 return childTaskResults
-            }.compactMap({ season in
+            }.compactMap { season in
                 season.episodes
-            }).flatMap({
+            }.flatMap {
                 $0
-            })
+            }
 
             tvShow.episodes.append(
-                contentsOf: tmdbEpisodes.compactMap { TVEpisode(episode: $0, watched: watched) })
+                contentsOf: tmdbEpisodes.compactMap { TVBuddyTVEpisode(episode: $0, watched: watched) })
         }
     }
 }

@@ -10,22 +10,20 @@ import SwiftUI
 import TMDb
 
 struct TVShowView: View {
-	
-	let id: TMDb.TVShow.ID
-	
+    let id: TVSeries.ID
+
     @Environment(\.presentationMode) var presentationMode
-    @Environment(\.modelContext) private var context
     @EnvironmentObject private var tvStore: TVStore
-    
+
     @State var offset: CGFloat = 0.0
     @State var visibility: Visibility = .hidden
-    
-    @State var tmdbTVShow: TMDb.TVShow?
+
+    @State var tmdbTVShow: TVSeries?
     @State var poster: URL?
     @State var backdrop: URL?
 
     private var progress: CGFloat { offset / 350.0 }
-    
+
     var body: some View {
         content
             .toolbarBackground(.black)
@@ -42,7 +40,7 @@ struct TVShowView: View {
                             .foregroundStyle(.accent)
                     }
                 }
-                
+
                 ToolbarItem(placement: .principal) {
                     Text(tmdbTVShow?.name ?? "")
                         .font(.system(size: 18, weight: .semibold))
@@ -57,8 +55,8 @@ struct TVShowView: View {
                 backdrop = await tvStore.backdrop(withID: id)
             }
     }
-	
-	@ViewBuilder private var content: some View {
+
+    @ViewBuilder private var content: some View {
         if let tmdbTVShow = tmdbTVShow {
             OffsettableScrollView(showsIndicators: false) { point in
                 offset = -point.y
@@ -72,5 +70,5 @@ struct TVShowView: View {
         } else {
             ProgressView()
         }
-	}
+    }
 }
