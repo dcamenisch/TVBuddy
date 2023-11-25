@@ -34,40 +34,48 @@ struct MediaCollection: View {
     let columns: [GridItem] = Array(repeating: .init(.flexible()), count: 4)
 
     var body: some View {
-        VStack(alignment: .leading) {
-            HStack(alignment: .bottom) {
-                Text(title)
-                    .font(.title2)
-                    .bold()
+        if !media.isEmpty {
+            VStack(alignment: .leading) {
+                HStack(alignment: .bottom) {
+                    Text(title)
+                        .font(.title2)
+                        .bold()
 
-                Spacer()
+                    Spacer()
 
-                NavigationLink {
-                    ScrollView {
-                        LazyVGrid(columns: columns, spacing: 10) {
-                            ForEach(media) { item in
-                                mediaListItem(item: item)
-                                    .posterStyle()
-                            }
-                        }
-                        .padding(.horizontal)
+                    NavigationLink {
+                        gridView
+                    } label: {
+                        Text("Show all")
+                            .foregroundStyle(.secondary)
                     }
-                    .scrollIndicators(.never)
-                    .navigationTitle(title)
-                } label: {
-                    Text("Show more")
+                    .buttonStyle(.plain)
                 }
-            }
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack {
-                    ForEach(media) { item in
-                        mediaListItem(item: item)
-                            .posterStyle(size: .small)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack {
+                        ForEach(media) { item in
+                            mediaListItem(item: item)
+                                .posterStyle(size: .small)
+                        }
                     }
                 }
             }
         }
+    }
+    
+    var gridView: some View {
+        ScrollView {
+            LazyVGrid(columns: columns, spacing: 10) {
+                ForEach(media) { item in
+                    mediaListItem(item: item)
+                        .posterStyle()
+                }
+            }
+            .padding(.horizontal)
+        }
+        .scrollIndicators(.never)
+        .navigationTitle(title)
     }
 
     func mediaListItem(item: TVBuddyMediaItem) -> some View {

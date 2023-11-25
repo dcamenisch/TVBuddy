@@ -11,7 +11,7 @@ import TMDb
 
 typealias TVBuddyTVShow = TVBuddyMediaSchemaV1.TVBuddyTVShow
 
-public extension TVBuddyMediaSchemaV1 {
+extension TVBuddyMediaSchemaV1 {
     @Model
     final class TVBuddyTVShow {
         @Attribute(.unique)
