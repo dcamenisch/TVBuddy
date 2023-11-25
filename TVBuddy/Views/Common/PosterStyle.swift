@@ -10,7 +10,7 @@ import SwiftUI
 struct PosterStyleDynamic: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .aspectRatio(2/3, contentMode: .fill)
+            .aspectRatio(2 / 3, contentMode: .fill)
             .cornerRadius(6)
     }
 }
@@ -52,7 +52,7 @@ extension View {
     func posterStyle() -> some View {
         modifier(PosterStyleDynamic())
     }
-    
+
     func posterStyle(size: PosterStyle.Size) -> some View {
         modifier(PosterStyle(size: size))
     }

@@ -57,11 +57,11 @@ class MovieManager {
             let images = try await movieService.images(forMovie: id)
                 .backdrops
                 .filter { $0.languageCode == AppConstants.languageCode }
-            
+
             if images.isEmpty {
                 return await fetchBackdrop(id: id)
             }
-            
+
             return imageService?.backdropURL(
                 for: images.first?.filePath,
                 idealWidth: AppConstants.idealBackdropWidth
@@ -89,7 +89,7 @@ class MovieManager {
             return nil
         }
     }
-    
+
     func fetchSimilar(id: Movie.ID, page: Int = 1) async -> [Movie]? {
         do {
             return try await movieService.similar(toMovie: id, page: page).results

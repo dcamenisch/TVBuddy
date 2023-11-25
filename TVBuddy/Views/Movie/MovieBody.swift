@@ -18,7 +18,7 @@ struct MovieBody: View {
 
     private var tmdbMovie: Movie
     private var tvBuddyMovie: TVBuddyMovie?
-    
+
     init(tmdbMovie: Movie, tvBuddyMovie: TVBuddyMovie?) {
         self.tmdbMovie = tmdbMovie
         self.tvBuddyMovie = tvBuddyMovie
@@ -28,7 +28,7 @@ struct MovieBody: View {
         VStack(alignment: .leading, spacing: 10) {
             watchButtons
             overview
-            
+
             genres
 
             if let credits = credits, !credits.cast.isEmpty {
@@ -83,7 +83,7 @@ struct MovieBody: View {
             }
         }
     }
-    
+
     private var genres: some View {
         Group {
             if let genres = tmdbMovie.genres {

@@ -18,17 +18,17 @@ struct FeedView: View {
 
     @Query
     private var tvShows: [TVBuddyTVShow]
-    
+
     @Query
     private var unreleasedTVShows: [TVBuddyTVShow]
-    
+
     init() {
         let now = Date.now
         let future = Date.distantFuture
-        
+
         _movies = Query(filter: #Predicate<TVBuddyMovie> { !$0.watched && $0.releaseDate ?? future <= now })
         _unreleasedMovies = Query(filter: #Predicate<TVBuddyMovie> { !$0.watched && $0.releaseDate ?? future > now })
-        
+
         _tvShows = Query(filter: #Predicate<TVBuddyTVShow> { !$0.startedWatching && $0.firstAirDate ?? future <= now })
         _unreleasedTVShows = Query(filter: #Predicate<TVBuddyTVShow> { !$0.startedWatching && $0.firstAirDate ?? future > now })
     }

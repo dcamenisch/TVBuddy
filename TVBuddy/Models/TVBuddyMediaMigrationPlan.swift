@@ -12,11 +12,11 @@ enum TVBuddyMediaMigrationPlan: SchemaMigrationPlan {
     static var stages: [MigrationStage] {
         []
     }
-    
+
     static var schemas: [any VersionedSchema.Type] {
         [TVBuddyMediaSchemaV1.self]
     }
-    
+
 //    static let migrateV1toV2 = MigrationStage.custom(
 //        fromVersion: TVBuddyMediaSchemaV1.self,
 //        toVersion: TVBuddyMediaSchemaV2.self,

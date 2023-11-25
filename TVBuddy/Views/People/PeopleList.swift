@@ -33,7 +33,7 @@ struct PeopleList: View {
                 if credits.cast.count == 0 {
                     ContentUnavailableView("No Cast Information Available", systemImage: "person.fill")
                 }
-                
+
                 if showMore {
                     ForEach(credits.cast) { castMember in
                         CastItem(castMember: castMember)
@@ -43,7 +43,7 @@ struct PeopleList: View {
                         CastItem(castMember: castMember)
                     }
                 }
-                
+
                 if credits.cast.count > 4 {
                     Button(action: { showMore.toggle() }, label: {
                         Text(showMore ? "Show less" : "Show more")
@@ -56,7 +56,7 @@ struct PeopleList: View {
                 if credits.crew.count == 0 {
                     ContentUnavailableView("No Crew Information Available", systemImage: "person.fill")
                 }
-                
+
                 if showMore {
                     ForEach(credits.crew) { crewMember in
                         CrewItem(crewMember: crewMember)
@@ -66,7 +66,7 @@ struct PeopleList: View {
                         CrewItem(crewMember: crewMember)
                     }
                 }
-                
+
                 if credits.crew.count > 4 {
                     Button(action: { showMore.toggle() }, label: {
                         Text(showMore ? "Show less" : "Show more")

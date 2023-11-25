@@ -11,22 +11,22 @@ import TMDb
 
 typealias TVBuddyTVShow = TVBuddyMediaSchemaV1.TVBuddyTVShow
 
-extension TVBuddyMediaSchemaV1 {
+public extension TVBuddyMediaSchemaV1 {
     @Model
-    public final class TVBuddyTVShow {
+    final class TVBuddyTVShow {
         @Attribute(.unique)
         public let id: Int
-        
+
         let name: String
         let firstAirDate: Date?
-        
+
         @Relationship(deleteRule: .cascade, inverse: \TVBuddyTVEpisode.tvShow)
         var episodes: [TVBuddyTVEpisode] = []
-        
+
         var startedWatching: Bool
         var finishedWatching: Bool
         var isFavorite: Bool
-        
+
         init(id: Int, name: String, firstAirDate: Date?, startedWatching: Bool, finishedWatching: Bool, isFavorite: Bool = false) {
             self.id = id
             self.name = name
@@ -35,7 +35,7 @@ extension TVBuddyMediaSchemaV1 {
             self.finishedWatching = finishedWatching
             self.isFavorite = isFavorite
         }
-        
+
         convenience init(
             tvShow: TVSeries, startedWatching: Bool = false, finishedWatching: Bool = false, isFavorite: Bool = false
         ) {
@@ -48,12 +48,12 @@ extension TVBuddyMediaSchemaV1 {
                 isFavorite: isFavorite
             )
         }
-        
+
         func toggleWatched() {
             episodes.forEach { $0.watched = !finishedWatching }
             checkWatching()
         }
-        
+
         func checkWatching() {
             startedWatching = episodes.contains { $0.watched && $0.seasonNumber != 0 }
             finishedWatching = episodes.allSatisfy { $0.watched || $0.seasonNumber == 0 }

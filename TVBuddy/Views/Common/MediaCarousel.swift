@@ -12,7 +12,7 @@ import TMDb
 struct MediaCarousel: View {
     @EnvironmentObject private var tvStore: TVStore
     @EnvironmentObject private var movieStore: MovieStore
-    
+
     @StateObject var page: Page = .first()
 
     @State var trendingMedia = [Media]()
@@ -43,15 +43,15 @@ struct MediaCarousel: View {
             if trendingMedia.isEmpty {
                 let trendingMovies = await movieStore.trending().prefix(6)
                 let trendingTVShows = await tvStore.trending().prefix(6)
-                
+
                 trendingMovies.forEach { movie in
                     trendingMedia.append(Media.movie(movie))
                 }
-                
+
                 trendingTVShows.forEach { tvShow in
                     trendingMedia.append(Media.tvSeries(tvShow))
                 }
-                
+
                 trendingMedia.shuffle()
             }
         }
@@ -61,14 +61,14 @@ struct MediaCarousel: View {
 struct MediaCarouselItem: View {
     @EnvironmentObject private var tvStore: TVStore
     @EnvironmentObject private var movieStore: MovieStore
-    
+
     @State var backdropWithText: URL?
 
     let media: Media
-    
+
     var body: some View {
         switch media {
-        case .movie(let movie):
+        case let .movie(movie):
             NavigationLink {
                 MovieView(id: movie.id)
             } label: {
@@ -80,7 +80,7 @@ struct MediaCarouselItem: View {
             .task {
                 backdropWithText = await movieStore.backdropWithText(withID: movie.id)
             }
-        case .tvSeries(let tvSeries):
+        case let .tvSeries(tvSeries):
             NavigationLink {
                 TVShowView(id: tvSeries.id)
             } label: {

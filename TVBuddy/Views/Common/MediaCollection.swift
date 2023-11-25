@@ -30,7 +30,7 @@ struct MediaCollection: View {
         media.append(contentsOf: tmdbTVShows.map { TVBuddyMediaItem.tmdbTVShow($0) })
         media.append(contentsOf: tmdbPerson.map { TVBuddyMediaItem.tmdbPerson($0) })
     }
-    
+
     let columns: [GridItem] = Array(repeating: .init(.flexible()), count: 4)
 
     var body: some View {
@@ -39,9 +39,9 @@ struct MediaCollection: View {
                 Text(title)
                     .font(.title2)
                     .bold()
-                
+
                 Spacer()
-                
+
                 NavigationLink {
                     ScrollView {
                         LazyVGrid(columns: columns, spacing: 10) {

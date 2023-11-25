@@ -13,14 +13,14 @@ struct MovieView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.presentationMode) private var presentationMode
     @EnvironmentObject private var movieStore: MovieStore
-    
+
     @State var offset: CGFloat = 0.0
     @State var visibility: Visibility = .hidden
 
     @State var tmdbMovie: Movie?
     @State var poster: URL?
     @State var backdrop: URL?
-    
+
     @Query
     private var movies: [TVBuddyMovie]
     private var _movie: TVBuddyMovie? { movies.first }
@@ -28,7 +28,7 @@ struct MovieView: View {
     let id: Movie.ID
 
     private var progress: CGFloat { offset / 350.0 }
-    
+
     init(id: Movie.ID) {
         self.id = id
         _movies = Query(filter: #Predicate<TVBuddyMovie> { $0.id == id })
@@ -58,7 +58,7 @@ struct MovieView: View {
                         .minimumScaleFactor(0.5)
                         .opacity(max(0, -22.0 + 20.0 * progress))
                 }
-                
+
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         if let movie = _movie {

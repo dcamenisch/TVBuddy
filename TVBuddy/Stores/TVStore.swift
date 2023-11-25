@@ -129,7 +129,7 @@ class TVStore: ObservableObject {
 
         return recommendationsIDs[id]!.compactMap { self.shows[$0] }
     }
-    
+
     @MainActor
     func similar(toTVSeries id: TVSeries.ID) async -> [TVSeries]? {
         if similarIDs[id] == nil {
@@ -172,7 +172,7 @@ class TVStore: ObservableObject {
         page.forEach { show in
             if !self.trendingIDs.contains(show.id) { self.trendingIDs.append(show.id) }
         }
-        
+
         trendingPage = max(nextPageNumber, trendingPage)
         return trendingIDs.compactMap { shows[$0] }
     }
@@ -199,7 +199,7 @@ class TVStore: ObservableObject {
         page.forEach { show in
             if !self.discoverIDs.contains(show.id) { self.discoverIDs.append(show.id) }
         }
-        
+
         discoverPage = max(nextPageNumber, discoverPage)
         return discoverIDs.compactMap { shows[$0] }
     }

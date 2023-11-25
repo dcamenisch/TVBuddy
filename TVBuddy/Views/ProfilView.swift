@@ -9,7 +9,6 @@ import SwiftData
 import SwiftUI
 import TMDb
 
-
 struct ProfilView: View {
     @Query(filter: #Predicate<TVBuddyMovie> { $0.watched })
     private var watchedMovies: [TVBuddyMovie]

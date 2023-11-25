@@ -12,19 +12,19 @@ import TMDb
 struct TVSeasonBody: View {
     @Environment(\.modelContext) private var context
     @EnvironmentObject private var tvStore: TVStore
-    
+
     let id: TVSeries.ID
     let tmdbSeason: TVSeason
     let tmdbTVShow: TVSeries
-        
+
     @Query
     private var shows: [TVBuddyTVShow]
     private var _show: TVBuddyTVShow? { shows.first }
-    
+
     @State private var watchedAll: Bool = false
-    
+
     init(tmdbTVShow: TVSeries, tmdbSeason: TVSeason) {
-        self.id = tmdbTVShow.id
+        id = tmdbTVShow.id
         self.tmdbTVShow = tmdbTVShow
         self.tmdbSeason = tmdbSeason
         _shows = Query(filter: #Predicate<TVBuddyTVShow> { $0.id == id })
@@ -42,10 +42,10 @@ struct TVSeasonBody: View {
                 } else {
                     insertTVShow()
                 }
-                
-                watchedAll = self._show?.episodes.allSatisfy({
+
+                watchedAll = self._show?.episodes.allSatisfy {
                     $0.seasonNumber != tmdbSeason.seasonNumber || $0.watched
-                }) ?? false
+                } ?? false
             } label: {
                 Label(watchedAll ? "Mark as unseen" : "Mark as seen", systemImage: watchedAll ? "eye.fill" : "eye")
                     .frame(height: 30)
@@ -53,7 +53,7 @@ struct TVSeasonBody: View {
             }
             .bold()
             .buttonStyle(.bordered)
-            
+
             if let overview = tmdbSeason.overview, !overview.isEmpty {
                 Text("Storyline")
                     .font(.title2)
@@ -76,12 +76,12 @@ struct TVSeasonBody: View {
             }
         }
         .onAppear(perform: {
-            watchedAll = self._show?.episodes.allSatisfy({
+            watchedAll = self._show?.episodes.allSatisfy {
                 $0.seasonNumber != tmdbSeason.seasonNumber || $0.watched
-            }) ?? false
+            } ?? false
         })
     }
-    
+
     private func insertTVShow() {
         let tvShow = TVBuddyTVShow(tvShow: tmdbTVShow)
         context.insert(tvShow)
@@ -112,7 +112,7 @@ struct TVSeasonBody: View {
 
             tvShow.episodes.append(
                 contentsOf: tmdbEpisodes.compactMap { TVBuddyTVEpisode(episode: $0) })
-            
+
             tvShow.episodes.forEach { episode in
                 if episode.seasonNumber == tmdbSeason.seasonNumber {
                     episode.toggleWatched()

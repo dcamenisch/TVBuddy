@@ -13,22 +13,22 @@ struct TVShowView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject private var tvStore: TVStore
-    
+
     @State var offset: CGFloat = 0.0
     @State var visibility: Visibility = .hidden
 
     @State var tmdbTVShow: TVSeries?
     @State var poster: URL?
     @State var backdrop: URL?
-    
+
     @Query
     private var shows: [TVBuddyTVShow]
     private var _show: TVBuddyTVShow? { shows.first }
-    
+
     let id: TVSeries.ID
 
     private var progress: CGFloat { offset / 350.0 }
-    
+
     init(id: TVSeries.ID) {
         self.id = id
         _shows = Query(filter: #Predicate<TVBuddyTVShow> { $0.id == id })
@@ -58,7 +58,7 @@ struct TVShowView: View {
                         .minimumScaleFactor(0.5)
                         .opacity(max(0, -22.0 + 20.0 * progress))
                 }
-                
+
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         if let show = _show {

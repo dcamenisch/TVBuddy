@@ -11,16 +11,16 @@ import TMDb
 
 typealias TVBuddyTVEpisode = TVBuddyMediaSchemaV1.TVBuddyTVEpisode
 
-extension TVBuddyMediaSchemaV1 {
+public extension TVBuddyMediaSchemaV1 {
     @Model
-    public final class TVBuddyTVEpisode {
+    final class TVBuddyTVEpisode {
         @Attribute(.unique)
         public let id: Int
 
         let episodeNumber: Int
         let seasonNumber: Int
         let airDate: Date?
-        
+
         var tvShow: TVBuddyTVShow?
 
         var watched: Bool

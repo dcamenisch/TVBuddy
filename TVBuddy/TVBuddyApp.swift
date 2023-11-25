@@ -15,7 +15,7 @@ struct TVBuddyApp: App {
     @StateObject private var personStore = PersonStore()
     @StateObject private var searchStore = SearchStore()
     @StateObject private var tvStore = TVStore()
-    
+
     var container: ModelContainer
 
     init() {
@@ -25,7 +25,7 @@ struct TVBuddyApp: App {
         Task {
             AppConstants.apiConfiguration = try await AppConstants.configurationService.apiConfiguration()
         }
-        
+
         do {
             let schema = Schema(TVBuddyMediaSchema.models)
             let config = ModelConfiguration(schema: schema)

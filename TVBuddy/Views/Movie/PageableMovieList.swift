@@ -11,9 +11,9 @@ import TMDb
 struct PageableMovieList: View {
     let title: String
     let fetchMethod: (Bool) async -> [Movie]
-    
+
     @State var movies = [Movie]()
-    
+
     var body: some View {
         VStack(alignment: .leading) {
             if !title.isEmpty {
@@ -21,7 +21,7 @@ struct PageableMovieList: View {
                     .font(.title2)
                     .bold()
             }
-            
+
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack {
                     ForEach(movies.indices, id: \.self) { i in

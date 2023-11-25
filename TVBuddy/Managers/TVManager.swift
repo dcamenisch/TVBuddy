@@ -83,11 +83,11 @@ class TVManager {
             let images = try await tvEpisodeService.images(forEpisode: episode, inSeason: season, inTVSeries: id)
                 .stills
                 .filter { $0.languageCode == nil }
-            
+
             if images.isEmpty {
                 return await fetchBackdrop(id: id, season: season)
             }
-            
+
             return imageService?.stillURL(
                 for: images.first?.filePath,
                 idealWidth: AppConstants.idealBackdropWidth
@@ -111,11 +111,11 @@ class TVManager {
             let images = try await tvSeriesService.images(forTVSeries: id)
                 .backdrops
                 .filter { $0.languageCode == AppConstants.languageCode }
-                        
+
             if images.isEmpty {
                 return await fetchBackdrop(id: id)
             }
-            
+
             return imageService?.backdropURL(
                 for: images.first?.filePath,
                 idealWidth: AppConstants.idealBackdropWidth
@@ -143,7 +143,7 @@ class TVManager {
             return nil
         }
     }
-    
+
     func fetchSimilar(id: TVSeries.ID, page: Int = 1) async -> [TVSeries]? {
         do {
             return try await tvSeriesService.similar(toTVSeries: id, page: page).results

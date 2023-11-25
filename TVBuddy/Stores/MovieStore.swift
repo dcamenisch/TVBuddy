@@ -107,7 +107,7 @@ class MovieStore: ObservableObject {
 
         return recommendationsIDs[id]!.compactMap { self.movies[$0] }
     }
-    
+
     @MainActor
     func similar(toMovie id: Movie.ID) async -> [Movie]? {
         if similarIDs[id] == nil {
@@ -133,7 +133,7 @@ class MovieStore: ObservableObject {
         if !newPage && trendingPage != 0 {
             return trendingIDs.compactMap { movies[$0] }
         }
-        
+
         let nextPageNumber = trendingPage + 1
 
         let page = await moviesManager.fetchTrending(page: nextPageNumber)
@@ -150,7 +150,7 @@ class MovieStore: ObservableObject {
         page.forEach { movie in
             if !self.trendingIDs.contains(movie.id) { self.trendingIDs.append(movie.id) }
         }
-        
+
         trendingPage = max(nextPageNumber, trendingPage)
         return trendingIDs.compactMap { movies[$0] }
     }
@@ -177,7 +177,7 @@ class MovieStore: ObservableObject {
         page.forEach { movie in
             if !self.discoverIDs.contains(movie.id) { self.discoverIDs.append(movie.id) }
         }
-        
+
         discoverPage = max(nextPageNumber, discoverPage)
         return discoverIDs.compactMap { movies[$0] }
     }

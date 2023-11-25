@@ -11,15 +11,15 @@ import TMDb
 
 typealias TVBuddyMovie = TVBuddyMediaSchemaV1.TVBuddyMovie
 
-extension TVBuddyMediaSchemaV1 {
+public extension TVBuddyMediaSchemaV1 {
     @Model
-    public final class TVBuddyMovie {
+    final class TVBuddyMovie {
         @Attribute(.unique)
         let id: Int
 
         let title: String
         let releaseDate: Date?
-        
+
         var watched: Bool
         var isFavorite: Bool
 

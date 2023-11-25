@@ -18,7 +18,7 @@ struct TVShowBody: View {
 
     private var tmdbTVShow: TVSeries
     private var tvBuddyTVShow: TVBuddyTVShow?
-    
+
     init(tmdbTVShow: TVSeries, tvBuddyTVShow: TVBuddyTVShow?) {
         self.tmdbTVShow = tmdbTVShow
         self.tvBuddyTVShow = tvBuddyTVShow
@@ -87,7 +87,7 @@ struct TVShowBody: View {
             }
         }
     }
-    
+
     private var genres: some View {
         Group {
             if let genres = tmdbTVShow.genres {

@@ -60,7 +60,7 @@ struct TVEpisodeRow: View {
             backdrop = await tvStore.backdrop(withID: id, season: seasonNumber, episode: episodeNumber)
         }
     }
-    
+
     var episodeRow: some View {
         HStack {
             ImageView(title: tmdbEpisode?.name ?? "", url: backdrop)

@@ -11,9 +11,9 @@ import TMDb
 struct PageableTVShowList: View {
     let title: String
     let fetchMethod: (Bool) async -> [TVSeries]
-    
+
     @State var tvSeries = [TVSeries]()
-    
+
     var body: some View {
         VStack(alignment: .leading) {
             if !title.isEmpty {
@@ -21,7 +21,7 @@ struct PageableTVShowList: View {
                     .font(.title2)
                     .bold()
             }
-            
+
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack {
                     ForEach(tvSeries.indices, id: \.self) { i in
