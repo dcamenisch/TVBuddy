@@ -64,7 +64,6 @@
 		6FE148AF2AB5BA5C00D007B6 /* FeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FE148AE2AB5BA5C00D007B6 /* FeedView.swift */; };
 		6FE148B32AB5BA5E00D007B6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6FE148B22AB5BA5E00D007B6 /* Assets.xcassets */; };
 		6FE148B62AB5BA5E00D007B6 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6FE148B52AB5BA5E00D007B6 /* Preview Assets.xcassets */; };
-		6FE148BE2AB5BC2D00D007B6 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 6FE148BD2AB5BC2D00D007B6 /* .swiftlint.yml */; };
 		6FF977F22AF7CDB800C887B6 /* LazyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FF977F12AF7CDB800C887B6 /* LazyView.swift */; };
 /* End PBXBuildFile section */
 
@@ -121,7 +120,6 @@
 		6FE148AE2AB5BA5C00D007B6 /* FeedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedView.swift; sourceTree = "<group>"; };
 		6FE148B22AB5BA5E00D007B6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6FE148B52AB5BA5E00D007B6 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		6FE148BD2AB5BC2D00D007B6 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		6FF977F12AF7CDB800C887B6 /* LazyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LazyView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -285,7 +283,6 @@
 				6FBBBB982AB5D31500D081FE /* Views */,
 				6FE148B22AB5BA5E00D007B6 /* Assets.xcassets */,
 				6FE148B42AB5BA5E00D007B6 /* Preview Content */,
-				6FE148BD2AB5BC2D00D007B6 /* .swiftlint.yml */,
 				6F8E1A4B2AF649530031CA5C /* TMDB-Info.plist */,
 			);
 			path = TVBuddy;
@@ -371,7 +368,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6FE148BE2AB5BC2D00D007B6 /* .swiftlint.yml in Resources */,
 				6F8E1A4C2AF649530031CA5C /* TMDB-Info.plist in Resources */,
 				6FE148B62AB5BA5E00D007B6 /* Preview Assets.xcassets in Resources */,
 				6FE148B32AB5BA5E00D007B6 /* Assets.xcassets in Resources */,
