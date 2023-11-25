@@ -17,12 +17,11 @@ extension TVBuddyMediaSchemaV1 {
         @Attribute(.unique)
         public let id: Int
 
-        var tvShow: TVBuddyTVShow?
-
         let episodeNumber: Int
         let seasonNumber: Int
-        
         let airDate: Date?
+        
+        var tvShow: TVBuddyTVShow?
 
         var watched: Bool
 

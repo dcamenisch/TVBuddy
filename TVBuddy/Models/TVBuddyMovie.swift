@@ -18,7 +18,6 @@ extension TVBuddyMediaSchemaV1 {
         let id: Int
 
         let title: String
-
         let releaseDate: Date?
         
         var watched: Bool

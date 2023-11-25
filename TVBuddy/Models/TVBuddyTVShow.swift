@@ -18,6 +18,7 @@ extension TVBuddyMediaSchemaV1 {
         public let id: Int
         
         let name: String
+        let firstAirDate: Date?
         
         @Relationship(deleteRule: .cascade, inverse: \TVBuddyTVEpisode.tvShow)
         var episodes: [TVBuddyTVEpisode] = []
@@ -26,9 +27,10 @@ extension TVBuddyMediaSchemaV1 {
         var finishedWatching: Bool
         var isFavorite: Bool
         
-        init(id: Int, name: String, startedWatching: Bool, finishedWatching: Bool, isFavorite: Bool = false) {
+        init(id: Int, name: String, firstAirDate: Date?, startedWatching: Bool, finishedWatching: Bool, isFavorite: Bool = false) {
             self.id = id
             self.name = name
+            self.firstAirDate = firstAirDate
             self.startedWatching = startedWatching
             self.finishedWatching = finishedWatching
             self.isFavorite = isFavorite
@@ -40,6 +42,7 @@ extension TVBuddyMediaSchemaV1 {
             self.init(
                 id: tvShow.id,
                 name: tvShow.name,
+                firstAirDate: tvShow.firstAirDate,
                 startedWatching: startedWatching,
                 finishedWatching: finishedWatching,
                 isFavorite: isFavorite
