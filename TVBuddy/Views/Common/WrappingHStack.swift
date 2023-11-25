@@ -27,7 +27,7 @@ struct WrappingHStack<Model, V>: View where Model: Hashable, V: View {
         }
         .frame(height: totalHeight)// << variant for ScrollView/List
         //.frame(maxHeight: totalHeight) // << variant for VStack
-        .padding(.vertical, -4.0)
+        .padding(.vertical, -verticalSpacing)
     }
 
     private func generateContent(in geometry: GeometryProxy) -> some View {

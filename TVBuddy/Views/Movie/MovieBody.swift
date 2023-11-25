@@ -104,7 +104,7 @@ struct MovieBody: View {
     private var similarMovies: some View {
         Group {
             if let movies = similar, !movies.isEmpty {
-                MediaList(title: "Similar Movies", tmdbMovies: movies)
+                MediaCollection(title: "Similar Movies", tmdbMovies: movies)
             }
         }
     }

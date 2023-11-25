@@ -20,8 +20,8 @@ struct ProfilView: View {
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 10) {
-                MediaList(title: "Watched TV Shows (\(watchedTVShows.count))", tvShows: watchedTVShows)
-                MediaList(title: "Watched Movies (\(watchedMovies.count))", movies: watchedMovies)
+                MediaCollection(title: "Watched TV Shows (\(watchedTVShows.count))", tvShows: watchedTVShows)
+                MediaCollection(title: "Watched Movies (\(watchedMovies.count))", movies: watchedMovies)
             }
             .padding(.horizontal)
         }
