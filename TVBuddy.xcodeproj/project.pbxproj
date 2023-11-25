@@ -141,6 +141,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6FB550642B1236BE001644DD /* ViewModifier */ = {
+			isa = PBXGroup;
+			children = (
+				6FBBBBB02AB5E61F00D081FE /* BackdropStyle.swift */,
+				6FBBBB962AB5D15F00D081FE /* PosterStyle.swift */,
+			);
+			path = ViewModifier;
+			sourceTree = "<group>";
+		};
 		6FBBBB982AB5D31500D081FE /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -153,6 +162,7 @@
 				6FBBBBCF2AB5F02A00D081FE /* TVShow */,
 				6FBBBBCC2AB5F02A00D081FE /* People */,
 				6FBBBB992AB5D31B00D081FE /* Common */,
+				6FB550642B1236BE001644DD /* ViewModifier */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -160,14 +170,12 @@
 		6FBBBB992AB5D31B00D081FE /* Common */ = {
 			isa = PBXGroup;
 			children = (
-				6FBBBBB02AB5E61F00D081FE /* BackdropStyle.swift */,
 				6F4781612AB5CDFD006846C9 /* ImageView.swift */,
 				6FF977F12AF7CDB800C887B6 /* LazyView.swift */,
 				6FBBBBB52AB5EBB400D081FE /* MediaCarousel.swift */,
 				6FD6BA822AB73714000B73C1 /* MediaCollection.swift */,
 				6FD6BA842AB74E4A000B73C1 /* MediaRow.swift */,
 				6FBBBBB72AB5EF0500D081FE /* OffsettableScrollView.swift */,
-				6FBBBB962AB5D15F00D081FE /* PosterStyle.swift */,
 				6FBBBBB92AB5EF1300D081FE /* VoteLabel.swift */,
 				6F4C370B2B0E8D09003408BB /* WrappingHStack.swift */,
 			);
