@@ -66,11 +66,9 @@ struct TVSeasonBody: View {
                     .font(.title2)
                     .bold()
                 ForEach(episodes) { episode in
-                    TVEpisodeRow(
-                        tvShowID: id,
-                        seasonNumber: episode.seasonNumber,
-                        episodeNumber: episode.episodeNumber,
-                        showOverview: true
+                    TVEpisodeRowNonClickable(
+                        tvShow: tmdbTVShow,
+                        tvEpisode: episode
                     )
                 }
             }

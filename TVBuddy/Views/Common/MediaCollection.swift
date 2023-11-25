@@ -31,8 +31,6 @@ struct MediaCollection: View {
         media.append(contentsOf: tmdbPerson.map { TVBuddyMediaItem.tmdbPerson($0) })
     }
 
-    let columns: [GridItem] = Array(repeating: .init(.flexible()), count: 4)
-
     var body: some View {
         if !media.isEmpty {
             VStack(alignment: .leading) {
@@ -44,7 +42,8 @@ struct MediaCollection: View {
                     Spacer()
 
                     NavigationLink {
-                        gridView
+                        MediaGrid(media: media)
+                            .navigationTitle(title)
                     } label: {
                         Text("Show all")
                             .foregroundStyle(.secondary)
@@ -52,32 +51,64 @@ struct MediaCollection: View {
                     .buttonStyle(.plain)
                 }
 
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack {
-                        ForEach(media) { item in
-                            mediaListItem(item: item)
-                                .posterStyle(size: .small)
-                        }
-                    }
-                }
+                MediaHorizontalList(media: media)
             }
         }
     }
+}
+
+struct MediaGrid: View {
+    let media: [TVBuddyMediaItem]
+    let columns: [GridItem] = Array(repeating: .init(.flexible()), count: 4)
     
-    var gridView: some View {
+    var body: some View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 10) {
                 ForEach(media) { item in
-                    mediaListItem(item: item)
+                    mediaGridItem(item: item)
                         .posterStyle()
                 }
             }
             .padding(.horizontal)
         }
         .scrollIndicators(.never)
-        .navigationTitle(title)
     }
+    
+    func mediaGridItem(item: TVBuddyMediaItem) -> some View {
+        switch item {
+        case .movie:
+            return AnyView(MediaListMovieItem(mediaItem: item))
 
+        case .tvShow:
+            return AnyView(MediaListTVShowItem(mediaItem: item))
+
+        case .tmdbMovie:
+            return AnyView(MediaListMovieItem(mediaItem: item))
+
+        case .tmdbTVShow:
+            return AnyView(MediaListTVShowItem(mediaItem: item))
+
+        case .tmdbPerson:
+            return AnyView(MediaListPersonItem(mediaItem: item))
+        }
+    }
+}
+
+struct MediaHorizontalList: View {
+    let media: [TVBuddyMediaItem]
+    
+    var body: some View {
+        ScrollView(.horizontal) {
+            HStack {
+                ForEach(media) { item in
+                    mediaListItem(item: item)
+                        .posterStyle(size: .small)
+                }
+            }
+        }
+        .scrollIndicators(.never)
+    }
+    
     func mediaListItem(item: TVBuddyMediaItem) -> some View {
         switch item {
         case .movie:
@@ -141,13 +172,9 @@ struct MediaListPersonItem: View {
     let mediaItem: TVBuddyMediaItem
 
     var body: some View {
-        NavigationLink {
-            Text(mediaItem.name)
-        } label: {
-            ImageView(title: mediaItem.name, url: poster)
-        }
-        .task {
-            poster = await personStore.image(forPerson: mediaItem.id)
-        }
+        ImageView(title: mediaItem.name, url: poster)
+            .task {
+                poster = await personStore.image(forPerson: mediaItem.id)
+            }
     }
 }

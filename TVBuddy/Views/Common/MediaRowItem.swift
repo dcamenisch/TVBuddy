@@ -1,5 +1,5 @@
 //
-//  MediaRow.swift
+//  MediaRowItem.swift
 //  TVBuddy
 //
 //  Created by Danny on 17.09.2023.
@@ -8,7 +8,7 @@
 import SwiftUI
 import TMDb
 
-struct MediaRow: View {
+struct MediaRowItem: View {
     let mediaItem: Media
 
     var body: some View {
@@ -17,23 +17,21 @@ struct MediaRow: View {
             NavigationLink {
                 MovieView(id: movie.id)
             } label: {
-                MovieRow(movie: movie)
+                MovieRowItem(movie: movie)
             }
         case let .tvSeries(tvShow):
             NavigationLink {
                 TVShowView(id: tvShow.id)
             } label: {
-                TVShowRow(tvShow: tvShow)
+                TVShowRowItem(tvShow: tvShow)
             }
         case let .person(person):
-            NavigationLink {} label: {
-                PersonRow(person: person)
-            }
+            PersonRowItem(person: person)
         }
     }
 }
 
-struct MovieRow: View {
+struct MovieRowItem: View {
     let movie: Movie
 
     @EnvironmentObject private var movieStore: MovieStore
@@ -61,7 +59,7 @@ struct MovieRow: View {
     }
 }
 
-struct TVShowRow: View {
+struct TVShowRowItem: View {
     let tvShow: TVSeries
 
     @EnvironmentObject private var tvStore: TVStore
@@ -89,7 +87,7 @@ struct TVShowRow: View {
     }
 }
 
-struct PersonRow: View {
+struct PersonRowItem: View {
     let person: Person
 
     @EnvironmentObject private var personStore: PersonStore

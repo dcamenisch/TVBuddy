@@ -31,12 +31,9 @@ struct TVEpisodeProgressItem: View {
     var body: some View {
         Group {
             if let tvEpisode = tvEpisode {
-                TVEpisodeRow(
-                    tvShowID: tvShow.id,
-                    seasonNumber: tvEpisode.seasonNumber,
-                    episodeNumber: tvEpisode.episodeNumber,
-                    showOverview: false,
-                    clickable: true
+                TVEpisodeRowClickable(
+                    tvBuddyTVShow: tvShow,
+                    tvBuddyTVEpisode: tvEpisode
                 )
             }
         }

@@ -21,7 +21,7 @@ struct SearchView: View {
 
     var body: some View {
         List(media ?? []) { mediaItem in
-            MediaRow(mediaItem: mediaItem)
+            MediaRowItem(mediaItem: mediaItem)
                 .onAppear { self.mediaItemDidAppear(currentMediaItem: mediaItem) }
                 .tag(mediaItem)
         }
