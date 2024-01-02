@@ -54,7 +54,7 @@ struct TVShowItem: View {
             TVShowView(id: tvSeries.id)
         } label: {
             ImageView(title: tvSeries.name, url: poster)
-                .posterStyle(size: .small)
+                .posterStyle(size: .medium)
         }
         .task {
             poster = await tvStore.poster(withID: tvSeries.id)

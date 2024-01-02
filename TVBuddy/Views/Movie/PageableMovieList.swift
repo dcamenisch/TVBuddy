@@ -54,7 +54,7 @@ struct MovieItem: View {
             MovieView(id: movie.id)
         } label: {
             ImageView(title: movie.title, url: poster)
-                .posterStyle(size: .small)
+                .posterStyle(size: .medium)
         }
         .task {
             poster = await movieStore.poster(withID: movie.id)
