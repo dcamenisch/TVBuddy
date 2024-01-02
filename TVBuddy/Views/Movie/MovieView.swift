@@ -90,7 +90,7 @@ struct MovieView: View {
                     visibility = offset > 290 ? .visible : .hidden
                 }
             } content: {
-                MovieHeader(tmdbMovie: tmdbMovie, poster: poster, backdrop: backdrop)
+                MovieHeader(movie: tmdbMovie, poster: poster, backdrop: backdrop)
                     .padding(.bottom, 10)
                 MovieBody(tmdbMovie: tmdbMovie, tvBuddyMovie: _movie)
                     .padding(.horizontal)

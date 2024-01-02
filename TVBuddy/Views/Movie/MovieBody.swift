@@ -28,7 +28,6 @@ struct MovieBody: View {
         VStack(alignment: .leading, spacing: 10) {
             watchButtons
             overview
-
             genres
 
             if let credits = credits, !credits.cast.isEmpty {
@@ -37,7 +36,7 @@ struct MovieBody: View {
 
             similarMovies
         }
-        .task {
+        .task(id: tmdbMovie) {
             credits = await movieStore.credits(forMovie: tmdbMovie.id)
             recommendations = await movieStore.recommendations(forMovie: tmdbMovie.id)
         }
