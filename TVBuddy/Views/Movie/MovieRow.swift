@@ -17,16 +17,6 @@ struct MovieRow: View {
     
     @Query
     private var movies: [TVBuddyMovie]
-    private var _movie: TVBuddyMovie? { movies.first }
-    
-    private var isOnWatchlist: Bool {
-        _movie != nil
-    }
-    
-    private var markedAsSeen: Bool {
-        guard let movie = _movie else { return false }
-        return movie.watched
-    }
     
     let movie: Movie
     
@@ -56,14 +46,8 @@ struct MovieRow: View {
                 
                 Spacer()
                 
-                Button {
-                    if let movie = _movie {
-                        context.delete(movie)
-                    } else {
-                        context.insert(TVBuddyMovie(movie: movie, watched: false))
-                    }
-                } label: {
-                    Image(systemName: isOnWatchlist ? markedAsSeen ? "eye.circle" : "checkmark.circle" : "plus.circle")
+                Button(action: toggleMovieInWatchlist) {
+                    Image(systemName: buttonImage())
                         .font(.title)
                         .bold()
                         .foregroundStyle(.gray)
@@ -74,6 +58,22 @@ struct MovieRow: View {
         .buttonStyle(.plain)
         .task(id: movie) {
             poster = await movieStore.poster(withID: movie.id)
+        }
+    }
+    
+    private func toggleMovieInWatchlist() {
+        if let movie = movies.first {
+            context.delete(movie)
+        } else {
+            context.insert(TVBuddyMovie(movie: movie, watched: false))
+        }
+    }
+    
+    private func buttonImage() -> String {
+        if let movie = movies.first {
+            return movie.watched ? "eye.circle" : "checkmark.circle"
+        } else {
+            return "plus.circle"
         }
     }
 }

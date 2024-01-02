@@ -17,16 +17,6 @@ struct TVShowRow: View {
     
     @Query
     private var tvShows: [TVBuddyTVShow]
-    private var _tvShow: TVBuddyTVShow? { tvShows.first }
-    
-    private var isOnWatchlist: Bool {
-        _tvShow != nil
-    }
-    
-    private var markedAsSeen: Bool {
-        guard let tvShow = _tvShow else { return false }
-        return tvShow.finishedWatching
-    }
     
     let tvShow: TVSeries
     
@@ -56,14 +46,8 @@ struct TVShowRow: View {
                 
                 Spacer()
                 
-                Button {
-                    if let tvShow = _tvShow {
-                        context.delete(tvShow)
-                    } else {
-                        insertTVShow(tmdbTVShow: tvShow)
-                    }
-                } label: {
-                    Image(systemName: isOnWatchlist ? markedAsSeen ? "eye.circle" : "checkmark.circle" : "plus.circle")
+                Button(action: toggleTVShowInWatchlist) {
+                    Image(systemName: buttonImage())
                         .font(.title)
                         .bold()
                         .foregroundStyle(.gray)
@@ -77,12 +61,31 @@ struct TVShowRow: View {
         }
     }
     
+    private func toggleTVShowInWatchlist() {
+        if let tvShow = tvShows.first {
+            context.delete(tvShow)
+        } else {
+            insertTVShow(tmdbTVShow: tvShow)
+        }
+    }
+    
+    private func buttonImage() -> String {
+        if let tvShow = tvShows.first {
+            return tvShow.finishedWatching ? "eye.circle" : "checkmark.circle"
+        } else {
+            return "plus.circle"
+        }
+    }
+    
     private func insertTVShow(tmdbTVShow: TVSeries, watched: Bool = false) {
         let tvShow = TVBuddyTVShow(
             tvShow: tmdbTVShow, startedWatching: watched, finishedWatching: watched
         )
         context.insert(tvShow)
-
+        fetchAndInsertEpisodes(for: tvShow, from: tmdbTVShow, watched: watched)
+    }
+    
+    private func fetchAndInsertEpisodes(for tvShow: TVBuddyTVShow, from tmdbTVShow: TVSeries, watched: Bool) {
         Task {
             let tmdbEpisodes = await withTaskGroup(
                 of: TVSeason?.self, returning: [TVSeason].self
