@@ -62,9 +62,22 @@ struct TVSeasonBody: View {
             }
 
             if let episodes = tmdbSeason.episodes {
-                Text("Episodes")
-                    .font(.title2)
-                    .bold()
+                Group {
+                    Text("Episodes")
+                        .font(.title2)
+                        .bold() +
+                    Text(" - seen")
+                        .font(.subheadline)
+                        .bold() +
+                    Text(" \(_show?.episodes.filter { $0.watched }.count ?? 0)")
+                        .font(.subheadline)
+                        .foregroundColor(.accentColor)
+                        .bold() +
+                    Text(" out of \(episodes.count)")
+                        .font(.subheadline)
+                        .bold()
+                }
+                
                 ForEach(episodes) { episode in
                     TVEpisodeRowNonClickable(
                         tvShow: tmdbTVShow,
