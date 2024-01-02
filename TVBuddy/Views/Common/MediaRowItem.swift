@@ -14,15 +14,23 @@ struct MediaRowItem: View {
     var body: some View {
         switch mediaItem {
         case let .movie(movie):
-            NavigationLink {
-                MovieView(id: movie.id)
-            } label: {
+            ZStack(alignment: .leading) {
+                NavigationLink {
+                    MovieView(id: movie.id)
+                } label: {
+                    EmptyView()
+                }.opacity(0)
+                
                 MovieRowItem(movie: movie)
             }
         case let .tvSeries(tvShow):
-            NavigationLink {
-                TVShowView(id: tvShow.id)
-            } label: {
+            ZStack(alignment: .leading) {
+                NavigationLink {
+                    TVShowView(id: tvShow.id)
+                } label: {
+                    EmptyView()
+                }.opacity(0)
+                
                 TVShowRowItem(tvShow: tvShow)
             }
         case let .person(person):
