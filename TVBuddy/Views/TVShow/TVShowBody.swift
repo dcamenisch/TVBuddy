@@ -177,7 +177,7 @@ struct TVShowBody: View {
             }
 
             tvShow.episodes.append(
-                contentsOf: tmdbEpisodes.compactMap { TVBuddyTVEpisode(episode: $0, watched: watched) })
+                contentsOf: tmdbEpisodes.compactMap { TVBuddyTVEpisode(episode: $0, watched: $0.seasonNumber == 0 ? false : watched) })
         }
     }
 }
