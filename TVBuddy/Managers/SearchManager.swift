@@ -15,6 +15,7 @@ class SearchManager {
         do {
             return try await searchService.searchAll(query: query, page: page).results
         } catch {
+            print("Error: \(error)")
             return nil
         }
     }

@@ -19,6 +19,7 @@ class PersonManager {
         do {
             return try await personService.details(forPerson: id)
         } catch {
+            print("Error: \(error)")
             return nil
         }
     }
@@ -31,6 +32,7 @@ class PersonManager {
                 idealWidth: AppConstants.idealPosterWidth
             )
         } catch {
+            print("Error: \(error)")
             return nil
         }
     }

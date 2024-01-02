@@ -21,7 +21,7 @@ class MovieManager {
         do {
             return try await movieService.details(forMovie: id)
         } catch {
-            print(error)
+            print("Error: \(error)")
             return nil
         }
     }
@@ -34,7 +34,7 @@ class MovieManager {
                 idealWidth: AppConstants.idealPosterWidth
             )
         } catch {
-            print(error)
+            print("Error: \(error)")
             return nil
         }
     }
@@ -47,7 +47,7 @@ class MovieManager {
                 idealWidth: AppConstants.idealBackdropWidth
             )
         } catch {
-            print(error)
+            print("Error: \(error)")
             return nil
         }
     }
@@ -67,7 +67,7 @@ class MovieManager {
                 idealWidth: AppConstants.idealBackdropWidth
             )
         } catch {
-            print(error)
+            print("Error: \(error)")
             return nil
         }
     }
@@ -76,7 +76,7 @@ class MovieManager {
         do {
             return try await movieService.credits(forMovie: id)
         } catch {
-            print(error)
+            print("Error: \(error)")
             return nil
         }
     }
@@ -85,7 +85,7 @@ class MovieManager {
         do {
             return try await movieService.recommendations(forMovie: id, page: page).results
         } catch {
-            print(error)
+            print("Error: \(error)")
             return nil
         }
     }
@@ -94,7 +94,7 @@ class MovieManager {
         do {
             return try await movieService.similar(toMovie: id, page: page).results
         } catch {
-            print(error)
+            print("Error: \(error)")
             return nil
         }
     }
@@ -103,7 +103,7 @@ class MovieManager {
         do {
             return try await discoverService.movies(sortedBy: .popularity(descending: true), page: page).results
         } catch {
-            print(error)
+            print("Error: \(error)")
             return nil
         }
     }
@@ -112,7 +112,7 @@ class MovieManager {
         do {
             return try await trendingService.movies(inTimeWindow: .week, page: page).results
         } catch {
-            print(error)
+            print("Error: \(error)")
             return nil
         }
     }

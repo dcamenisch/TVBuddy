@@ -23,7 +23,7 @@ class TVManager {
         do {
             return try await tvSeriesService.details(forTVSeries: id)
         } catch {
-            print(error)
+            print("Error: \(error)")
             return nil
         }
     }
@@ -32,7 +32,7 @@ class TVManager {
         do {
             return try await tvSeasonService.details(forSeason: season, inTVSeries: id)
         } catch {
-            print(error)
+            print("Error fetching season \(season) for show \(id): \(error)")
             return nil
         }
     }
@@ -41,7 +41,7 @@ class TVManager {
         do {
             return try await tvEpisodeService.details(forEpisode: episode, inSeason: season, inTVSeries: id)
         } catch {
-            print(error)
+            print("Error: \(error)")
             return nil
         }
     }
@@ -60,7 +60,7 @@ class TVManager {
                 idealWidth: AppConstants.idealPosterWidth
             )
         } catch {
-            print(error)
+            print("Error: \(error)")
             return nil
         }
     }
@@ -73,7 +73,7 @@ class TVManager {
                 idealWidth: AppConstants.idealBackdropWidth
             )
         } catch {
-            print(error)
+            print("Error: \(error)")
             return nil
         }
     }
@@ -93,7 +93,7 @@ class TVManager {
                 idealWidth: AppConstants.idealBackdropWidth
             )
         } catch {
-            print(error)
+            print("Error: \(error)")
             return await fetchBackdrop(id: id, season: season)
         }
     }
@@ -121,7 +121,7 @@ class TVManager {
                 idealWidth: AppConstants.idealBackdropWidth
             )
         } catch {
-            print(error)
+            print("Error: \(error)")
             return nil
         }
     }
@@ -130,7 +130,7 @@ class TVManager {
         do {
             return try await tvSeriesService.credits(forTVSeries: id)
         } catch {
-            print(error)
+            print("Error: \(error)")
             return nil
         }
     }
@@ -139,7 +139,7 @@ class TVManager {
         do {
             return try await tvSeriesService.recommendations(forTVSeries: id, page: page).results
         } catch {
-            print(error)
+            print("Error: \(error)")
             return nil
         }
     }
@@ -148,7 +148,7 @@ class TVManager {
         do {
             return try await tvSeriesService.similar(toTVSeries: id, page: page).results
         } catch {
-            print(error)
+            print("Error: \(error)")
             return nil
         }
     }
@@ -157,7 +157,7 @@ class TVManager {
         do {
             return try await discoverService.tvSeries(sortedBy: .popularity(descending: true), page: page).results
         } catch {
-            print(error)
+            print("Error: \(error)")
             return nil
         }
     }
@@ -166,7 +166,7 @@ class TVManager {
         do {
             return try await trendingService.tvSeries(inTimeWindow: .week, page: page).results
         } catch {
-            print(error)
+            print("Error: \(error)")
             return nil
         }
     }
