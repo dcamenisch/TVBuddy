@@ -17,9 +17,9 @@ extension TVBuddyMediaSchemaV1 {
         @Attribute(.unique)
         public let id: Int
 
-        let episodeNumber: Int
-        let seasonNumber: Int
-        let airDate: Date?
+        var episodeNumber: Int
+        var seasonNumber: Int
+        var airDate: Date?
 
         var tvShow: TVBuddyTVShow?
 
@@ -41,6 +41,12 @@ extension TVBuddyMediaSchemaV1 {
                 airDate: episode.airDate,
                 watched: watched
             )
+        }
+        
+        func update(episode: TVEpisode) {
+            self.episodeNumber = episode.episodeNumber
+            self.seasonNumber = episode.seasonNumber
+            self.airDate = episode.airDate
         }
 
         func toggleWatched() {

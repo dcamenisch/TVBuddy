@@ -17,8 +17,8 @@ extension TVBuddyMediaSchemaV1 {
         @Attribute(.unique)
         let id: Int
 
-        let title: String
-        let releaseDate: Date?
+        var title: String
+        var releaseDate: Date?
 
         var watched: Bool
         var isFavorite: Bool
@@ -39,6 +39,11 @@ extension TVBuddyMediaSchemaV1 {
                 watched: watched,
                 isFavorite: isFavorite
             )
+        }
+        
+        func update(movie: Movie) {
+            self.title = movie.title
+            self.releaseDate = movie.releaseDate
         }
     }
 }
