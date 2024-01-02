@@ -27,7 +27,7 @@ struct MovieView: View {
 
     let id: Movie.ID
 
-    private var progress: CGFloat { offset / 350.0 }
+    private var progress: CGFloat { backdrop != nil ? offset / 350.0 : offset / 100.0}
 
     init(id: Movie.ID) {
         self.id = id
@@ -84,7 +84,11 @@ struct MovieView: View {
         if let tmdbMovie = tmdbMovie {
             OffsettableScrollView(showsIndicators: false) { point in
                 offset = -point.y
-                visibility = offset > 290 ? .visible : .hidden
+                if backdrop == nil {
+                    visibility = offset > 0 ? .visible : .hidden
+                } else {
+                    visibility = offset > 290 ? .visible : .hidden
+                }
             } content: {
                 MovieHeader(tmdbMovie: tmdbMovie, poster: poster, backdrop: backdrop)
                     .padding(.bottom, 10)

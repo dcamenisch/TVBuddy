@@ -24,7 +24,7 @@ struct TVSeasonView: View {
     @State var poster: URL?
     @State var backdrop: URL?
 
-    private var progress: CGFloat { offset / 350.0 }
+    private var progress: CGFloat { backdrop != nil ? offset / 350.0 : offset / 100.0}
 
     var body: some View {
         content
@@ -63,7 +63,11 @@ struct TVSeasonView: View {
         if let tmdbSeason = tmdbSeason, let tmdbTVShow = tmdbTVShow {
             OffsettableScrollView(showsIndicators: false) { point in
                 offset = -point.y
-                visibility = offset > 290 ? .visible : .hidden
+                if backdrop == nil {
+                    visibility = offset > 0 ? .visible : .hidden
+                } else {
+                    visibility = offset > 290 ? .visible : .hidden
+                }
             } content: {
                 TVSeasonHeader(season: tmdbSeason, poster: poster, backdrop: backdrop)
                     .padding(.bottom, 10)

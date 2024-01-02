@@ -27,7 +27,7 @@ struct TVShowView: View {
 
     let id: TVSeries.ID
 
-    private var progress: CGFloat { offset / 350.0 }
+    private var progress: CGFloat { backdrop != nil ? offset / 350.0 : offset / 100.0}
 
     init(id: TVSeries.ID) {
         self.id = id
@@ -84,7 +84,11 @@ struct TVShowView: View {
         if let tmdbTVShow = tmdbTVShow {
             OffsettableScrollView(showsIndicators: false) { point in
                 offset = -point.y
-                visibility = offset > 290 ? .visible : .hidden
+                if backdrop == nil {
+                    visibility = offset > 0 ? .visible : .hidden
+                } else {
+                    visibility = offset > 290 ? .visible : .hidden
+                }
             } content: {
                 TVShowHeader(show: tmdbTVShow, poster: poster, backdrop: backdrop)
                     .padding(.bottom, 10)

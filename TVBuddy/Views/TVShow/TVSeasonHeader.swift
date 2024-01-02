@@ -29,29 +29,32 @@ struct TVSeasonHeader: View {
     var body: some View {
         ZStack(alignment: .bottomLeading) {
             VStack {
-                GeometryReader { geometry in
-                    let minY = geometry.frame(in: .global).minY
+                if let _ = backdrop {
+                    GeometryReader { geometry in
+                        let minY = geometry.frame(in: .global).minY
 
-                    LazyImage(url: backdrop) { state in
-                        if let image = state.image {
-                            image
-                                .resizable()
-                                .clipped()
-                                .aspectRatio(2, contentMode: .fill)
-                        } else {
-                            Rectangle()
+                        LazyImage(url: backdrop) { state in
+                            if let image = state.image {
+                                image
+                                    .resizable()
+                                    .clipped()
+                                    .aspectRatio(2, contentMode: .fill)
+                            } else {
+                                Rectangle()
+                                    .foregroundStyle(Color(UIColor.systemGray6))
+                            }
                         }
+                        .overlay(alignment: .bottom) {
+                            Rectangle()
+                                .foregroundColor(Color(uiColor: .systemBackground))
+                                .frame(height: 100)
+                                .mask(LinearGradient(gradient: Gradient(colors: [.white, .clear]), startPoint: .bottom, endPoint: .top))
+                        }
+                        .offset(y: minY > 0 ? -minY : 0)
+                        .frame(width: UIScreen.main.bounds.width, height: minY > 0 ? initialHeaderHeight + minY : initialHeaderHeight)
                     }
-                    .overlay(alignment: .bottom) {
-                        Rectangle()
-                            .foregroundColor(Color(uiColor: .systemBackground))
-                            .frame(height: 100)
-                            .mask(LinearGradient(gradient: Gradient(colors: [.white, .clear]), startPoint: .bottom, endPoint: .top))
-                    }
-                    .offset(y: minY > 0 ? -minY : 0)
-                    .frame(width: UIScreen.main.bounds.width, height: minY > 0 ? initialHeaderHeight + minY : initialHeaderHeight)
+                    .frame(height: initialHeaderHeight)
                 }
-                .frame(height: initialHeaderHeight)
 
                 VStack(alignment: .leading, spacing: 5) {
                     Text(season.name)
