@@ -23,7 +23,20 @@ struct SearchView: View {
         List(media ?? []) { mediaItem in
             MediaRowItem(mediaItem: mediaItem)
                 .onAppear { self.mediaItemDidAppear(currentMediaItem: mediaItem) }
-                .tag(mediaItem)
+                .listRowSeparator(.hidden)
+                .listRowBackground(
+                    RoundedRectangle(cornerRadius: 5)
+                        .background(.clear)
+                        .foregroundColor(Color(UIColor.systemGray6))
+                        .padding(
+                            EdgeInsets(
+                                top: 4,
+                                leading: 10,
+                                bottom: 4,
+                                trailing: 10
+                            )
+                        )
+                )
         }
         .listStyle(.plain)
         .overlay(overlay)
@@ -37,6 +50,7 @@ struct SearchView: View {
             Task { await searchStore.search() }
         }
         .navigationTitle("Search")
+        .scrollIndicators(.never)
     }
 
     @ViewBuilder private var overlay: some View {
