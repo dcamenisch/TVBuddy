@@ -56,7 +56,7 @@ struct MovieBody: View {
                     .frame(height: 30)
                     .frame(maxWidth: .infinity)
             }
-
+            
             Button {
                 if let movie = tvBuddyMovie {
                     movie.watched.toggle()
@@ -94,7 +94,7 @@ struct MovieBody: View {
                         .padding(.vertical, 8.0)
                         .background {
                             RoundedRectangle(cornerRadius: 15.0, style: .circular)
-                                .foregroundStyle(.quaternary)
+                                .foregroundColor(Color(UIColor.systemGray6))
                         }
                 }
             }
