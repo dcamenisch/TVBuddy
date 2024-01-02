@@ -13,39 +13,28 @@ struct TVSeasonBody: View {
     @Environment(\.modelContext) private var context
     @EnvironmentObject private var tvStore: TVStore
 
-    let id: TVSeries.ID
-    let tmdbSeason: TVSeason
     let tmdbTVShow: TVSeries
-
-    @Query
-    private var shows: [TVBuddyTVShow]
-    private var _show: TVBuddyTVShow? { shows.first }
-
-    @State private var watchedAll: Bool = false
-
-    init(tmdbTVShow: TVSeries, tmdbSeason: TVSeason) {
-        id = tmdbTVShow.id
-        self.tmdbTVShow = tmdbTVShow
-        self.tmdbSeason = tmdbSeason
-        _shows = Query(filter: #Predicate<TVBuddyTVShow> { $0.id == id })
+    let tmdbSeason: TVSeason
+    
+    @State private var show: TVBuddyTVShow?
+    @State private var episodes: [TVBuddyTVEpisode] = []
+    
+    private var watchedAll: Bool {
+        episodes.allSatisfy {
+            $0.seasonNumber != tmdbSeason.seasonNumber || $0.watched
+        }
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Button {
-                if let show = _show {
-                    show.episodes.forEach { episode in
-                        if episode.seasonNumber == tmdbSeason.seasonNumber {
-                            episode.toggleWatched()
-                        }
+                if show != nil {
+                    episodes.forEach { episode in
+                        episode.toggleWatched()
                     }
                 } else {
                     insertTVShow()
                 }
-
-                watchedAll = self._show?.episodes.allSatisfy {
-                    $0.seasonNumber != tmdbSeason.seasonNumber || $0.watched
-                } ?? false
             } label: {
                 Label(watchedAll ? "Mark as unseen" : "Mark as seen", systemImage: watchedAll ? "eye.fill" : "eye")
                     .frame(height: 30)
@@ -61,7 +50,7 @@ struct TVSeasonBody: View {
                 Text(overview)
             }
 
-            if let episodes = tmdbSeason.episodes {
+            if let tmdbEpisodes = tmdbSeason.episodes {
                 Group {
                     Text("Episodes")
                         .font(.title2)
@@ -69,7 +58,7 @@ struct TVSeasonBody: View {
                     Text(" - seen")
                         .font(.subheadline)
                         .bold() +
-                    Text(" \(_show?.episodes.filter { $0.watched }.count ?? 0)")
+                    Text(" \(episodes.filter { $0.watched }.count)")
                         .font(.subheadline)
                         .foregroundColor(.accentColor)
                         .bold() +
@@ -78,19 +67,26 @@ struct TVSeasonBody: View {
                         .bold()
                 }
                 
-                ForEach(episodes) { episode in
+                ForEach(tmdbEpisodes) { episode in
                     TVEpisodeRowNonClickable(
                         tvShow: tmdbTVShow,
-                        tvEpisode: episode
+                        tvEpisode: episode,
+                        tvBuddyTVEpisode: episodes.first(where: {$0.id == episode.id})
                     )
                 }
             }
         }
-        .onAppear(perform: {
-            watchedAll = self._show?.episodes.allSatisfy {
-                $0.seasonNumber != tmdbSeason.seasonNumber || $0.watched
-            } ?? false
-        })
+        .task(id: episodes) {
+            let id = tmdbTVShow.id
+            let seasonNumber = tmdbSeason.seasonNumber
+            
+            do {
+                show = try context.fetch(FetchDescriptor<TVBuddyTVShow>(predicate: #Predicate<TVBuddyTVShow> { $0.id == id })).first
+                episodes = try context.fetch(FetchDescriptor<TVBuddyTVEpisode>(predicate: #Predicate<TVBuddyTVEpisode> {$0.tvShow?.id == id && $0.seasonNumber == seasonNumber}))
+            } catch {
+                print("Error: \(error)")
+            }
+        }
     }
 
     private func insertTVShow() {

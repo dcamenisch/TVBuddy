@@ -12,30 +12,12 @@ import TMDb
 struct TVEpisodeRowNonClickable: View {
     let tvShow: TVSeries
     let tvEpisode: TVEpisode
+    let tvBuddyTVEpisode: TVBuddyTVEpisode?
 
     @Environment(\.modelContext) private var context
     @EnvironmentObject private var tvStore: TVStore
 
     @State var backdrop: URL?
-
-    @Query
-    private var episodes: [TVBuddyTVEpisode]
-    private var episode: TVBuddyTVEpisode? { episodes.first }
-    
-    init(tvShow: TVSeries, tvEpisode: TVEpisode) {
-        self.tvShow = tvShow
-        self.tvEpisode = tvEpisode
-        
-        let id = tvShow.id
-        let seasonNumber = tvEpisode.seasonNumber
-        let episodeNumber = tvEpisode.episodeNumber
-        
-        _episodes = Query(filter: #Predicate<TVBuddyTVEpisode> {
-            $0.episodeNumber == episodeNumber
-                && $0.seasonNumber == seasonNumber
-                && $0.tvShow?.id == id
-        })
-    }
     
     var body: some View {
         HStack {
@@ -60,13 +42,13 @@ struct TVEpisodeRowNonClickable: View {
             Spacer()
 
             Button(action: {
-                if let episode = episode {
+                if let episode = tvBuddyTVEpisode {
                     episode.toggleWatched()
                 } else {
                     insertTVShowWithEpisode(tmdbTVShow: tvShow, tmdbEpisode: tvEpisode, watched: false)
                 }
             }, label: {
-                Image(systemName: episode?.watched ?? false ? "checkmark.circle" : "plus.circle")
+                Image(systemName: tvBuddyTVEpisode?.watched ?? false ? "checkmark.circle" : "plus.circle")
                     .font(.title)
                     .bold()
                     .foregroundStyle(.gray)
