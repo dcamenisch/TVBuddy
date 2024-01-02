@@ -14,8 +14,9 @@ struct MediaCarousel: View {
     @EnvironmentObject private var movieStore: MovieStore
 
     @StateObject var page: Page = .first()
-
     @State var trendingMedia = [Media]()
+    
+    let timer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
 
     var body: some View {
         Group {
@@ -29,6 +30,12 @@ struct MediaCarousel: View {
                 .loopPages()
                 .pagingPriority(.high)
                 .aspectRatio(1.77, contentMode: .fit)
+                .onReceive(timer) { _ in
+                    withAnimation {
+                        page.update(.next)
+                    }
+                }
+            
             } else {
                 Rectangle().overlay(
                     ProgressView()
