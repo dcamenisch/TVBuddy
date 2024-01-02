@@ -89,9 +89,7 @@ struct MovieHeader: View {
                     Text(tmdbMovie.title)
                         .font(.system(size: 25, weight: .bold))
                     
-                    HStack {
-                        Text("\(metadata.joined(separator: "・"))")
-                    }
+                    Text("\(metadata.joined(separator: "・"))")
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, PosterStyle.Size.medium.width() + 15)
