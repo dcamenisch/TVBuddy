@@ -16,21 +16,31 @@ struct TVSeasonBody: View {
     let tmdbTVShow: TVSeries
     let tmdbSeason: TVSeason
     
-    @State private var show: TVBuddyTVShow?
+    @Query
+    private var shows: [TVBuddyTVShow]
+    private var show: TVBuddyTVShow? { shows.first }
+    
     @State private var episodes: [TVBuddyTVEpisode] = []
     
     private var watchedAll: Bool {
         episodes.allSatisfy {
             $0.seasonNumber != tmdbSeason.seasonNumber || $0.watched
-        }
+        } && episodes.count > 0
+    }
+    
+    init(tmdbTVShow: TVSeries, tmdbSeason: TVSeason) {
+        self.tmdbTVShow = tmdbTVShow
+        self.tmdbSeason = tmdbSeason
+        _shows = Query(filter: #Predicate<TVBuddyTVShow> { $0.id == tmdbTVShow.id })
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Button {
                 if show != nil {
+                    let newValue = !watchedAll
                     episodes.forEach { episode in
-                        episode.toggleWatched()
+                        episode.watched = newValue
                     }
                 } else {
                     insertTVShow()
@@ -62,7 +72,7 @@ struct TVSeasonBody: View {
                         .font(.subheadline)
                         .foregroundColor(.accentColor)
                         .bold() +
-                    Text(" out of \(episodes.count)")
+                    Text(" out of \(tmdbEpisodes.count)")
                         .font(.subheadline)
                         .bold()
                 }
@@ -76,12 +86,14 @@ struct TVSeasonBody: View {
                 }
             }
         }
-        .task(id: episodes) {
+        .task(id: show?.episodes) {
+            // This task is triggered a first time when the show gets inserted (without episodes)
+            // and a second time when the episodes are added
+            
             let id = tmdbTVShow.id
             let seasonNumber = tmdbSeason.seasonNumber
             
             do {
-                show = try context.fetch(FetchDescriptor<TVBuddyTVShow>(predicate: #Predicate<TVBuddyTVShow> { $0.id == id })).first
                 episodes = try context.fetch(FetchDescriptor<TVBuddyTVEpisode>(predicate: #Predicate<TVBuddyTVEpisode> {$0.tvShow?.id == id && $0.seasonNumber == seasonNumber}))
             } catch {
                 print("Error: \(error)")
