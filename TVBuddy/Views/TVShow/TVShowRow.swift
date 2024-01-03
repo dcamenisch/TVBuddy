@@ -78,38 +78,39 @@ struct TVShowRow: View {
     }
     
     private func insertTVShow(tmdbTVShow: TVSeries, watched: Bool = false) {
-        let tvShow = TVBuddyTVShow(
-            tvShow: tmdbTVShow, startedWatching: watched, finishedWatching: watched
-        )
-        context.insert(tvShow)
-        fetchAndInsertEpisodes(for: tvShow, from: tmdbTVShow, watched: watched)
-    }
-    
-    private func fetchAndInsertEpisodes(for tvShow: TVBuddyTVShow, from tmdbTVShow: TVSeries, watched: Bool) {
         Task {
+            guard let detailedTVShow = await tvStore.show(withID: tmdbTVShow.id) else {
+                return
+            }
+            
+            let tvShow = TVBuddyTVShow(
+                tvShow: detailedTVShow, startedWatching: watched, finishedWatching: watched
+            )
+            context.insert(tvShow)
+                        
             let tmdbEpisodes = await withTaskGroup(
                 of: TVSeason?.self, returning: [TVSeason].self
             ) { group in
-                for season in tmdbTVShow.seasons ?? [] {
+                for season in detailedTVShow.seasons ?? [] {
                     group.addTask {
                         await tvStore.season(season.seasonNumber, forTVSeries: tmdbTVShow.id)
                     }
                 }
-
+                
                 var childTaskResults = [TVSeason]()
                 for await result in group {
                     if let result = result {
                         childTaskResults.append(result)
                     }
                 }
-
+                
                 return childTaskResults
             }.compactMap { season in
                 season.episodes
             }.flatMap {
                 $0
             }
-
+            
             tvShow.episodes.append(
                 contentsOf: tmdbEpisodes.compactMap { TVBuddyTVEpisode(episode: $0, watched: $0.seasonNumber == 0 ? false : watched) })
         }
