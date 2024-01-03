@@ -5,12 +5,18 @@
 //  Created by Danny on 16.09.2023.
 //
 
+import os
 import SwiftData
 import SwiftUI
 import TMDb
 
 @main
 struct TVBuddyApp: App {
+    private static let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier!,
+        category: String(describing: TVBuddyApp.self)
+    )
+    
     @StateObject private var movieStore = MovieStore()
     @StateObject private var personStore = PersonStore()
     @StateObject private var searchStore = SearchStore()
@@ -35,6 +41,7 @@ struct TVBuddyApp: App {
                 configurations: config
             )
         } catch {
+            TVBuddyApp.logger.error("Failed to configure SwiftData container: \(error.localizedDescription)")
             fatalError("Failed to configure SwiftData container.")
         }
     }
@@ -58,6 +65,8 @@ struct TVBuddyApp: App {
     
     func updateMedia() async {
         do {
+            TVBuddyApp.logger.info("Trying to update media items")
+            
             let context = ModelContext(container)
             
             let now = Date.now
@@ -68,6 +77,7 @@ struct TVBuddyApp: App {
             for movie in movies {
                 if let _movie = await movieStore.movie(withID: movie.id) {
                     movie.update(movie: _movie)
+                    TVBuddyApp.logger.info("Updated movie: \(_movie.title)")
                 }
             }
                         
@@ -76,6 +86,7 @@ struct TVBuddyApp: App {
                 if let _tvShow = await tvStore.show(withID: tvShow.id) {
                     if tvShow.lastAirDate ?? past < _tvShow.lastAirDate ?? future {
                         tvShow.update(tvShow: _tvShow)
+                        TVBuddyApp.logger.info("Updated tv show: \(_tvShow.name)")
                                                                         
                         for season in _tvShow.seasons ?? [] {
                             if let _season = await tvStore.season(season.seasonNumber, forTVSeries: _tvShow.id) {
@@ -83,6 +94,7 @@ struct TVBuddyApp: App {
                                     if !tvShow.episodes.contains(where: {$0.seasonNumber == episode.seasonNumber && $0.episodeNumber == episode.episodeNumber}) {
                                         tvShow.episodes.append(TVBuddyTVEpisode(episode: episode))
                                         tvShow.finishedWatching = false
+                                        TVBuddyApp.logger.info("Added new episodes for tv show: \(_tvShow.name)")
                                     }
                                 }
                             }
@@ -95,13 +107,14 @@ struct TVBuddyApp: App {
             for episode in episodes {
                 if let _episode = await tvStore.episode(episode.episodeNumber, season: episode.seasonNumber, forTVSeries: episode.tvShow?.id ?? 0) {
                     episode.update(episode: _episode)
+                    TVBuddyApp.logger.info("Updated episodes: \(_episode.name)")
                 }
             }
             
             try context.save()
-            
+            TVBuddyApp.logger.info("Finished updating media items")
         } catch {
-            print("Error: \(error)")
+            TVBuddyApp.logger.error("\(error.localizedDescription)")
         }
     }
 }
