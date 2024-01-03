@@ -36,7 +36,6 @@ struct MovieView: View {
 
     var body: some View {
         content
-            .toolbarBackground(.black)
             .toolbarBackground(visibility, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
