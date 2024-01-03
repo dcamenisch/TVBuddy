@@ -14,7 +14,6 @@ struct TVSeasonView: View {
     let seasonNumber: Int
 
     @Environment(\.presentationMode) var presentationMode
-    @EnvironmentObject private var tvStore: TVStore
 
     @State var offset: CGFloat = 0.0
     @State var visibility: Visibility = .hidden
@@ -51,10 +50,10 @@ struct TVSeasonView: View {
                 }
             }
             .task {
-                tmdbTVShow = await tvStore.show(withID: id)
-                tmdbSeason = await tvStore.season(seasonNumber, forTVSeries: id)
-                poster = await tvStore.poster(withID: id, season: seasonNumber)
-                backdrop = await tvStore.backdrop(withID: id, season: seasonNumber)
+                tmdbTVShow = await TVStore.shared.show(withID: id)
+                tmdbSeason = await TVStore.shared.season(seasonNumber, forTVSeries: id)
+                poster = await TVStore.shared.poster(withID: id, season: seasonNumber)
+                backdrop = await TVStore.shared.backdrop(withID: id, season: seasonNumber)
             }
     }
 

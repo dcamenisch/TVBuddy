@@ -15,6 +15,8 @@ struct PageableTVShowList: View {
     @State var tvSeries = [TVSeries]()
 
     var body: some View {
+        let _ = Self._printChanges()
+        
         VStack(alignment: .leading) {
             if !title.isEmpty {
                 Text(title)
@@ -44,7 +46,6 @@ struct PageableTVShowList: View {
 }
 
 struct TVShowItem: View {
-    @EnvironmentObject private var tvStore: TVStore
     @State var poster: URL?
 
     let tvSeries: TVSeries
@@ -57,7 +58,7 @@ struct TVShowItem: View {
                 .posterStyle(size: .medium)
         }
         .task {
-            poster = await tvStore.poster(withID: tvSeries.id)
+            poster = await TVStore.shared.poster(withID: tvSeries.id)
         }
     }
 }

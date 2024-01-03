@@ -9,11 +9,13 @@ import SwiftUI
 
 struct TabBarView: View {
     var body: some View {
+        let _ = Self._printChanges()
+        
         TabView {
             Group {
                 NavigationStack {
                     FeedView()
-                        .toolbarBackground(.black, for: .navigationBar)
+                        .toolbarBackground(.background1, for: .navigationBar)
                 }.tabItem {
                     Image(systemName: "house.fill")
                     Text("Feed")
@@ -21,7 +23,7 @@ struct TabBarView: View {
 
                 NavigationStack {
                     DiscoverView()
-                        .toolbarBackground(.black, for: .navigationBar)
+                        .toolbarBackground(Color.background1, for: .navigationBar)
                 }.tabItem {
                     Image(systemName: "binoculars.fill")
                     Text("Discover")
@@ -29,7 +31,7 @@ struct TabBarView: View {
 
                 NavigationStack {
                     SearchView()
-                        .toolbarBackground(.black, for: .navigationBar)
+                        .toolbarBackground(.background1, for: .navigationBar)
                 }.tabItem {
                     Image(systemName: "text.magnifyingglass")
                     Text("Search")
@@ -37,13 +39,13 @@ struct TabBarView: View {
 
                 NavigationStack {
                     ProfilView()
-                        .toolbarBackground(.black, for: .navigationBar)
+                        .toolbarBackground(.background1, for: .navigationBar)
                 }.tabItem {
                     Image(systemName: "person.crop.circle")
                     Text("Profil")
                 }
             }
-            .toolbarBackground(.black, for: .tabBar)
+            .toolbarBackground(.background1, for: .tabBar)
         }
     }
 }

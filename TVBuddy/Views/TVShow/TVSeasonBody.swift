@@ -11,7 +11,6 @@ import TMDb
 
 struct TVSeasonBody: View {
     @Environment(\.modelContext) private var context
-    @EnvironmentObject private var tvStore: TVStore
 
     let tmdbTVShow: TVSeries
     let tmdbSeason: TVSeason
@@ -111,7 +110,7 @@ struct TVSeasonBody: View {
             ) { group in
                 for season in tmdbTVShow.seasons ?? [] {
                     group.addTask {
-                        await tvStore.season(season.seasonNumber, forTVSeries: tmdbTVShow.id)
+                        await TVStore.shared.season(season.seasonNumber, forTVSeries: tmdbTVShow.id)
                     }
                 }
 

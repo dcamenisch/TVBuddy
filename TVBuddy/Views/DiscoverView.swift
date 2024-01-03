@@ -9,16 +9,15 @@ import SwiftUI
 import TMDb
 
 struct DiscoverView: View {
-    @EnvironmentObject private var tvStore: TVStore
-    @EnvironmentObject private var movieStore: MovieStore
-
     var body: some View {
+        let _ = Self._printChanges()
+        
         ScrollView(.vertical, showsIndicators: false) {
             MediaCarousel()
 
             VStack(spacing: 10) {
-                PageableMovieList(title: "Trending Movies", fetchMethod: movieStore.trending)
-                PageableTVShowList(title: "Trending TV Shows", fetchMethod: tvStore.trending)
+                PageableMovieList(title: "Trending Movies", fetchMethod: MovieStore.shared.trending)
+                PageableTVShowList(title: "Trending TV Shows", fetchMethod: TVStore.shared.trending)
             }
             .padding(.horizontal)
         }

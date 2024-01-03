@@ -11,7 +11,6 @@ import TMDb
 struct PersonRow: View {
     let person: Person
 
-    @EnvironmentObject private var personStore: PersonStore
     @State var image: URL?
 
     var body: some View {
@@ -26,7 +25,7 @@ struct PersonRow: View {
             }
         }
         .task(id: person) {
-            image = await personStore.image(forPerson: person.id)
+            image = await PersonStore.shared.image(forPerson: person.id)
         }
     }
 }

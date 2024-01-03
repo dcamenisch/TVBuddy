@@ -15,6 +15,8 @@ struct PageableMovieList: View {
     @State var movies = [Movie]()
 
     var body: some View {
+        let _ = Self._printChanges()
+        
         VStack(alignment: .leading) {
             if !title.isEmpty {
                 Text(title)
@@ -44,12 +46,13 @@ struct PageableMovieList: View {
 }
 
 struct MovieItem: View {
-    @EnvironmentObject private var movieStore: MovieStore
-    @State var poster: URL?
+    @State private var poster: URL?
 
     let movie: Movie
 
     var body: some View {
+        let _ = Self._printChanges()
+        
         NavigationLink {
             MovieView(id: movie.id)
         } label: {
@@ -57,7 +60,7 @@ struct MovieItem: View {
                 .posterStyle(size: .medium)
         }
         .task {
-            poster = await movieStore.poster(withID: movie.id)
+            poster = await MovieStore.shared.poster(withID: movie.id)
         }
     }
 }

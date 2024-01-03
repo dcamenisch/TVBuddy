@@ -11,7 +11,6 @@ import TMDb
 
 struct MovieRow: View {
     @Environment(\.modelContext) private var context
-    @EnvironmentObject private var movieStore: MovieStore
     
     @State var poster: URL?
     
@@ -57,7 +56,7 @@ struct MovieRow: View {
         }
         .buttonStyle(.plain)
         .task(id: movie) {
-            poster = await movieStore.poster(withID: movie.id)
+            poster = await MovieStore.shared.poster(withID: movie.id)
         }
     }
     

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		6F0B493C2B42FC9200557884 /* CircularProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F0B493B2B42FC9200557884 /* CircularProgressBar.swift */; };
 		6F1C0FD02B45CCA500C67DB2 /* WrappingHStack in Frameworks */ = {isa = PBXBuildFile; productRef = 6F1C0FCF2B45CCA500C67DB2 /* WrappingHStack */; };
+		6F1C0FD22B45D05900C67DB2 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6F1C0FD12B45D05900C67DB2 /* Colors.xcassets */; };
 		6F21624A2AFFDFF000DBD6CB /* TVEpisodeProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F2162492AFFDFF000DBD6CB /* TVEpisodeProgressView.swift */; };
 		6F21624C2AFFE00100DBD6CB /* TVEpisodeProgressItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F21624B2AFFE00100DBD6CB /* TVEpisodeProgressItem.swift */; };
 		6F21624E2AFFF0B300DBD6CB /* TVBuddyMediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F21624D2AFFF0B300DBD6CB /* TVBuddyMediaItem.swift */; };
@@ -72,6 +73,7 @@
 
 /* Begin PBXFileReference section */
 		6F0B493B2B42FC9200557884 /* CircularProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularProgressBar.swift; sourceTree = "<group>"; };
+		6F1C0FD12B45D05900C67DB2 /* Colors.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Colors.xcassets; sourceTree = "<group>"; };
 		6F2162492AFFDFF000DBD6CB /* TVEpisodeProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVEpisodeProgressView.swift; sourceTree = "<group>"; };
 		6F21624B2AFFE00100DBD6CB /* TVEpisodeProgressItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVEpisodeProgressItem.swift; sourceTree = "<group>"; };
 		6F21624D2AFFF0B300DBD6CB /* TVBuddyMediaItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVBuddyMediaItem.swift; sourceTree = "<group>"; };
@@ -298,6 +300,7 @@
 				6FBBBB9A2AB5D3A500D081FE /* Models */,
 				6FBBBB982AB5D31500D081FE /* Views */,
 				6FE148B22AB5BA5E00D007B6 /* Assets.xcassets */,
+				6F1C0FD12B45D05900C67DB2 /* Colors.xcassets */,
 				6FE148B42AB5BA5E00D007B6 /* Preview Content */,
 				6F8E1A4B2AF649530031CA5C /* TMDB-Info.plist */,
 			);
@@ -387,6 +390,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6F8E1A4C2AF649530031CA5C /* TMDB-Info.plist in Resources */,
+				6F1C0FD22B45D05900C67DB2 /* Colors.xcassets in Resources */,
 				6FE148B62AB5BA5E00D007B6 /* Preview Assets.xcassets in Resources */,
 				6FE148B32AB5BA5E00D007B6 /* Assets.xcassets in Resources */,
 			);
@@ -593,6 +597,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -625,6 +630,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

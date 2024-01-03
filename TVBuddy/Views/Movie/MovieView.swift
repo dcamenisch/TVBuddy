@@ -12,7 +12,6 @@ import TMDb
 struct MovieView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.presentationMode) private var presentationMode
-    @EnvironmentObject private var movieStore: MovieStore
 
     @State var offset: CGFloat = 0.0
     @State var visibility: Visibility = .hidden
@@ -73,9 +72,9 @@ struct MovieView: View {
                 }
             }
             .task {
-                tmdbMovie = await movieStore.movie(withID: id)
-                poster = await movieStore.poster(withID: id)
-                backdrop = await movieStore.backdrop(withID: id)
+                tmdbMovie = await MovieStore.shared.movie(withID: id)
+                poster = await MovieStore.shared.poster(withID: id)
+                backdrop = await MovieStore.shared.backdrop(withID: id)
             }
     }
 

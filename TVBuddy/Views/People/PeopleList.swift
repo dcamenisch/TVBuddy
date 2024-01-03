@@ -83,7 +83,6 @@ struct PeopleList: View {
 struct CastItem: View {
     let castMember: CastMember
 
-    @EnvironmentObject private var personStore: PersonStore
     @State var image: URL?
 
     var body: some View {
@@ -103,7 +102,7 @@ struct CastItem: View {
             }
         }
         .task {
-            image = await personStore.image(forPerson: castMember.id)
+            image = await PersonStore.shared.image(forPerson: castMember.id)
         }
     }
 }
@@ -111,7 +110,6 @@ struct CastItem: View {
 struct CrewItem: View {
     let crewMember: CrewMember
 
-    @EnvironmentObject private var personStore: PersonStore
     @State var image: URL?
 
     var body: some View {
@@ -131,7 +129,7 @@ struct CrewItem: View {
             }
         }
         .task {
-            image = await personStore.image(forPerson: crewMember.id)
+            image = await PersonStore.shared.image(forPerson: crewMember.id)
         }
     }
 }

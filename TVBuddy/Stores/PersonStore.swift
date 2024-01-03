@@ -8,13 +8,15 @@
 import Foundation
 import TMDb
 
-class PersonStore: ObservableObject {
+class PersonStore {
+    static let shared = PersonStore()
+    
     private let personManager: PersonManager
 
-    @Published var persons: [Person.ID: Person] = [:]
-    @Published var images: [Person.ID: URL] = [:]
+    var persons: [Person.ID: Person] = [:]
+    var images: [Person.ID: URL] = [:]
 
-    init() {
+    private init() {
         personManager = PersonManager()
     }
 

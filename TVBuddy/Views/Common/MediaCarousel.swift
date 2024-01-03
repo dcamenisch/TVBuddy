@@ -10,15 +10,14 @@ import SwiftUIPager
 import TMDb
 
 struct MediaCarousel: View {
-    @EnvironmentObject private var tvStore: TVStore
-    @EnvironmentObject private var movieStore: MovieStore
-
     @StateObject var page: Page = .first()
     @State var trendingMedia = [Media]()
     
     let timer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
 
     var body: some View {
+        let _ = Self._printChanges()
+        
         Group {
             if !trendingMedia.isEmpty {
                 Pager(page: page, data: trendingMedia) { media in
@@ -46,10 +45,10 @@ struct MediaCarousel: View {
                 .padding(5)
             }
         }
-        .task {
+        .task(id: trendingMedia) {
             if trendingMedia.isEmpty {
-                let trendingMovies = await movieStore.trending().prefix(6)
-                let trendingTVShows = await tvStore.trending().prefix(6)
+                let trendingMovies = await MovieStore.shared.trending().prefix(6)
+                let trendingTVShows = await TVStore.shared.trending().prefix(6)
 
                 trendingMovies.forEach { movie in
                     trendingMedia.append(Media.movie(movie))
@@ -66,9 +65,6 @@ struct MediaCarousel: View {
 }
 
 struct MediaCarouselItem: View {
-    @EnvironmentObject private var tvStore: TVStore
-    @EnvironmentObject private var movieStore: MovieStore
-
     @State var backdropWithText: URL?
 
     let media: Media
@@ -85,7 +81,7 @@ struct MediaCarouselItem: View {
             }
             .buttonStyle(.plain)
             .task {
-                backdropWithText = await movieStore.backdropWithText(withID: movie.id)
+                backdropWithText = await MovieStore.shared.backdropWithText(withID: movie.id)
             }
         case let .tvSeries(tvSeries):
             NavigationLink {
@@ -97,7 +93,7 @@ struct MediaCarouselItem: View {
             }
             .buttonStyle(.plain)
             .task {
-                backdropWithText = await tvStore.backdropWithText(withID: tvSeries.id)
+                backdropWithText = await TVStore.shared.backdropWithText(withID: tvSeries.id)
             }
         case .person:
             Group {}

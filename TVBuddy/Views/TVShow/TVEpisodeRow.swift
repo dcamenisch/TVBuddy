@@ -15,7 +15,6 @@ struct TVEpisodeRowNonClickable: View {
     let tvBuddyTVEpisode: TVBuddyTVEpisode?
 
     @Environment(\.modelContext) private var context
-    @EnvironmentObject private var tvStore: TVStore
 
     @State var backdrop: URL?
     
@@ -56,7 +55,7 @@ struct TVEpisodeRowNonClickable: View {
             })
         }
         .task {
-            backdrop = await tvStore.backdrop(withID: tvShow.id, season: tvEpisode.seasonNumber, episode: tvEpisode.episodeNumber)
+            backdrop = await TVStore.shared.backdrop(withID: tvShow.id, season: tvEpisode.seasonNumber, episode: tvEpisode.episodeNumber)
         }
     }
     
@@ -74,7 +73,7 @@ struct TVEpisodeRowNonClickable: View {
             ) { group in
                 for season in tmdbTVShow.seasons ?? [] {
                     group.addTask {
-                        await tvStore.season(season.seasonNumber, forTVSeries: tmdbTVShow.id)
+                        await TVStore.shared.season(season.seasonNumber, forTVSeries: tmdbTVShow.id)
                     }
                 }
 
@@ -104,7 +103,6 @@ struct TVEpisodeRowClickable: View {
     let tvBuddyTVEpisode: TVBuddyTVEpisode
 
     @Environment(\.modelContext) private var context
-    @EnvironmentObject private var tvStore: TVStore
     
     @State var backdrop: URL?
     @State var tvEpisode: TVEpisode?
@@ -122,8 +120,8 @@ struct TVEpisodeRowClickable: View {
         }
         .buttonStyle(.plain)
         .task(id: tvBuddyTVEpisode) {
-            backdrop = await tvStore.backdrop(withID: tvBuddyTVShow.id, season: tvBuddyTVEpisode.seasonNumber, episode: tvBuddyTVEpisode.episodeNumber)
-            tvEpisode = await tvStore.episode(tvBuddyTVEpisode.episodeNumber, season: tvBuddyTVEpisode.seasonNumber, forTVSeries: tvBuddyTVShow.id)
+            backdrop = await TVStore.shared.backdrop(withID: tvBuddyTVShow.id, season: tvBuddyTVEpisode.seasonNumber, episode: tvBuddyTVEpisode.episodeNumber)
+            tvEpisode = await TVStore.shared.episode(tvBuddyTVEpisode.episodeNumber, season: tvBuddyTVEpisode.seasonNumber, forTVSeries: tvBuddyTVShow.id)
         }
     }
 

@@ -20,6 +20,8 @@ struct SearchView: View {
     }
 
     var body: some View {
+        let _ = Self._printChanges()
+        
         List(media ?? []) { mediaItem in
             MediaRowItem(mediaItem: mediaItem)
                 .onAppear { self.mediaItemDidAppear(currentMediaItem: mediaItem) }

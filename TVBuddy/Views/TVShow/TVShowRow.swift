@@ -11,7 +11,6 @@ import TMDb
 
 struct TVShowRow: View {
     @Environment(\.modelContext) private var context
-    @EnvironmentObject private var tvStore: TVStore
     
     @State var poster: URL?
     
@@ -57,7 +56,7 @@ struct TVShowRow: View {
         }
         .buttonStyle(.plain)
         .task(id: tvShow) {
-            poster = await tvStore.poster(withID: tvShow.id)
+            poster = await TVStore.shared.poster(withID: tvShow.id)
         }
     }
     
@@ -79,7 +78,7 @@ struct TVShowRow: View {
     
     private func insertTVShow(tmdbTVShow: TVSeries, watched: Bool = false) {
         Task {
-            guard let detailedTVShow = await tvStore.show(withID: tmdbTVShow.id) else {
+            guard let detailedTVShow = await TVStore.shared.show(withID: tmdbTVShow.id) else {
                 return
             }
             
@@ -93,7 +92,7 @@ struct TVShowRow: View {
             ) { group in
                 for season in detailedTVShow.seasons ?? [] {
                     group.addTask {
-                        await tvStore.season(season.seasonNumber, forTVSeries: tmdbTVShow.id)
+                        await TVStore.shared.season(season.seasonNumber, forTVSeries: tmdbTVShow.id)
                     }
                 }
                 

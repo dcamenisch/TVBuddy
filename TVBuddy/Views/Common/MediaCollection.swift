@@ -130,7 +130,6 @@ struct MediaHorizontalList: View {
 }
 
 struct MediaListMovieItem: View {
-    @EnvironmentObject private var movieStore: MovieStore
     @State var poster: URL?
 
     let mediaItem: TVBuddyMediaItem
@@ -142,13 +141,12 @@ struct MediaListMovieItem: View {
             ImageView(title: mediaItem.name, url: poster)
         }
         .task {
-            poster = await movieStore.poster(withID: mediaItem.id)
+            poster = await MovieStore.shared.poster(withID: mediaItem.id)
         }
     }
 }
 
 struct MediaListTVShowItem: View {
-    @EnvironmentObject private var tvStore: TVStore
     @State var poster: URL?
 
     let mediaItem: TVBuddyMediaItem
@@ -160,13 +158,12 @@ struct MediaListTVShowItem: View {
             ImageView(title: mediaItem.name, url: poster)
         }
         .task {
-            poster = await tvStore.poster(withID: mediaItem.id)
+            poster = await TVStore.shared.poster(withID: mediaItem.id)
         }
     }
 }
 
 struct MediaListPersonItem: View {
-    @EnvironmentObject private var personStore: PersonStore
     @State var poster: URL?
 
     let mediaItem: TVBuddyMediaItem
@@ -174,7 +171,7 @@ struct MediaListPersonItem: View {
     var body: some View {
         ImageView(title: mediaItem.name, url: poster)
             .task {
-                poster = await personStore.image(forPerson: mediaItem.id)
+                poster = await PersonStore.shared.image(forPerson: mediaItem.id)
             }
     }
 }

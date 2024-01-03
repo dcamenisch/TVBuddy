@@ -12,7 +12,6 @@ import TMDb
 struct TVShowView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.presentationMode) var presentationMode
-    @EnvironmentObject private var tvStore: TVStore
 
     @State var offset: CGFloat = 0.0
     @State var visibility: Visibility = .hidden
@@ -73,9 +72,9 @@ struct TVShowView: View {
                 }
             }
             .task {
-                tmdbTVShow = await tvStore.show(withID: id)
-                poster = await tvStore.poster(withID: id)
-                backdrop = await tvStore.backdrop(withID: id)
+                tmdbTVShow = await TVStore.shared.show(withID: id)
+                poster = await TVStore.shared.poster(withID: id)
+                backdrop = await TVStore.shared.backdrop(withID: id)
             }
     }
 

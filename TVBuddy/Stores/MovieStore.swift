@@ -8,24 +8,26 @@
 import Foundation
 import TMDb
 
-class MovieStore: ObservableObject {
+class MovieStore {
+    static let shared = MovieStore()
+    
     private let moviesManager: MovieManager
 
-    @Published var movies: [Movie.ID: Movie] = [:]
-    @Published var posters: [Movie.ID: URL] = [:]
-    @Published var backdrops: [Movie.ID: URL] = [:]
-    @Published var backdropsWithText: [Movie.ID: URL] = [:]
-    @Published var credits: [Movie.ID: ShowCredits] = [:]
-    @Published var recommendationsIDs: [Movie.ID: [Movie.ID]] = [:]
-    @Published var similarIDs: [Movie.ID: [Movie.ID]] = [:]
-    @Published var discoverIDs: [Movie.ID] = []
-    @Published var trendingIDs: [Movie.ID] = []
+    var movies: [Movie.ID: Movie] = [:]
+    var posters: [Movie.ID: URL] = [:]
+    var backdrops: [Movie.ID: URL] = [:]
+    var backdropsWithText: [Movie.ID: URL] = [:]
+    var credits: [Movie.ID: ShowCredits] = [:]
+    var recommendationsIDs: [Movie.ID: [Movie.ID]] = [:]
+    var similarIDs: [Movie.ID: [Movie.ID]] = [:]
+    var discoverIDs: [Movie.ID] = []
+    var trendingIDs: [Movie.ID] = []
 
     private var discoverPage: Int = 0
     private var trendingPage: Int = 0
 
-    init(moviesManager: MovieManager = MovieManager()) {
-        self.moviesManager = moviesManager
+    private init() {
+        self.moviesManager = MovieManager()
     }
 
     @MainActor

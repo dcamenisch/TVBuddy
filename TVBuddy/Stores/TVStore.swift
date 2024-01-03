@@ -9,24 +9,26 @@ import Foundation
 import TMDb
 
 class TVStore: ObservableObject {
+    static let shared = TVStore()
+    
     private let tvManager: TVManager
 
-    @Published var shows: [TVSeries.ID: TVSeries] = [:]
-    @Published var seasons: [TVSeries.ID: [Int: TVSeason]] = [:]
-    @Published var posters: [[Int?]: URL] = [:]
-    @Published var backdrops: [[Int?]: URL] = [:]
-    @Published var backdropsWithText: [TVSeries.ID: URL] = [:]
-    @Published var credits: [TVSeries.ID: ShowCredits] = [:]
-    @Published var recommendationsIDs: [TVSeries.ID: [TVSeries.ID]] = [:]
-    @Published var similarIDs: [TVSeries.ID: [TVSeries.ID]] = [:]
-    @Published var discoverIDs: [TVSeries.ID] = []
-    @Published var trendingIDs: [TVSeries.ID] = []
+    var shows: [TVSeries.ID: TVSeries] = [:]
+    var seasons: [TVSeries.ID: [Int: TVSeason]] = [:]
+    var posters: [[Int?]: URL] = [:]
+    var backdrops: [[Int?]: URL] = [:]
+    var backdropsWithText: [TVSeries.ID: URL] = [:]
+    var credits: [TVSeries.ID: ShowCredits] = [:]
+    var recommendationsIDs: [TVSeries.ID: [TVSeries.ID]] = [:]
+    var similarIDs: [TVSeries.ID: [TVSeries.ID]] = [:]
+    var discoverIDs: [TVSeries.ID] = []
+    var trendingIDs: [TVSeries.ID] = []
 
     private var discoverPage: Int = 0
     private var trendingPage: Int = 0
 
-    init(tvManager: TVManager = TVManager()) {
-        self.tvManager = tvManager
+    private init() {
+        self.tvManager = TVManager()
     }
 
     @MainActor

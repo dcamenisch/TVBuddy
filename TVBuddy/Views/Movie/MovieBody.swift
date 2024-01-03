@@ -12,7 +12,6 @@ import WrappingHStack
 
 struct MovieBody: View {
     @Environment(\.modelContext) private var context
-    @EnvironmentObject private var movieStore: MovieStore
 
     @State var credits: ShowCredits?
     @State var recommendations: [Movie]?
@@ -38,8 +37,8 @@ struct MovieBody: View {
             similarMovies
         }
         .task(id: tmdbMovie) {
-            credits = await movieStore.credits(forMovie: tmdbMovie.id)
-            recommendations = await movieStore.recommendations(forMovie: tmdbMovie.id)
+            credits = await MovieStore.shared.credits(forMovie: tmdbMovie.id)
+            recommendations = await MovieStore.shared.recommendations(forMovie: tmdbMovie.id)
         }
     }
 

@@ -12,7 +12,6 @@ import WrappingHStack
 
 struct TVShowBody: View {
     @Environment(\.modelContext) private var context
-    @EnvironmentObject private var tvStore: TVStore
 
     @State var credits: ShowCredits?
     @State var recommendations: [TVSeries]?
@@ -43,8 +42,8 @@ struct TVShowBody: View {
             similarTVShows
         }
         .task {
-            credits = await tvStore.credits(forTVSeries: tmdbTVShow.id)
-            recommendations = await tvStore.recommendations(forTVSeries: tmdbTVShow.id)
+            credits = await TVStore.shared.credits(forTVSeries: tmdbTVShow.id)
+            recommendations = await TVStore.shared.recommendations(forTVSeries: tmdbTVShow.id)
         }
     }
 
@@ -159,7 +158,7 @@ struct TVShowBody: View {
             ) { group in
                 for season in tmdbTVShow.seasons ?? [] {
                     group.addTask {
-                        await tvStore.season(season.seasonNumber, forTVSeries: tmdbTVShow.id)
+                        await TVStore.shared.season(season.seasonNumber, forTVSeries: tmdbTVShow.id)
                     }
                 }
 

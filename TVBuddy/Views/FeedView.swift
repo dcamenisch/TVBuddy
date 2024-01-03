@@ -34,8 +34,16 @@ struct FeedView: View {
     }
 
     var body: some View {
+        let _ = Self._printChanges()
+        
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 10) {
+                // Structure:
+                // - Progress
+                // - Upcoming Episodes
+                // - Show Watchlist
+                // - Movie Watchlist
+                
                 TVEpisodeProgressView()
                 MediaCollection(title: "TV Show Watchlist (\(tvShows.count))", tvShows: tvShows)
                 MediaCollection(title: "Upcoming TV Shows (\(unreleasedTVShows.count))", tvShows: unreleasedTVShows)
