@@ -8,6 +8,7 @@
 import SwiftData
 import SwiftUI
 import TMDb
+import WrappingHStack
 
 struct TVShowBody: View {
     @Environment(\.modelContext) private var context
@@ -91,14 +92,14 @@ struct TVShowBody: View {
     private var genres: some View {
         Group {
             if let genres = tmdbTVShow.genres {
-                WrappingHStack(models: genres) { genre in
+                WrappingHStack(genres, spacing: .constant(8), lineSpacing: 8) { genre in
                     Text(genre.name)
                         .font(.headline)
                         .padding(.horizontal, 10.0)
                         .padding(.vertical, 8.0)
                         .background {
                             RoundedRectangle(cornerRadius: 15.0, style: .circular)
-                                .foregroundStyle(.quaternary)
+                                .foregroundColor(Color(UIColor.systemGray6))
                         }
                 }
             }

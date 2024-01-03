@@ -8,6 +8,7 @@
 import SwiftData
 import SwiftUI
 import TMDb
+import WrappingHStack
 
 struct MovieBody: View {
     @Environment(\.modelContext) private var context
@@ -86,7 +87,7 @@ struct MovieBody: View {
     private var genres: some View {
         Group {
             if let genres = tmdbMovie.genres {
-                WrappingHStack(models: genres) { genre in
+                WrappingHStack(genres) { genre in
                     Text(genre.name)
                         .font(.headline)
                         .padding(.horizontal, 10.0)
