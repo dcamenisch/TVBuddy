@@ -12,40 +12,33 @@ struct TabBarView: View {
         let _ = Self._printChanges()
         
         TabView {
-            Group {
-                NavigationStack {
-                    FeedView()
-                        .toolbarBackground(.background1, for: .navigationBar)
-                }.tabItem {
-                    Image(systemName: "house.fill")
-                    Text("Feed")
-                }
-
-                NavigationStack {
-                    DiscoverView()
-                        .toolbarBackground(Color.background1, for: .navigationBar)
-                }.tabItem {
-                    Image(systemName: "binoculars.fill")
-                    Text("Discover")
-                }
-
-                NavigationStack {
-                    SearchView()
-                        .toolbarBackground(.background1, for: .navigationBar)
-                }.tabItem {
-                    Image(systemName: "text.magnifyingglass")
-                    Text("Search")
-                }
-
-                NavigationStack {
-                    ProfilView()
-                        .toolbarBackground(.background1, for: .navigationBar)
-                }.tabItem {
-                    Image(systemName: "person.crop.circle")
-                    Text("Profil")
-                }
+            NavigationStack {
+                FeedView()
+            }.tabItem {
+                Image(systemName: "house.fill")
+                Text("Feed")
             }
-            .toolbarBackground(.background1, for: .tabBar)
+
+            NavigationStack {
+                DiscoverView()
+            }.tabItem {
+                Image(systemName: "binoculars.fill")
+                Text("Discover")
+            }
+
+            NavigationStack {
+                SearchView()
+            }.tabItem {
+                Image(systemName: "text.magnifyingglass")
+                Text("Search")
+            }
+
+            NavigationStack {
+                ProfilView()
+            }.tabItem {
+                Image(systemName: "person.crop.circle")
+                Text("Profil")
+            }
         }
     }
 }

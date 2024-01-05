@@ -13,7 +13,7 @@ struct TVSeasonView: View {
     let id: TVSeries.ID
     let seasonNumber: Int
 
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.presentationMode) private var presentationMode
 
     @State var offset: CGFloat = 0.0
     @State var visibility: Visibility = .hidden

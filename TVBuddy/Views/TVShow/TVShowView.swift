@@ -11,7 +11,7 @@ import TMDb
 
 struct TVShowView: View {
     @Environment(\.modelContext) private var context
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.presentationMode) private var presentationMode
 
     @State var offset: CGFloat = 0.0
     @State var visibility: Visibility = .hidden
@@ -35,7 +35,6 @@ struct TVShowView: View {
 
     var body: some View {
         content
-            .toolbarBackground(.background1)
             .toolbarBackground(visibility, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
