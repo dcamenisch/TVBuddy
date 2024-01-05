@@ -20,7 +20,7 @@ struct TVEpisodeRowNonClickable: View {
     
     var body: some View {
         HStack {
-            ImageView(title: tvEpisode.name , url: backdrop)
+            ImageView(url: backdrop, placeholder: tvEpisode.name)
                 .frame(width: 130)
                 .aspectRatio(1.77, contentMode: .fit)
                 .cornerRadius(5.0)
@@ -127,7 +127,7 @@ struct TVEpisodeRowClickable: View {
 
     var label: some View {
         HStack {
-            ImageView(title: "", url: backdrop)
+            ImageView(url: backdrop)
                 .frame(width: 130)
                 .aspectRatio(1.77, contentMode: .fit)
                 .cornerRadius(5.0)

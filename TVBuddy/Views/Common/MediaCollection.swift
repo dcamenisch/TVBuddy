@@ -138,7 +138,7 @@ struct MediaListMovieItem: View {
         NavigationLink {
             MovieView(id: mediaItem.id)
         } label: {
-            ImageView(title: mediaItem.name, url: poster)
+            ImageView(url: poster, placeholder: mediaItem.name)
         }
         .task {
             poster = await MovieStore.shared.poster(withID: mediaItem.id)
@@ -155,7 +155,7 @@ struct MediaListTVShowItem: View {
         NavigationLink {
             TVShowView(id: mediaItem.id)
         } label: {
-            ImageView(title: mediaItem.name, url: poster)
+            ImageView(url: poster, placeholder: mediaItem.name)
         }
         .task {
             poster = await TVStore.shared.poster(withID: mediaItem.id)
@@ -169,7 +169,7 @@ struct MediaListPersonItem: View {
     let mediaItem: TVBuddyMediaItem
 
     var body: some View {
-        ImageView(title: mediaItem.name, url: poster)
+        ImageView(url: poster, placeholder: mediaItem.name)
             .task {
                 poster = await PersonStore.shared.image(forPerson: mediaItem.id)
             }

@@ -87,7 +87,7 @@ struct CastItem: View {
 
     var body: some View {
         HStack {
-            ImageView(title: castMember.name, url: image)
+            ImageView(url: image, placeholder: castMember.name)
                 .posterStyle(size: .tiny)
 
             VStack(alignment: .leading) {
@@ -114,7 +114,7 @@ struct CrewItem: View {
 
     var body: some View {
         HStack {
-            ImageView(title: crewMember.name, url: image)
+            ImageView(url: image, placeholder: crewMember.name)
                 .posterStyle(size: .tiny)
 
             VStack(alignment: .leading) {

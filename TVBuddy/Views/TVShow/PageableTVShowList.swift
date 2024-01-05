@@ -52,7 +52,7 @@ struct TVShowItem: View {
         NavigationLink {
             TVShowView(id: tvSeries.id)
         } label: {
-            ImageView(title: tvSeries.name, url: poster)
+            ImageView(url: poster, placeholder: tvSeries.name)
                 .posterStyle(size: .medium)
         }
         .task {

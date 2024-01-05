@@ -32,18 +32,8 @@ struct TVSeasonHeader: View {
                 if let _ = backdrop {
                     GeometryReader { geometry in
                         let minY = geometry.frame(in: .global).minY
-
-                        LazyImage(url: backdrop) { state in
-                            if let image = state.image {
-                                image
-                                    .resizable()
-                                    .clipped()
-                                    .aspectRatio(2, contentMode: .fill)
-                            } else {
-                                Rectangle()
-                                    .foregroundStyle(Color(UIColor.systemGray6))
-                            }
-                        }
+                        
+                        ImageView(url: backdrop)
                         .overlay(alignment: .bottom) {
                             Rectangle()
                                 .foregroundColor(Color(uiColor: .systemBackground))
@@ -69,7 +59,7 @@ struct TVSeasonHeader: View {
                 .padding(.horizontal, 15)
             }
 
-            ImageView(title: season.name, url: poster)
+            ImageView(url: poster, placeholder: season.name)
                 .posterStyle(size: .medium)
                 .padding(.horizontal, 10)
         }

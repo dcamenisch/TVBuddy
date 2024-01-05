@@ -29,7 +29,7 @@ struct MovieRow: View {
             MovieView(id: movie.id)
         } label: {
             HStack {
-                ImageView(title: movie.title, url: poster)
+                ImageView(url: poster, placeholder: movie.title)
                     .posterStyle(size: .tiny)
                 
                 VStack(alignment: .leading, spacing: 5) {

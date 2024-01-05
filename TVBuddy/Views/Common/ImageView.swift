@@ -9,8 +9,13 @@ import NukeUI
 import SwiftUI
 
 struct ImageView: View {
-    let title: String
     let url: URL?
+    let placeholder: String
+    
+    init(url: URL?, placeholder: String = "") {
+        self.url = url
+        self.placeholder = placeholder
+    }
 
     var body: some View {
         LazyImage(url: url) { state in
@@ -19,13 +24,14 @@ struct ImageView: View {
                     .resizable()
                     .scaledToFill()
             } else {
-                Rectangle().overlay(
-                    Text(title)
-                        .fontWeight(.bold)
-                        .multilineTextAlignment(.center)
-                        .foregroundColor(.white)
+                Rectangle()
+                    .overlay(
+                        Text(placeholder)
+                            .fontWeight(.bold)
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(.white)
                 )
-                .foregroundColor(.secondary)
+                .foregroundStyle(Color.background3)
             }
         }
     }

@@ -15,7 +15,7 @@ struct PersonRow: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 15) {
-            ImageView(title: person.name, url: image)
+            ImageView(url: image, placeholder: person.name)
                 .posterStyle(size: .tiny)
 
             VStack(alignment: .leading, spacing: 5) {

@@ -29,7 +29,7 @@ struct TVShowRow: View {
             TVShowView(id: tvShow.id)
         } label: {
             HStack {
-                ImageView(title: tvShow.name, url: poster)
+                ImageView(url: poster, placeholder: tvShow.name)
                     .posterStyle(size: .tiny)
                 
                 VStack(alignment: .leading, spacing: 5) {

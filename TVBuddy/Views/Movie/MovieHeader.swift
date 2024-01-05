@@ -61,7 +61,7 @@ struct MovieHeader: View {
                 .padding(.horizontal, 15)
             }
             
-            ImageView(title: movie.title, url: poster)
+            ImageView(url: poster, placeholder: movie.title)
                 .posterStyle(size: .medium)
                 .padding(.horizontal)
         }
@@ -74,17 +74,7 @@ struct MovieHeader: View {
             GeometryReader { geometry in
                 let minY = geometry.frame(in: .global).minY
                 
-                LazyImage(url: backdrop) { state in
-                    if let image = state.image {
-                        image
-                            .resizable()
-                            .clipped()
-                            .aspectRatio(2, contentMode: .fill)
-                    } else {
-                        Rectangle()
-                            .foregroundStyle(Color(UIColor.systemGray6))
-                    }
-                }
+                ImageView(url: backdrop)
                 .overlay(alignment: .bottom) {
                     Rectangle()
                         .foregroundColor(Color(uiColor: .systemBackground))

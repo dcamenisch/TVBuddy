@@ -38,7 +38,7 @@ struct MediaCarousel: View {
                 )
                 .foregroundColor(.secondary)
                 .aspectRatio(1.77, contentMode: .fit)
-                .backdropStyle()
+                .cornerRadius(15)
                 .padding(5)
             }
         }
@@ -78,8 +78,8 @@ struct MediaCarouselItem: View {
             NavigationLink {
                 MovieView(id: movie.id)
             } label: {
-                ImageView(title: movie.title, url: backdropWithText)
-                    .backdropStyle()
+                ImageView(url: backdropWithText, placeholder: movie.title)
+                    .cornerRadius(15)
                     .padding(5)
             }
             .buttonStyle(.plain)
@@ -90,8 +90,8 @@ struct MediaCarouselItem: View {
             NavigationLink {
                 TVShowView(id: tvSeries.id)
             } label: {
-                ImageView(title: tvSeries.name, url: backdropWithText)
-                    .backdropStyle()
+                ImageView(url: backdropWithText, placeholder: tvSeries.name)
+                    .cornerRadius(15)
                     .padding(5)
             }
             .buttonStyle(.plain)
