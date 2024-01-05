@@ -14,9 +14,7 @@ struct PageableMovieList: View {
 
     @State var movies = [Movie]()
 
-    var body: some View {
-        let _ = Self._printChanges()
-        
+    var body: some View {        
         VStack(alignment: .leading) {
             if !title.isEmpty {
                 Text(title)
@@ -51,8 +49,6 @@ struct MovieItem: View {
     let movie: Movie
 
     var body: some View {
-        let _ = Self._printChanges()
-        
         NavigationLink {
             MovieView(id: movie.id)
         } label: {

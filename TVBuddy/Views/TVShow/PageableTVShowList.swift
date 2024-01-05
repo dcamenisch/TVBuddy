@@ -14,9 +14,7 @@ struct PageableTVShowList: View {
 
     @State var tvSeries = [TVSeries]()
 
-    var body: some View {
-        let _ = Self._printChanges()
-        
+    var body: some View {        
         VStack(alignment: .leading) {
             if !title.isEmpty {
                 Text(title)

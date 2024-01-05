@@ -19,9 +19,7 @@ struct ProfilView: View {
     @Query(filter: #Predicate<TVBuddyMovie> { $0.watched })
     private var watchedMovies: [TVBuddyMovie]
 
-    var body: some View {
-        let _ = Self._printChanges()
-        
+    var body: some View {        
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {

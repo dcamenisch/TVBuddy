@@ -9,9 +9,7 @@ import SwiftUI
 import TMDb
 
 struct DiscoverView: View {
-    var body: some View {
-        let _ = Self._printChanges()
-        
+    var body: some View {        
         ScrollView(.vertical, showsIndicators: false) {
             MediaCarousel()
 

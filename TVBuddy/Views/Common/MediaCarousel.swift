@@ -14,9 +14,7 @@ struct MediaCarousel: View {
     @State var trendingMedia = [Media]()
     @State var timer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
 
-    var body: some View {
-        let _ = Self._printChanges()
-        
+    var body: some View {        
         Group {
             if !trendingMedia.isEmpty {
                 Pager(page: page, data: trendingMedia) { media in

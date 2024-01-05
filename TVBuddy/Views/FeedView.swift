@@ -33,9 +33,7 @@ struct FeedView: View {
         _unreleasedTVShows = Query(filter: #Predicate<TVBuddyTVShow> { !$0.startedWatching && $0.firstAirDate ?? future > now })
     }
 
-    var body: some View {
-        let _ = Self._printChanges()
-        
+    var body: some View {        
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 10) {
                 // Structure:
