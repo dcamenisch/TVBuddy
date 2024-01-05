@@ -12,8 +12,7 @@ import TMDb
 struct MediaCarousel: View {
     @StateObject var page: Page = .first()
     @State var trendingMedia = [Media]()
-    
-    let timer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
+    @State var timer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
 
     var body: some View {
         let _ = Self._printChanges()
@@ -45,6 +44,12 @@ struct MediaCarousel: View {
                 .padding(5)
             }
         }
+        .onAppear(perform: {
+            timer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
+        })
+        .onDisappear(perform: {
+            timer.upstream.connect().cancel()
+        })
         .task(id: trendingMedia) {
             if trendingMedia.isEmpty {
                 let trendingMovies = await MovieStore.shared.trending().prefix(6)
