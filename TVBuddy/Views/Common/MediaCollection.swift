@@ -99,7 +99,7 @@ struct MediaHorizontalList: View {
     
     var body: some View {
         ScrollView(.horizontal) {
-            HStack {
+            LazyHStack {
                 ForEach(media) { item in
                     mediaListItem(item: item)
                         .posterStyle(size: .small)
