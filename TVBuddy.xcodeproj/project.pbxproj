@@ -45,7 +45,6 @@
 		6FBBBBAB2AB5E46A00D081FE /* PersonManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FBBBBA32AB5E46A00D081FE /* PersonManager.swift */; };
 		6FBBBBAC2AB5E46A00D081FE /* SearchManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FBBBBA42AB5E46A00D081FE /* SearchManager.swift */; };
 		6FBBBBAF2AB5E5FC00D081FE /* DateFormatter+year.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FBBBBAE2AB5E5FC00D081FE /* DateFormatter+year.swift */; };
-		6FBBBBB12AB5E61F00D081FE /* BackdropStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FBBBBB02AB5E61F00D081FE /* BackdropStyle.swift */; };
 		6FBBBBB42AB5EADF00D081FE /* SwiftUIPager in Frameworks */ = {isa = PBXBuildFile; productRef = 6FBBBBB32AB5EADF00D081FE /* SwiftUIPager */; };
 		6FBBBBB62AB5EBB400D081FE /* MediaCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FBBBBB52AB5EBB400D081FE /* MediaCarousel.swift */; };
 		6FBBBBB82AB5EF0500D081FE /* OffsettableScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FBBBBB72AB5EF0500D081FE /* OffsettableScrollView.swift */; };
@@ -104,7 +103,6 @@
 		6FBBBBA32AB5E46A00D081FE /* PersonManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PersonManager.swift; sourceTree = "<group>"; };
 		6FBBBBA42AB5E46A00D081FE /* SearchManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchManager.swift; sourceTree = "<group>"; };
 		6FBBBBAE2AB5E5FC00D081FE /* DateFormatter+year.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "DateFormatter+year.swift"; sourceTree = "<group>"; };
-		6FBBBBB02AB5E61F00D081FE /* BackdropStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackdropStyle.swift; sourceTree = "<group>"; };
 		6FBBBBB52AB5EBB400D081FE /* MediaCarousel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaCarousel.swift; sourceTree = "<group>"; };
 		6FBBBBB72AB5EF0500D081FE /* OffsettableScrollView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OffsettableScrollView.swift; sourceTree = "<group>"; };
 		6FBBBBB92AB5EF1300D081FE /* VoteLabel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VoteLabel.swift; sourceTree = "<group>"; };
@@ -152,7 +150,6 @@
 		6FB550642B1236BE001644DD /* ViewModifier */ = {
 			isa = PBXGroup;
 			children = (
-				6FBBBBB02AB5E61F00D081FE /* BackdropStyle.swift */,
 				6FBBBB962AB5D15F00D081FE /* PosterStyle.swift */,
 			);
 			path = ViewModifier;
@@ -433,7 +430,6 @@
 				6F8B4C102B4426F10002F48C /* PersonRow.swift in Sources */,
 				6FBBBBA72AB5E46A00D081FE /* PersonStore.swift in Sources */,
 				6F8B4C0E2B44261C0002F48C /* TVShowRow.swift in Sources */,
-				6FBBBBB12AB5E61F00D081FE /* BackdropStyle.swift in Sources */,
 				6FBBBBB62AB5EBB400D081FE /* MediaCarousel.swift in Sources */,
 				6FBBBBDB2AB5F02A00D081FE /* TVShowHeader.swift in Sources */,
 				6F8B4C0C2B441B940002F48C /* MovieRow.swift in Sources */,

@@ -43,10 +43,10 @@ struct FeedView: View {
                 // - Movie Watchlist
                 
                 TVEpisodeProgressView()
-                MediaCollection(title: "TV Show Watchlist (\(tvShows.count))", tvShows: tvShows)
-                MediaCollection(title: "Upcoming TV Shows (\(unreleasedTVShows.count))", tvShows: unreleasedTVShows)
-                MediaCollection(title: "Movie Watchlist (\(movies.count))", movies: movies)
-                MediaCollection(title: "Upcoming Movies (\(unreleasedMovies.count))", movies: unreleasedMovies)
+                MediaCollection(title: "TV Show Watchlist", media: tvShows)
+                MediaCollection(title: "Upcoming TV Shows", media: unreleasedTVShows)
+                MediaCollection(title: "Movie Watchlist", media: movies)
+                MediaCollection(title: "Upcoming Movies", media: unreleasedMovies)
             }
             .padding(.horizontal)
         }

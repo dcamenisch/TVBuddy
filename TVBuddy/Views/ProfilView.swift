@@ -54,9 +54,9 @@ struct ProfilView: View {
                     .cornerRadius(10)
                 }
                 
-                MediaCollection(title: "Archived TV Shows (\(archivedTVShows.count))", tvShows: archivedTVShows)
-                MediaCollection(title: "Watched TV Shows (\(watchedTVShows.count))", tvShows: watchedTVShows)
-                MediaCollection(title: "Watched Movies (\(watchedMovies.count))", movies: watchedMovies)
+                MediaCollection(title: "Archived TV Shows (\(archivedTVShows.count))", media: archivedTVShows)
+                MediaCollection(title: "Watched TV Shows (\(watchedTVShows.count))", media: watchedTVShows)
+                MediaCollection(title: "Watched Movies (\(watchedMovies.count))", media: watchedMovies)
             }
             .padding(.horizontal)
         }

@@ -48,7 +48,12 @@ struct MediaCarousel: View {
         .onDisappear(perform: {
             timer.upstream.connect().cancel()
         })
-        .task(id: trendingMedia) {
+        .task {
+            
+            
+            
+            
+            
             if trendingMedia.isEmpty {
                 let trendingMovies = await MovieStore.shared.trending().prefix(6)
                 let trendingTVShows = await TVStore.shared.trending().prefix(6)
