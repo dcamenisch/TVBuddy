@@ -35,6 +35,7 @@ struct TVShowView: View {
 
     var body: some View {
         content
+            .toolbarBackground(.background1)
             .toolbarBackground(visibility, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
@@ -55,6 +56,18 @@ struct TVShowView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
                         .opacity(max(0, -22.0 + 20.0 * progress))
+                }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    if let show = _show {
+                        Button {
+                            show.isArchived.toggle()
+                        } label: {
+                            Image(systemName: show.isArchived ? "archivebox.fill" : "archivebox")
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.accent)
+                        }
+                    }
                 }
 
                 ToolbarItem(placement: .topBarTrailing) {

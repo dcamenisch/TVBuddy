@@ -27,8 +27,9 @@ extension TVBuddyMediaSchemaV1 {
         var startedWatching: Bool
         var finishedWatching: Bool
         var isFavorite: Bool
+        var isArchived: Bool
 
-        init(id: Int, name: String, firstAirDate: Date?, lastAirDate: Date?, startedWatching: Bool, finishedWatching: Bool, isFavorite: Bool = false) {
+        init(id: Int, name: String, firstAirDate: Date?, lastAirDate: Date?, startedWatching: Bool, finishedWatching: Bool, isFavorite: Bool = false, isArchived: Bool = false) {
             self.id = id
             self.name = name
             self.firstAirDate = firstAirDate
@@ -36,10 +37,11 @@ extension TVBuddyMediaSchemaV1 {
             self.startedWatching = startedWatching
             self.finishedWatching = finishedWatching
             self.isFavorite = isFavorite
+            self.isArchived = isArchived
         }
 
         convenience init(
-            tvShow: TVSeries, startedWatching: Bool = false, finishedWatching: Bool = false, isFavorite: Bool = false
+            tvShow: TVSeries, startedWatching: Bool = false, finishedWatching: Bool = false, isFavorite: Bool = false, isArchived: Bool = false
         ) {
             self.init(
                 id: tvShow.id,
@@ -48,7 +50,8 @@ extension TVBuddyMediaSchemaV1 {
                 lastAirDate: tvShow.lastAirDate,
                 startedWatching: startedWatching,
                 finishedWatching: finishedWatching,
-                isFavorite: isFavorite
+                isFavorite: isFavorite,
+                isArchived: isArchived
             )
         }
         
