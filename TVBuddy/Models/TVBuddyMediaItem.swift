@@ -7,50 +7,60 @@
 
 import Foundation
 import TMDb
+import SwiftUI
 
-enum TVBuddyMediaItem: Identifiable, Equatable, Hashable {
-    public var id: Int {
-        switch self {
-        case let .movie(movie):
-            return movie.id
+protocol TVBuddyMediaItem {
+    var id: Int { get }
+    var name: String { get }
+    
+    func getPosterURL() async -> URL?
+    func getDetailView() -> any View
+}
 
-        case let .tvShow(tvShow):
-            return tvShow.id
-
-        case let .tmdbMovie(tmdbMovie):
-            return tmdbMovie.id
-
-        case let .tmdbTVShow(tmdbTVShow):
-            return tmdbTVShow.id
-
-        case let .tmdbPerson(tmdbPerson):
-            return tmdbPerson.id
-        }
+extension TVBuddyMovie: TVBuddyMediaItem {
+    var name: String {
+        self.title
     }
-
-    public var name: String {
-        switch self {
-        case let .movie(movie):
-            return movie.title
-
-        case let .tvShow(tvShow):
-            return tvShow.name
-
-        case let .tmdbMovie(tmdbMovie):
-            return tmdbMovie.title
-
-        case let .tmdbTVShow(tmdbTVShow):
-            return tmdbTVShow.name
-
-        case let .tmdbPerson(tmdbPerson):
-            return tmdbPerson.name
-        }
+    
+    func getPosterURL() async -> URL? {
+        await MovieStore.shared.poster(withID: self.id)
     }
+    
+    func getDetailView() -> any View {
+        MovieView(id: self.id)
+    }
+}
 
-    case movie(TVBuddyMovie)
-    case tvShow(TVBuddyTVShow)
+extension TVBuddyTVShow: TVBuddyMediaItem {
+    func getPosterURL() async -> URL? {
+        await TVStore.shared.poster(withID: self.id)
+    }
+    
+    func getDetailView() -> any View {
+        TVShowView(id: self.id)
+    }
+}
 
-    case tmdbMovie(Movie)
-    case tmdbTVShow(TVSeries)
-    case tmdbPerson(Person)
+extension Movie: TVBuddyMediaItem {
+    var name: String {
+        self.title
+    }
+    
+    func getPosterURL() async -> URL? {
+        await MovieStore.shared.poster(withID: self.id)
+    }
+    
+    func getDetailView() -> any View {
+        MovieView(id: self.id)
+    }
+}
+
+extension TVSeries: TVBuddyMediaItem {
+    func getPosterURL() async -> URL? {
+        await TVStore.shared.poster(withID: self.id)
+    }
+    
+    func getDetailView() -> any View {
+        TVShowView(id: self.id)
+    }
 }
