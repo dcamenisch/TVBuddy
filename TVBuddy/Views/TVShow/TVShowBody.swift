@@ -5,6 +5,7 @@
 //  Created by Danny on 11.11.2023.
 //
 
+import Foundation
 import SwiftData
 import SwiftUI
 import TMDb
@@ -16,19 +17,19 @@ struct TVShowBody: View {
     @State var credits: ShowCredits?
     @State var recommendations: [TVSeries]?
 
-    private var tmdbTVShow: TVSeries
-    private var tvBuddyTVShow: TVBuddyTVShow?
+    let tmdbTVShow: TVSeries
+    let tvBuddyTVShow: TVBuddyTVShow?
 
+    private var hasSpecials: Bool {
+        return tmdbTVShow.seasons?.count != tmdbTVShow.numberOfSeasons
+    }
+    
     init(tmdbTVShow: TVSeries, tvBuddyTVShow: TVBuddyTVShow?) {
         self.tmdbTVShow = tmdbTVShow
         self.tvBuddyTVShow = tvBuddyTVShow
     }
 
-    private var hasSpecials: Bool {
-        return tmdbTVShow.seasons?.count != tmdbTVShow.numberOfSeasons
-    }
-
-    var body: some View {
+    var body: some View {        
         VStack(alignment: .leading, spacing: 10) {
             watchButtons
             overview
@@ -52,8 +53,9 @@ struct TVShowBody: View {
             Button {
                 if let show = tvBuddyTVShow {
                     context.delete(show)
+                    try! context.save()
                 } else {
-                    insertTVShow(tmdbTVShow: tmdbTVShow, watched: false)
+                    insertTVShow(id: tmdbTVShow.id, watched: false, isFavorite: false)
                 }
             } label: {
                 Label("Watchlist", systemImage: tvBuddyTVShow == nil ? "plus" : "checkmark")
@@ -65,7 +67,7 @@ struct TVShowBody: View {
                 if let show = tvBuddyTVShow {
                     show.toggleWatched()
                 } else {
-                    insertTVShow(tmdbTVShow: tmdbTVShow, watched: true)
+                    insertTVShow(id: tmdbTVShow.id, watched: true, isFavorite: false)
                 }
             } label: {
                 Label("Watched", systemImage: tvBuddyTVShow?.finishedWatching ?? false ? "eye.fill" : "eye")
@@ -145,39 +147,12 @@ struct TVShowBody: View {
             }
         }
     }
-
-    private func insertTVShow(tmdbTVShow: TVSeries, watched: Bool = false) {
-        let tvShow = TVBuddyTVShow(
-            tvShow: tmdbTVShow, startedWatching: watched, finishedWatching: watched
-        )
-        context.insert(tvShow)
-
+    
+    func insertTVShow(id: TVSeries.ID, watched: Bool, isFavorite: Bool) {
         Task {
-            let tmdbEpisodes = await withTaskGroup(
-                of: TVSeason?.self, returning: [TVSeason].self
-            ) { group in
-                for season in tmdbTVShow.seasons ?? [] {
-                    group.addTask {
-                        await TVStore.shared.season(season.seasonNumber, forTVSeries: tmdbTVShow.id)
-                    }
-                }
-
-                var childTaskResults = [TVSeason]()
-                for await result in group {
-                    if let result = result {
-                        childTaskResults.append(result)
-                    }
-                }
-
-                return childTaskResults
-            }.compactMap { season in
-                season.episodes
-            }.flatMap {
-                $0
-            }
-
-            tvShow.episodes.append(
-                contentsOf: tmdbEpisodes.compactMap { TVBuddyTVEpisode(episode: $0, watched: $0.seasonNumber == 0 ? false : watched) })
+            let container = context.container
+            let actor = TVShowActor(modelContainer: container)
+            await actor.insertTVShow(id: id, watched: watched, isFavorite: isFavorite)
         }
     }
 }

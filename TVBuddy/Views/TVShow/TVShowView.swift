@@ -27,13 +27,13 @@ struct TVShowView: View {
     let id: TVSeries.ID
 
     private var progress: CGFloat { backdrop != nil ? offset / 350.0 : offset / 100.0}
-
+    
     init(id: TVSeries.ID) {
         self.id = id
         _shows = Query(filter: #Predicate<TVBuddyTVShow> { $0.id == id })
     }
 
-    var body: some View {
+    var body: some View { 
         content
             .toolbarBackground(visibility, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
@@ -74,7 +74,7 @@ struct TVShowView: View {
                         if let show = _show {
                             show.isFavorite.toggle()
                         } else if let tmdbTVShow = tmdbTVShow {
-                            context.insert(TVBuddyTVShow(tvShow: tmdbTVShow, startedWatching: true, finishedWatching: true, isFavorite: true))
+                            insertTVShow(id: tmdbTVShow.id, watched: true, isFavorite: true)
                         }
                     } label: {
                         Image(systemName: _show?.isFavorite ?? false ? "heart.fill" : "heart")
@@ -107,6 +107,14 @@ struct TVShowView: View {
             }
         } else {
             ProgressView()
+        }
+    }
+    
+    func insertTVShow(id: TVSeries.ID, watched: Bool, isFavorite: Bool) {
+        Task {
+            let container = context.container
+            let actor = TVShowActor(modelContainer: container)
+            await actor.insertTVShow(id: id, watched: watched, isFavorite: isFavorite)
         }
     }
 }

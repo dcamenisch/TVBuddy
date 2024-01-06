@@ -22,10 +22,20 @@ struct TVSeasonView: View {
     @State var tmdbSeason: TVSeason?
     @State var poster: URL?
     @State var backdrop: URL?
+    
+    @Query
+    private var shows: [TVBuddyTVShow]
+    private var _show: TVBuddyTVShow? { shows.first }
 
     private var progress: CGFloat { backdrop != nil ? offset / 350.0 : offset / 100.0}
 
-    var body: some View {
+    init(id: TVSeries.ID, seasonNumber: Int) {
+        self.id = id
+        self.seasonNumber = seasonNumber
+        _shows = Query(filter: #Predicate<TVBuddyTVShow> { $0.id == id })
+    }
+    
+    var body: some View {        
         content
             .toolbarBackground(visibility, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
@@ -69,7 +79,7 @@ struct TVSeasonView: View {
             } content: {
                 TVSeasonHeader(season: tmdbSeason, poster: poster, backdrop: backdrop)
                     .padding(.bottom, 10)
-                TVSeasonBody(tmdbTVShow: tmdbTVShow, tmdbSeason: tmdbSeason)
+                TVSeasonBody(tmdbTVShow: tmdbTVShow, tmdbSeason: tmdbSeason, tvBuddyTVShow: _show)
                     .padding(.horizontal)
             }
         } else {

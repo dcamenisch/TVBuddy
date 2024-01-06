@@ -44,7 +44,7 @@ struct TVEpisodeRowNonClickable: View {
                 if let episode = tvBuddyTVEpisode {
                     episode.toggleWatched()
                 } else {
-                    insertTVShowWithEpisode(tmdbTVShow: tvShow, tmdbEpisode: tvEpisode, watched: false)
+                    insertTVShow(id: tvShow.id, watched: false, isFavorite: false, episodeID: tvEpisode.id)
                 }
             }, label: {
                 Image(systemName: tvBuddyTVEpisode?.watched ?? false ? "checkmark.circle" : "plus.circle")
@@ -59,41 +59,11 @@ struct TVEpisodeRowNonClickable: View {
         }
     }
     
-    private func insertTVShowWithEpisode(
-        tmdbTVShow: TVSeries, tmdbEpisode: TVEpisode, watched: Bool = false
-    ) {
-        let tvShow = TVBuddyTVShow(
-            tvShow: tmdbTVShow, startedWatching: watched, finishedWatching: watched
-        )
-        context.insert(tvShow)
-
+    func insertTVShow(id: TVSeries.ID, watched: Bool, isFavorite: Bool, episodeID: TVEpisode.ID) {
         Task {
-            let tmdbEpisodes = await withTaskGroup(
-                of: TVSeason?.self, returning: [TVSeason].self
-            ) { group in
-                for season in tmdbTVShow.seasons ?? [] {
-                    group.addTask {
-                        await TVStore.shared.season(season.seasonNumber, forTVSeries: tmdbTVShow.id)
-                    }
-                }
-
-                var childTaskResults = [TVSeason]()
-                for await result in group {
-                    if let result = result {
-                        childTaskResults.append(result)
-                    }
-                }
-
-                return childTaskResults
-            }.compactMap { season in
-                season.episodes
-            }.flatMap {
-                $0
-            }
-
-            tvShow.episodes.append(
-                contentsOf: tmdbEpisodes.compactMap { TVBuddyTVEpisode(episode: $0, watched: watched) })
-            tvShow.episodes.first { $0.id == tmdbEpisode.id }?.toggleWatched()
+            let container = context.container
+            let actor = TVShowActor(modelContainer: container)
+            await actor.insertTVShow(id: id, watched: watched, isFavorite: isFavorite, episodeID: episodeID)
         }
     }
 }
@@ -101,8 +71,6 @@ struct TVEpisodeRowNonClickable: View {
 struct TVEpisodeRowClickable: View {
     let tvBuddyTVShow: TVBuddyTVShow
     let tvBuddyTVEpisode: TVBuddyTVEpisode
-
-    @Environment(\.modelContext) private var context
     
     @State var backdrop: URL?
     @State var tvEpisode: TVEpisode?

@@ -14,10 +14,7 @@ struct TVSeasonBody: View {
 
     let tmdbTVShow: TVSeries
     let tmdbSeason: TVSeason
-    
-    @Query
-    private var shows: [TVBuddyTVShow]
-    private var show: TVBuddyTVShow? { shows.first }
+    let tvBuddyTVShow: TVBuddyTVShow?
     
     @State private var episodes: [TVBuddyTVEpisode] = []
     
@@ -26,23 +23,17 @@ struct TVSeasonBody: View {
             $0.seasonNumber != tmdbSeason.seasonNumber || $0.watched
         } && episodes.count > 0
     }
-    
-    init(tmdbTVShow: TVSeries, tmdbSeason: TVSeason) {
-        self.tmdbTVShow = tmdbTVShow
-        self.tmdbSeason = tmdbSeason
-        _shows = Query(filter: #Predicate<TVBuddyTVShow> { $0.id == tmdbTVShow.id })
-    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Button {
-                if show != nil {
+                if tvBuddyTVShow != nil {
                     let newValue = !watchedAll
                     episodes.forEach { episode in
                         episode.watched = newValue
                     }
                 } else {
-                    insertTVShow()
+                    insertTVShow(id: tmdbTVShow.id, watched: false, isFavorite: false)
                 }
             } label: {
                 Label(watchedAll ? "Mark as unseen" : "Mark as seen", systemImage: watchedAll ? "eye.fill" : "eye")
@@ -85,7 +76,7 @@ struct TVSeasonBody: View {
                 }
             }
         }
-        .task(id: show?.episodes) {
+        .task(id: tvBuddyTVShow?.episodes) {
             // This task is triggered a first time when the show gets inserted (without episodes)
             // and a second time when the episodes are added
             
@@ -100,42 +91,11 @@ struct TVSeasonBody: View {
         }
     }
 
-    private func insertTVShow() {
-        let tvShow = TVBuddyTVShow(tvShow: tmdbTVShow)
-        context.insert(tvShow)
-
+    func insertTVShow(id: TVSeries.ID, watched: Bool, isFavorite: Bool) {
         Task {
-            let tmdbEpisodes = await withTaskGroup(
-                of: TVSeason?.self, returning: [TVSeason].self
-            ) { group in
-                for season in tmdbTVShow.seasons ?? [] {
-                    group.addTask {
-                        await TVStore.shared.season(season.seasonNumber, forTVSeries: tmdbTVShow.id)
-                    }
-                }
-
-                var childTaskResults = [TVSeason]()
-                for await result in group {
-                    if let result = result {
-                        childTaskResults.append(result)
-                    }
-                }
-
-                return childTaskResults
-            }.compactMap { season in
-                season.episodes
-            }.flatMap {
-                $0
-            }
-
-            tvShow.episodes.append(
-                contentsOf: tmdbEpisodes.compactMap { TVBuddyTVEpisode(episode: $0) })
-
-            tvShow.episodes.forEach { episode in
-                if episode.seasonNumber == tmdbSeason.seasonNumber {
-                    episode.toggleWatched()
-                }
-            }
+            let container = context.container
+            let actor = TVShowActor(modelContainer: container)
+            await actor.insertTVShow(id: id, watched: watched, isFavorite: isFavorite)
         }
     }
 }
