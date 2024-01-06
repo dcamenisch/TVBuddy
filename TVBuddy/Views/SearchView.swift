@@ -9,59 +9,62 @@ import SwiftUI
 import TMDb
 
 struct SearchView: View {
-    @EnvironmentObject private var searchStore: SearchStore
-
-    private var isSearching: Bool {
-        searchStore.isSearching
-    }
-
-    private var media: [Media]? {
-        searchStore.results
-    }
-
-    var body: some View {        
-        List(media ?? []) { mediaItem in
-            MediaRowItem(mediaItem: mediaItem)
-                .onAppear { self.mediaItemDidAppear(currentMediaItem: mediaItem) }
-                .listRowSeparator(.hidden)
-                .listRowBackground(
-                    RoundedRectangle(cornerRadius: 5)
-                        .background(.clear)
-                        .foregroundColor(Color(UIColor.systemGray6))
-                        .padding(
-                            EdgeInsets(
-                                top: 4,
-                                leading: 10,
-                                bottom: 4,
-                                trailing: 10
-                            )
+    private var searchStore: SearchStore = SearchStore()
+    
+    @State private var isSearching: Bool = false
+    @State private var searchText: String = ""
+    @State private var searchResults: [Media] = []
+    
+    var body: some View {
+        let _ = Self._printChanges()
+        
+        List {
+            ForEach(Array(searchResults.enumerated()), id: \.element) { index, element in
+                MediaRowItem(mediaItem: element)
+                    .task {
+                        if searchResults.endIndex - AppConstants.nextPageOffset == index {
+                            searchResults = await searchStore.search(searchText)
+                        }
+                    }
+            }
+            .listRowSeparator(.hidden)
+            .listRowBackground(
+                RoundedRectangle(cornerRadius: 5)
+                    .background(.clear)
+                    .foregroundColor(Color(UIColor.systemGray6))
+                    .padding(
+                        EdgeInsets(
+                            top: 4,
+                            leading: 10,
+                            bottom: 4,
+                            trailing: 10
                         )
-                )
+                    )
+            )
         }
         .listStyle(.plain)
         .overlay(overlay)
-        .searchable(text: $searchStore.searchQuery)
-        .searchScopes($searchStore.searchScope) {
-            ForEach(SearchScope.allCases) { category in
-                Text(category.rawValue).tag(SearchScope(rawValue: category.rawValue))
-            }
-        }
-        .onReceive(searchStore.$searchQuery) { _ in
-            Task { await searchStore.search() }
-        }
-        .navigationTitle("Search")
+        .searchable(text: $searchText)
+        //        .searchScopes($searchStore.searchScope) {
+        //            ForEach(SearchScope.allCases) { category in
+        //                Text(category.rawValue).tag(SearchScope(rawValue: category.rawValue))
+        //            }
+        //        }
         .scrollIndicators(.never)
-    }
-
-    @ViewBuilder private var overlay: some View {
-        if isSearching && (media?.isEmpty ?? true || media == nil) {
-            ProgressView()
-        } else if media?.isEmpty ?? true {
-            ContentUnavailableView.search(text: searchStore.searchQuery)
+        .navigationTitle("Search")
+        .task(id: searchText) {
+            isSearching = true
+            searchResults = await searchStore.search(searchText)
+            isSearching = false
         }
     }
-
-    private func mediaItemDidAppear(currentMediaItem mediaItem: Media) {
-        searchStore.fetchNextPage(currentMediaItem: mediaItem)
+    
+    @ViewBuilder
+    private var overlay: some View {
+        if isSearching && searchResults.isEmpty {
+            ProgressView()
+        } else if searchResults.isEmpty {
+            ContentUnavailableView.search(text: searchText)
+        }
     }
 }

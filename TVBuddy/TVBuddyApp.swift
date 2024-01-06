@@ -17,8 +17,6 @@ struct TVBuddyApp: App {
         category: String(describing: TVBuddyApp.self)
     )
     
-    @StateObject private var searchStore = SearchStore()
-
     var container: ModelContainer
 
     init() {
@@ -46,7 +44,6 @@ struct TVBuddyApp: App {
     var body: some Scene {
         WindowGroup {
             TabBarView()
-                .environmentObject(searchStore)
                 .onAppear(perform: {
                     Task(priority: .background) {
                         await updateMedia()

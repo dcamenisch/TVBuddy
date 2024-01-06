@@ -18,63 +18,32 @@ enum SearchScope: String, Codable, CaseIterable, Identifiable, Hashable {
 }
 
 class SearchStore: ObservableObject {
-    @Published var searchQuery: String = ""
-    @Published var results: [Media] = []
-    @Published var isSearching = false
-    @Published var searchScope: SearchScope = .all
+//    @Published var searchScope: SearchScope = .all
 
     private let searchManager: SearchManager = SearchManager()
 
-    private var currentPage = 1
-    private var searchTask: Task<Void, Never>?
-    private var newPageTask: Task<Void, Never>?
+    private var searchPage = 0
+    private var searchQuery = ""
+    private var results: [Media] = []
 
     init() {}
 
     @MainActor
-    func search() async {
-        searchTask?.cancel()
-        newPageTask?.cancel()
-
-        currentPage = 1
-
-        let query = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        if query.isEmpty {
+    func search(_ searchText: String) async -> [Media] {
+        let newSearchQuery = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if searchQuery != newSearchQuery {
             results = []
-        } else {
-            searchTask = Task {
-                isSearching = true
-                let newResults = await searchManager.search(query: query)
-                if !Task.isCancelled {
-                    results = newResults ?? []
-                    isSearching = false
-                }
-            }
+            searchPage = 0
+            searchQuery = newSearchQuery
         }
-    }
 
-    @MainActor
-    func fetchNextPage(currentMediaItem: Media) {
-        guard !isSearching else { return }
-
-        let resultIDs = results.map(\.id)
-        let index = resultIDs.firstIndex(where: { $0 == currentMediaItem.id })
-        let thresholdIndex = resultIDs.endIndex - AppConstants.nextPageOffset
-
-        guard index == thresholdIndex else { return }
-
-        currentPage += 1
-
-        let query = searchQuery.trimmingCharacters(in: .whitespaces)
-
-        newPageTask = Task {
-            isSearching = true
-            let newPage = await searchManager.search(query: query, page: currentPage)
-            if !Task.isCancelled {
-                results = results + (newPage ?? [])
-                isSearching = false
-            }
-        }
+        let nextPageNumber = searchPage + 1
+    
+        var newPage = await searchManager.search(query: searchQuery, page: nextPageNumber) ?? []
+        newPage.removeAll { item in results.contains { $0.id == item.id } }
+        results += newPage
+        
+        searchPage = max(searchPage, nextPageNumber)
+        return results
     }
 }
