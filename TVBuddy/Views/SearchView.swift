@@ -16,8 +16,6 @@ struct SearchView: View {
     @State private var searchResults: [Media] = []
     
     var body: some View {
-        let _ = Self._printChanges()
-        
         List {
             ForEach(Array(searchResults.enumerated()), id: \.element) { index, element in
                 MediaRowItem(mediaItem: element)
@@ -28,19 +26,7 @@ struct SearchView: View {
                     }
             }
             .listRowSeparator(.hidden)
-            .listRowBackground(
-                RoundedRectangle(cornerRadius: 5)
-                    .background(.clear)
-                    .foregroundColor(Color(UIColor.systemGray6))
-                    .padding(
-                        EdgeInsets(
-                            top: 4,
-                            leading: 10,
-                            bottom: 4,
-                            trailing: 10
-                        )
-                    )
-            )
+            .listRowBackground(listRowBackground)
         }
         .listStyle(.plain)
         .overlay(overlay)
@@ -66,5 +52,19 @@ struct SearchView: View {
         } else if searchResults.isEmpty {
             ContentUnavailableView.search(text: searchText)
         }
+    }
+    
+    private var listRowBackground: some View {
+        RoundedRectangle(cornerRadius: 5)
+            .background(.clear)
+            .foregroundColor(Color(UIColor.systemGray6))
+            .padding(
+                EdgeInsets(
+                    top: 4,
+                    leading: 10,
+                    bottom: 4,
+                    trailing: 10
+                )
+            )
     }
 }
