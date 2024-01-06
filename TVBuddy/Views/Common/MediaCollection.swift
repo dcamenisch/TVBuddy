@@ -14,7 +14,6 @@ struct MediaCollection<T:TVBuddyMediaItem>: View {
     let fetchMethod: ((Bool) async -> [T])?
     let posterSize: PosterStyle.Size
     
-    private let mediaTmp: [T] = []
     @State private var media: [T]
     
     init(
@@ -75,13 +74,11 @@ struct MediaCollection<T:TVBuddyMediaItem>: View {
                 ForEach(Array(media.enumerated()), id: \.element) { index, element in
                     MediaListItem(mediaItem: element)
                         .posterStyle(size: posterSize)
-                        .onAppear(perform: {
+                        .task {
                             if let fetchMethod = fetchMethod, media.endIndex - AppConstants.nextPageOffset == index {
-                                Task {
-                                    media = await fetchMethod(true)
-                                }
+                                media = await fetchMethod(true)
                             }
-                        })
+                        }
                 }
             }
         }
