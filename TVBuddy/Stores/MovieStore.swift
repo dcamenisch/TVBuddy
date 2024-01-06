@@ -11,7 +11,7 @@ import TMDb
 class MovieStore {
     static let shared = MovieStore()
     
-    private let moviesManager: MovieManager
+    private let moviesManager: MovieManager = MovieManager()
 
     var movies: [Movie.ID: Movie] = [:]
     var posters: [Movie.ID: URL] = [:]
@@ -26,9 +26,7 @@ class MovieStore {
     private var discoverPage: Int = 0
     private var trendingPage: Int = 0
 
-    private init() {
-        self.moviesManager = MovieManager()
-    }
+    private init() {}
 
     @MainActor
     func movie(withID id: Movie.ID) async -> Movie? {

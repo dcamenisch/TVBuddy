@@ -11,7 +11,7 @@ import TMDb
 class TVStore: ObservableObject {
     static let shared = TVStore()
     
-    private let tvManager: TVManager
+    private let tvManager: TVManager = TVManager()
 
     var shows: [TVSeries.ID: TVSeries] = [:]
     var seasons: [TVSeries.ID: [Int: TVSeason]] = [:]
@@ -27,9 +27,7 @@ class TVStore: ObservableObject {
     private var discoverPage: Int = 0
     private var trendingPage: Int = 0
 
-    private init() {
-        self.tvManager = TVManager()
-    }
+    private init() {}
 
     @MainActor
     func show(withID id: TVSeries.ID) async -> TVSeries? {

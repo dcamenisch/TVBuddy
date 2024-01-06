@@ -19,19 +19,17 @@ enum SearchScope: String, Codable, CaseIterable, Identifiable, Hashable {
 
 class SearchStore: ObservableObject {
     @Published var searchQuery: String = ""
-    @Published var results: [Media]?
+    @Published var results: [Media] = []
     @Published var isSearching = false
     @Published var searchScope: SearchScope = .all
 
-    private let searchManager: SearchManager
+    private let searchManager: SearchManager = SearchManager()
 
     private var currentPage = 1
     private var searchTask: Task<Void, Never>?
     private var newPageTask: Task<Void, Never>?
 
-    init() {
-        searchManager = SearchManager()
-    }
+    init() {}
 
     @MainActor
     func search() async {
@@ -43,13 +41,13 @@ class SearchStore: ObservableObject {
         let query = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
 
         if query.isEmpty {
-            results = nil
+            results = []
         } else {
             searchTask = Task {
                 isSearching = true
                 let newResults = await searchManager.search(query: query)
                 if !Task.isCancelled {
-                    results = newResults
+                    results = newResults ?? []
                     isSearching = false
                 }
             }
@@ -60,9 +58,7 @@ class SearchStore: ObservableObject {
     func fetchNextPage(currentMediaItem: Media) {
         guard !isSearching else { return }
 
-        guard let res = results else { return }
-
-        let resultIDs = res.map(\.id)
+        let resultIDs = results.map(\.id)
         let index = resultIDs.firstIndex(where: { $0 == currentMediaItem.id })
         let thresholdIndex = resultIDs.endIndex - AppConstants.nextPageOffset
 
@@ -76,7 +72,7 @@ class SearchStore: ObservableObject {
             isSearching = true
             let newPage = await searchManager.search(query: query, page: currentPage)
             if !Task.isCancelled {
-                results = (results ?? []) + (newPage ?? [])
+                results = results + (newPage ?? [])
                 isSearching = false
             }
         }
