@@ -33,7 +33,7 @@ struct FeedView: View {
         _unreleasedTVShows = Query(filter: #Predicate<TVBuddyTVShow> { !$0.startedWatching && $0.firstAirDate ?? future > now })
     }
 
-    var body: some View {        
+    var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 10) {
                 // Structure:
@@ -43,10 +43,10 @@ struct FeedView: View {
                 // - Movie Watchlist
                 
                 TVEpisodeProgressView()
-                MediaCollection(title: "TV Show Watchlist", media: tvShows)
-                MediaCollection(title: "Upcoming TV Shows", media: unreleasedTVShows)
-                MediaCollection(title: "Movie Watchlist", media: movies)
-                MediaCollection(title: "Upcoming Movies", media: unreleasedMovies)
+                MediaCollection(title: "TV Show Watchlist", media: tvShows).id(tvShows)
+                MediaCollection(title: "Upcoming TV Shows", media: unreleasedTVShows).id(unreleasedTVShows)
+                MediaCollection(title: "Movie Watchlist", media: movies).id(movies)
+                MediaCollection(title: "Upcoming Movies", media: unreleasedMovies).id(unreleasedMovies)
             }
             .padding(.horizontal)
         }

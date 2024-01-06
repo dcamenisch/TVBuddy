@@ -9,12 +9,14 @@ import Foundation
 import TMDb
 import SwiftUI
 
-protocol TVBuddyMediaItem {
+protocol TVBuddyMediaItem: Identifiable, Equatable, Hashable {
     var id: Int { get }
     var name: String { get }
     
+    associatedtype T: View
+    @ViewBuilder var detailView: T { get }
+    
     func getPosterURL() async -> URL?
-    func getDetailView() -> any View
 }
 
 extension TVBuddyMovie: TVBuddyMediaItem {
@@ -22,22 +24,22 @@ extension TVBuddyMovie: TVBuddyMediaItem {
         self.title
     }
     
-    func getPosterURL() async -> URL? {
-        await MovieStore.shared.poster(withID: self.id)
+    var detailView: some View {
+        MovieView(id: self.id)
     }
     
-    func getDetailView() -> any View {
-        MovieView(id: self.id)
+    func getPosterURL() async -> URL? {
+        await MovieStore.shared.poster(withID: self.id)
     }
 }
 
 extension TVBuddyTVShow: TVBuddyMediaItem {
-    func getPosterURL() async -> URL? {
-        await TVStore.shared.poster(withID: self.id)
+    var detailView: some View {
+        TVShowView(id: self.id)
     }
     
-    func getDetailView() -> any View {
-        TVShowView(id: self.id)
+    func getPosterURL() async -> URL? {
+        await TVStore.shared.poster(withID: self.id)
     }
 }
 
@@ -46,21 +48,21 @@ extension Movie: TVBuddyMediaItem {
         self.title
     }
     
-    func getPosterURL() async -> URL? {
-        await MovieStore.shared.poster(withID: self.id)
+    var detailView: some View {
+        MovieView(id: self.id)
     }
     
-    func getDetailView() -> any View {
-        MovieView(id: self.id)
+    func getPosterURL() async -> URL? {
+        await MovieStore.shared.poster(withID: self.id)
     }
 }
 
 extension TVSeries: TVBuddyMediaItem {
-    func getPosterURL() async -> URL? {
-        await TVStore.shared.poster(withID: self.id)
+    var detailView: some View {
+        TVShowView(id: self.id)
     }
     
-    func getDetailView() -> any View {
-        TVShowView(id: self.id)
+    func getPosterURL() async -> URL? {
+        await TVStore.shared.poster(withID: self.id)
     }
 }

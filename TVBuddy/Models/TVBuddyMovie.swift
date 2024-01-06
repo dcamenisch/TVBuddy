@@ -13,7 +13,7 @@ typealias TVBuddyMovie = TVBuddyMediaSchemaV1.TVBuddyMovie
 
 extension TVBuddyMediaSchemaV1 {
     @Model
-    final class TVBuddyMovie {
+    final class TVBuddyMovie: Identifiable, Equatable, Hashable {
         @Attribute(.unique)
         let id: Int
 

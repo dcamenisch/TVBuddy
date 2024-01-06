@@ -26,7 +26,7 @@ struct MovieRow: View {
     
     var body: some View {
         NavigationLink {
-            MovieView(id: movie.id)
+            movie.detailView
         } label: {
             HStack {
                 ImageView(url: poster, placeholder: movie.title)
@@ -63,8 +63,10 @@ struct MovieRow: View {
     private func toggleMovieInWatchlist() {
         if let movie = movies.first {
             context.delete(movie)
+            try? context.save()
         } else {
             context.insert(TVBuddyMovie(movie: movie, watched: false))
+            try? context.save()
         }
     }
     

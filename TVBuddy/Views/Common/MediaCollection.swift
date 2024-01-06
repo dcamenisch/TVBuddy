@@ -8,29 +8,49 @@
 import SwiftUI
 import TMDb
 
-struct MediaCollection: View {
+struct MediaCollection<T:TVBuddyMediaItem>: View {
     let title: String
     let showAllButton: Bool
+    let fetchMethod: ((Bool) async -> [T])?
+    let posterSize: PosterStyle.Size
     
-    private var media = [any TVBuddyMediaItem]()
-
+    private let mediaTmp: [T] = []
+    @State private var media: [T]
+    
+    // Using a workaround with mediaTmp to update the State var media from outside the view
+    // while also triggering the update of the view
     init(
         title: String = "",
         showAllButton: Bool = true,
-        media: [any TVBuddyMediaItem] = []
+        media: [T] = [],
+        fetchMethod: ((Bool) async -> [T])? = nil,
+        posterSize: PosterStyle.Size = .small
     ) {
         self.title = title
         self.showAllButton = showAllButton
         self.media = media
+        self.fetchMethod = fetchMethod
+        self.posterSize = posterSize
+        
+//        self.mediaTmp = media
     }
 
-    var body: some View {
+    var body: some View {        
         VStack(alignment: .leading) {
             if !title.isEmpty || showAllButton {
                 upperBar
             }
             
             horizontalList
+        }
+        .task(id: mediaTmp) {
+            if let fetchMethod = fetchMethod {
+                Task {
+                    media = await fetchMethod(false)
+                }
+            } else {
+//                media = mediaTmp // update @State var when the tmp var updated
+            }
         }
     }
     
@@ -58,9 +78,16 @@ struct MediaCollection: View {
     var horizontalList: some View {
         ScrollView(.horizontal) {
             LazyHStack {
-                ForEach(media, id: \.id) { item in
-                    MediaListItem(mediaItem: item)
-                        .posterStyle(size: .small)
+                ForEach(Array(media.enumerated()), id: \.element) { index, element in
+                    MediaListItem(mediaItem: element)
+                        .posterStyle(size: posterSize)
+                        .onAppear(perform: {
+                            if let fetchMethod = fetchMethod, media.endIndex - AppConstants.nextPageOffset == index {
+                                Task {
+                                    media = await fetchMethod(true)
+                                }
+                            }
+                        })
                 }
             }
         }
@@ -70,9 +97,16 @@ struct MediaCollection: View {
     var verticalGrid: some View {
         ScrollView {
             LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 4), spacing: 10) {
-                ForEach(media, id: \.id) { item in
-                    MediaListItem(mediaItem: item)
+                ForEach(Array(media.enumerated()), id: \.element) { index, element in
+                    MediaListItem(mediaItem: element)
                         .posterStyle()
+                        .onAppear(perform: {
+                            if let fetchMethod = fetchMethod, media.endIndex - AppConstants.nextPageOffset == index {
+                                Task {
+                                    media = await fetchMethod(true)
+                                }
+                            }
+                        })
                 }
             }
             .padding(.horizontal)
@@ -81,14 +115,14 @@ struct MediaCollection: View {
     }
 }
 
-struct MediaListItem: View {
+struct MediaListItem<T:TVBuddyMediaItem>: View {
     @State var poster: URL?
 
-    let mediaItem: any TVBuddyMediaItem
+    let mediaItem: T
 
     var body: some View {
         NavigationLink {
-            AnyView(mediaItem.getDetailView())
+            mediaItem.detailView
         } label: {
             ImageView(url: poster, placeholder: mediaItem.name)
         }

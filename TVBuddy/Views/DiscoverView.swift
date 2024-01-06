@@ -14,8 +14,8 @@ struct DiscoverView: View {
             MediaCarousel()
 
             VStack(spacing: 10) {
-                PageableMovieList(title: "Trending Movies", fetchMethod: MovieStore.shared.trending)
-                PageableTVShowList(title: "Trending TV Shows", fetchMethod: TVStore.shared.trending)
+                MediaCollection(title: "Trending Movies", fetchMethod: MovieStore.shared.trending, posterSize: .medium)
+                MediaCollection(title: "Trending TV Shows", fetchMethod: TVStore.shared.trending, posterSize: .medium)
             }
             .padding(.horizontal)
         }
