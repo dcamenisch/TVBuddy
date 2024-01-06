@@ -17,8 +17,6 @@ struct MediaCollection<T:TVBuddyMediaItem>: View {
     private let mediaTmp: [T] = []
     @State private var media: [T]
     
-    // Using a workaround with mediaTmp to update the State var media from outside the view
-    // while also triggering the update of the view
     init(
         title: String = "",
         showAllButton: Bool = true,
@@ -31,8 +29,6 @@ struct MediaCollection<T:TVBuddyMediaItem>: View {
         self.media = media
         self.fetchMethod = fetchMethod
         self.posterSize = posterSize
-        
-//        self.mediaTmp = media
     }
 
     var body: some View {        
@@ -43,13 +39,11 @@ struct MediaCollection<T:TVBuddyMediaItem>: View {
             
             horizontalList
         }
-        .task(id: mediaTmp) {
+        .task {
             if let fetchMethod = fetchMethod {
                 Task {
                     media = await fetchMethod(false)
                 }
-            } else {
-//                media = mediaTmp // update @State var when the tmp var updated
             }
         }
     }
