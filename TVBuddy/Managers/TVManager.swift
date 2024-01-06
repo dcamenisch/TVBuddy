@@ -5,10 +5,16 @@
 //  Created by Danny on 07.07.22.
 //
 
+import os
 import Foundation
 import TMDb
 
 class TVManager {
+    private static let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier!,
+        category: String(describing: TVManager.self)
+    )
+    
     private let tvSeriesService = TVSeriesService()
     private let tvSeasonService = TVSeasonService()
     private let tvEpisodeService = TVEpisodeService()
@@ -23,7 +29,7 @@ class TVManager {
         do {
             return try await tvSeriesService.details(forTVSeries: id)
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return nil
         }
     }
@@ -32,7 +38,7 @@ class TVManager {
         do {
             return try await tvSeasonService.details(forSeason: season, inTVSeries: id)
         } catch {
-            print("Error fetching season \(season) for show \(id): \(error)")
+            handleError(error)
             return nil
         }
     }
@@ -41,7 +47,7 @@ class TVManager {
         do {
             return try await tvEpisodeService.details(forEpisode: episode, inSeason: season, inTVSeries: id)
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return nil
         }
     }
@@ -60,7 +66,7 @@ class TVManager {
                 idealWidth: AppConstants.idealPosterWidth
             )
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return nil
         }
     }
@@ -73,7 +79,7 @@ class TVManager {
                 idealWidth: AppConstants.idealBackdropWidth
             )
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return nil
         }
     }
@@ -93,7 +99,7 @@ class TVManager {
                 idealWidth: AppConstants.idealBackdropWidth
             )
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return await fetchBackdrop(id: id, season: season)
         }
     }
@@ -121,7 +127,7 @@ class TVManager {
                 idealWidth: AppConstants.idealBackdropWidth
             )
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return nil
         }
     }
@@ -130,7 +136,7 @@ class TVManager {
         do {
             return try await tvSeriesService.credits(forTVSeries: id)
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return nil
         }
     }
@@ -139,7 +145,7 @@ class TVManager {
         do {
             return try await tvSeriesService.recommendations(forTVSeries: id, page: page).results
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return nil
         }
     }
@@ -148,7 +154,7 @@ class TVManager {
         do {
             return try await tvSeriesService.similar(toTVSeries: id, page: page).results
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return nil
         }
     }
@@ -157,7 +163,7 @@ class TVManager {
         do {
             return try await discoverService.tvSeries(sortedBy: .popularity(descending: true), page: page).results
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return nil
         }
     }
@@ -166,8 +172,20 @@ class TVManager {
         do {
             return try await trendingService.tvSeries(inTimeWindow: .week, page: page).results
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return nil
         }
+    }
+    
+    func handleError(_ error: any Error) {
+        if let tmdbError = error as? TMDbError, case .network(let networkError) = tmdbError {
+            if let nsError = networkError as NSError?, nsError.code == NSURLErrorCancelled {
+                TVManager.logger.info("Request cancelled")
+                return
+            }
+        }
+        
+        TVManager.logger.error("\(error.localizedDescription)")
+        return
     }
 }

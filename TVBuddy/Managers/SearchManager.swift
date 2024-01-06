@@ -20,17 +20,21 @@ class SearchManager {
     func search(query: String, page: Int = 1) async -> [Media]? {
         do {
             return try await searchService.searchAll(query: query, page: page).results
-        } catch TMDbError.network(let error) {
-            if let error = error as NSError?, error.code == NSURLErrorCancelled {
-                SearchManager.logger.info("Search request cancelled")
-                return nil
-            }
-            
-            SearchManager.logger.error("\(error.localizedDescription)")
-            return nil
         } catch {
-            SearchManager.logger.error("\(error.localizedDescription)")
+            handleError(error)
             return nil
         }
+    }
+    
+    func handleError(_ error: any Error) {
+        if let tmdbError = error as? TMDbError, case .network(let networkError) = tmdbError {
+            if let nsError = networkError as NSError?, nsError.code == NSURLErrorCancelled {
+                SearchManager.logger.info("Request cancelled")
+                return
+            }
+        }
+        
+        SearchManager.logger.error("\(error.localizedDescription)")
+        return
     }
 }

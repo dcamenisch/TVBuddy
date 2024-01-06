@@ -5,10 +5,16 @@
 //  Created by Danny on 03.07.22.
 //
 
+import os
 import Foundation
 import TMDb
 
 class PersonManager {
+    private static let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier!,
+        category: String(describing: PersonManager.self)
+    )
+    
     private let personService = PersonService()
 
     private var imageService: ImagesConfiguration? {
@@ -19,7 +25,7 @@ class PersonManager {
         do {
             return try await personService.details(forPerson: id)
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return nil
         }
     }
@@ -32,8 +38,20 @@ class PersonManager {
                 idealWidth: AppConstants.idealPosterWidth
             )
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return nil
         }
+    }
+    
+    func handleError(_ error: any Error) {
+        if let tmdbError = error as? TMDbError, case .network(let networkError) = tmdbError {
+            if let nsError = networkError as NSError?, nsError.code == NSURLErrorCancelled {
+                PersonManager.logger.info("Request cancelled")
+                return
+            }
+        }
+        
+        PersonManager.logger.error("\(error.localizedDescription)")
+        return
     }
 }

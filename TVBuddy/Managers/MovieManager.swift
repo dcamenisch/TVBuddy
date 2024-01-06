@@ -5,10 +5,16 @@
 //  Created by Danny on 02.07.22.
 //
 
+import os
 import Foundation
 import TMDb
 
 class MovieManager {
+    private static let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier!,
+        category: String(describing: MovieManager.self)
+    )
+    
     private let movieService = MovieService()
     private let discoverService = AppConstants.discoverService
     private let trendingService = AppConstants.trendingService
@@ -21,7 +27,7 @@ class MovieManager {
         do {
             return try await movieService.details(forMovie: id)
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return nil
         }
     }
@@ -34,7 +40,7 @@ class MovieManager {
                 idealWidth: AppConstants.idealPosterWidth
             )
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return nil
         }
     }
@@ -47,7 +53,7 @@ class MovieManager {
                 idealWidth: AppConstants.idealBackdropWidth
             )
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return nil
         }
     }
@@ -67,7 +73,7 @@ class MovieManager {
                 idealWidth: AppConstants.idealBackdropWidth
             )
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return nil
         }
     }
@@ -76,7 +82,7 @@ class MovieManager {
         do {
             return try await movieService.credits(forMovie: id)
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return nil
         }
     }
@@ -85,7 +91,7 @@ class MovieManager {
         do {
             return try await movieService.recommendations(forMovie: id, page: page).results
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return nil
         }
     }
@@ -94,7 +100,7 @@ class MovieManager {
         do {
             return try await movieService.similar(toMovie: id, page: page).results
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return nil
         }
     }
@@ -103,7 +109,7 @@ class MovieManager {
         do {
             return try await discoverService.movies(sortedBy: .popularity(descending: true), page: page).results
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return nil
         }
     }
@@ -112,8 +118,20 @@ class MovieManager {
         do {
             return try await trendingService.movies(inTimeWindow: .week, page: page).results
         } catch {
-            print("Error: \(error)")
+            handleError(error)
             return nil
         }
+    }
+    
+    func handleError(_ error: any Error) {
+        if let tmdbError = error as? TMDbError, case .network(let networkError) = tmdbError {
+            if let nsError = networkError as NSError?, nsError.code == NSURLErrorCancelled {
+                MovieManager.logger.info("Request cancelled")
+                return
+            }
+        }
+        
+        MovieManager.logger.error("\(error.localizedDescription)")
+        return
     }
 }
