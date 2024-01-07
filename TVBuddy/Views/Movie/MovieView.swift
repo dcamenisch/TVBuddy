@@ -12,27 +12,27 @@ import TMDb
 struct MovieView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.presentationMode) private var presentationMode
-
-    @State var offset: CGFloat = 0.0
-    @State var visibility: Visibility = .hidden
-
-    @State var tmdbMovie: Movie?
-    @State var poster: URL?
-    @State var backdrop: URL?
-
+    
+    @State private var offset: CGFloat = 0.0
+    @State private var visibility: Visibility = .hidden
+    
+    @State private var movie: Movie?
+    @State private var poster: URL?
+    @State private var backdrop: URL?
+    
     @Query
-    private var movies: [TVBuddyMovie]
-    private var _movie: TVBuddyMovie? { movies.first }
-
-    let id: Movie.ID
-
+    private var tvbMovies: [TVBuddyMovie]
+    private var tvbMovie: TVBuddyMovie? { tvbMovies.first }
+    
     private var progress: CGFloat { backdrop != nil ? offset / 350.0 : offset / 100.0}
 
+    private let id: Movie.ID
+        
     init(id: Movie.ID) {
         self.id = id
-        _movies = Query(filter: #Predicate<TVBuddyMovie> { $0.id == id })
+        _tvbMovies = Query(filter: #Predicate<TVBuddyMovie> { $0.id == id })
     }
-
+    
     var body: some View {
         content
             .toolbarBackground(visibility, for: .navigationBar)
@@ -48,38 +48,39 @@ struct MovieView: View {
                             .foregroundStyle(.accent)
                     }
                 }
-
+                
                 ToolbarItem(placement: .principal) {
-                    Text(tmdbMovie?.title ?? "")
+                    Text(movie?.title ?? "")
                         .font(.system(size: 18, weight: .semibold))
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
                         .opacity(max(0, -22.0 + 20.0 * progress))
                 }
-
+                
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        if let movie = _movie {
+                        if let movie = tvbMovie {
                             movie.isFavorite.toggle()
-                        } else if let tmdbMovie = tmdbMovie {
+                        } else if let tmdbMovie = movie {
                             context.insert(TVBuddyMovie(movie: tmdbMovie, watched: true, isFavorite: true))
                         }
                     } label: {
-                        Image(systemName: _movie?.isFavorite ?? false ? "heart.fill" : "heart")
+                        Image(systemName: tvbMovie?.isFavorite ?? false ? "heart.fill" : "heart")
                             .fontWeight(.semibold)
                             .foregroundStyle(.accent)
                     }
                 }
             }
             .task {
-                tmdbMovie = await MovieStore.shared.movie(withID: id)
+                movie = await MovieStore.shared.movie(withID: id)
                 poster = await MovieStore.shared.poster(withID: id)
                 backdrop = await MovieStore.shared.backdrop(withID: id)
             }
     }
-
-    @ViewBuilder private var content: some View {
-        if let tmdbMovie = tmdbMovie {
+    
+    @ViewBuilder 
+    private var content: some View {
+        if let movie = movie {
             OffsettableScrollView(showsIndicators: false) { point in
                 offset = -point.y
                 if backdrop == nil {
@@ -88,9 +89,9 @@ struct MovieView: View {
                     visibility = offset > 290 ? .visible : .hidden
                 }
             } content: {
-                MovieHeader(movie: tmdbMovie, poster: poster, backdrop: backdrop)
+                MovieHeader(movie: movie, poster: poster, backdrop: backdrop)
                     .padding(.bottom, 10)
-                MovieBody(tmdbMovie: tmdbMovie, tvBuddyMovie: _movie)
+                MovieBody(movie: movie, tvbMovie: tvbMovie)
                     .padding(.horizontal)
             }
         } else {

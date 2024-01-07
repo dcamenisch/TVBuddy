@@ -14,7 +14,7 @@ struct MovieHeader: View {
     let poster: URL?
     let backdrop: URL?
     
-    var initialHeaderHeight: CGFloat = 350.0
+    let initialHeaderHeight: CGFloat = 350.0
     
     private var metadata: [String] {
         var items = [String]()
@@ -67,7 +67,6 @@ struct MovieHeader: View {
         }
     }
     
-    @MainActor
     @ViewBuilder
     private var backdropImage: some View {
         if let _ = backdrop {
@@ -75,21 +74,21 @@ struct MovieHeader: View {
                 let minY = geometry.frame(in: .global).minY
                 
                 ImageView(url: backdrop)
-                .overlay(alignment: .bottom) {
-                    Rectangle()
-                        .foregroundColor(Color(uiColor: .systemBackground))
-                        .frame(height: 100)
-                        .mask(
-                            LinearGradient(
-                                gradient: Gradient(colors: [.white, .clear]),
-                                startPoint: .bottom, endPoint: .top
-                            ))
-                }
-                .offset(y: minY > 0 ? -minY : 0)
-                .frame(
-                    width: UIScreen.main.bounds.width,
-                    height: minY > 0 ? initialHeaderHeight + minY : initialHeaderHeight
-                )
+                    .overlay(alignment: .bottom) {
+                        Rectangle()
+                            .foregroundColor(Color(uiColor: .systemBackground))
+                            .frame(height: 100)
+                            .mask(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [.white, .clear]),
+                                    startPoint: .bottom, endPoint: .top
+                                ))
+                    }
+                    .offset(y: minY > 0 ? -minY : 0)
+                    .frame(
+                        width: UIScreen.main.bounds.width,
+                        height: minY > 0 ? initialHeaderHeight + minY : initialHeaderHeight
+                    )
             }
             .frame(height: initialHeaderHeight)
         }

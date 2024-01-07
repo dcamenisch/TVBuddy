@@ -12,16 +12,17 @@ import TMDb
 struct MovieRow: View {
     @Environment(\.modelContext) private var context
     
-    @State var poster: URL?
+    @State private var poster: URL?
     
     @Query
-    private var movies: [TVBuddyMovie]
+    private var tvbMovies: [TVBuddyMovie]
+    private var tvbMovie: TVBuddyMovie? { tvbMovies.first }
     
     let movie: Movie
     
     init(movie: Movie) {
         self.movie = movie
-        _movies = Query(filter: #Predicate<TVBuddyMovie> { $0.id == movie.id })
+        _tvbMovies = Query(filter: #Predicate<TVBuddyMovie> { $0.id == movie.id })
     }
     
     var body: some View {
@@ -61,8 +62,8 @@ struct MovieRow: View {
     }
     
     private func toggleMovieInWatchlist() {
-        if let movie = movies.first {
-            context.delete(movie)
+        if let tvbMovie = tvbMovie {
+            context.delete(tvbMovie)
             try? context.save()
         } else {
             context.insert(TVBuddyMovie(movie: movie, watched: false))
@@ -71,8 +72,8 @@ struct MovieRow: View {
     }
     
     private func buttonImage() -> String {
-        if let movie = movies.first {
-            return movie.watched ? "eye.circle" : "checkmark.circle"
+        if let tvbMovie = tvbMovie {
+            return tvbMovie.watched ? "eye.circle" : "checkmark.circle"
         } else {
             return "plus.circle"
         }

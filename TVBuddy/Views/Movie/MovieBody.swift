@@ -12,58 +12,49 @@ import WrappingHStack
 
 struct MovieBody: View {
     @Environment(\.modelContext) private var context
-
-    @State var credits: ShowCredits?
-    @State var recommendations: [Movie]?
-
-    private var tmdbMovie: Movie
-    private var tvBuddyMovie: TVBuddyMovie?
-
-    init(tmdbMovie: Movie, tvBuddyMovie: TVBuddyMovie?) {
-        self.tmdbMovie = tmdbMovie
-        self.tvBuddyMovie = tvBuddyMovie
-    }
-
+    
+    @State private var credits: ShowCredits?
+    @State private var recommendations: [Movie]?
+    
+    let movie: Movie
+    let tvbMovie: TVBuddyMovie?
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             watchButtons
             overview
             genres
-
-            if let credits = credits, !credits.cast.isEmpty {
-                PeopleList(credits: credits)
-            }
-
+            creditsAndCast
             similarMovies
         }
-        .task(id: tmdbMovie) {
-            credits = await MovieStore.shared.credits(forMovie: tmdbMovie.id)
-            recommendations = await MovieStore.shared.recommendations(forMovie: tmdbMovie.id)
+        .task {
+            credits = await MovieStore.shared.credits(forMovie: movie.id)
+            recommendations = await MovieStore.shared.recommendations(forMovie: movie.id)
         }
     }
-
+    
     private var watchButtons: some View {
         HStack {
             Button {
-                if let movie = tvBuddyMovie {
+                if let movie = tvbMovie {
                     context.delete(movie)
                 } else {
-                    context.insert(TVBuddyMovie(movie: tmdbMovie, watched: false))
+                    context.insert(TVBuddyMovie(movie: movie, watched: false))
                 }
             } label: {
-                Label("Watchlist", systemImage: tvBuddyMovie == nil ? "plus" : "checkmark")
+                Label("Watchlist", systemImage: tvbMovie == nil ? "plus" : "checkmark")
                     .frame(height: 30)
                     .frame(maxWidth: .infinity)
             }
             
             Button {
-                if let movie = tvBuddyMovie {
+                if let movie = tvbMovie {
                     movie.watched.toggle()
                 } else {
-                    context.insert(TVBuddyMovie(movie: tmdbMovie, watched: true))
+                    context.insert(TVBuddyMovie(movie: movie, watched: true))
                 }
             } label: {
-                Label("Watched", systemImage: tvBuddyMovie?.watched ?? false ? "eye.fill" : "eye")
+                Label("Watched", systemImage: tvbMovie?.watched ?? false ? "eye.fill" : "eye")
                     .frame(height: 30)
                     .frame(maxWidth: .infinity)
             }
@@ -71,40 +62,44 @@ struct MovieBody: View {
         .bold()
         .buttonStyle(.bordered)
     }
-
+    
+    @ViewBuilder
     private var overview: some View {
-        Group {
-            if tmdbMovie.overview != nil {
-                Text("Storyline")
-                    .font(.title2)
-                    .bold()
-                Text(tmdbMovie.overview ?? "")
-            }
+        if let overview = movie.overview, !overview.isEmpty {
+            Text("Storyline")
+                .font(.title2)
+                .bold()
+            Text(overview)
         }
     }
-
+    
+    @ViewBuilder
     private var genres: some View {
-        Group {
-            if let genres = tmdbMovie.genres {
-                WrappingHStack(genres) { genre in
-                    Text(genre.name)
-                        .font(.headline)
-                        .padding(.horizontal, 10.0)
-                        .padding(.vertical, 8.0)
-                        .background {
-                            RoundedRectangle(cornerRadius: 15.0, style: .circular)
-                                .foregroundColor(Color(UIColor.systemGray6))
-                        }
-                }
+        if let genres = movie.genres {
+            WrappingHStack(genres) { genre in
+                Text(genre.name)
+                    .font(.headline)
+                    .padding(.horizontal, 10.0)
+                    .padding(.vertical, 8.0)
+                    .background {
+                        RoundedRectangle(cornerRadius: 15.0, style: .circular)
+                            .foregroundColor(Color(UIColor.systemGray6))
+                    }
             }
         }
     }
-
+    
+    @ViewBuilder
+    private var creditsAndCast: some View {
+        if let credits = credits, !credits.cast.isEmpty {
+            PeopleList(credits: credits)
+        }
+    }
+    
+    @ViewBuilder
     private var similarMovies: some View {
-        Group {
-            if let movies = recommendations, !movies.isEmpty {
-                MediaCollection(title: "Recommendations", media: movies)
-            }
+        if let movies = recommendations, !movies.isEmpty {
+            MediaCollection(title: "Recommendations", media: movies)
         }
     }
 }
