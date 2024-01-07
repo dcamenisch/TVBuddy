@@ -110,28 +110,21 @@ struct TVShowBody: View {
     private var seasons: some View {
         Group {
             if let numberOfSeasons = tmdbTVShow.numberOfSeasons {
-                VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 5) {
                     Text("Seasons")
                         .font(.title2)
                         .bold()
 
                     ScrollView(.horizontal, showsIndicators: false) {
-                        HStack {
-                            ForEach((hasSpecials ? 0 : 1) ... numberOfSeasons, id: \.self) { season in
+                        HStack(spacing: 5) {
+                            ForEach((hasSpecials ? 0 : 1) ... numberOfSeasons, id: \.self) { seasonNumber in
                                 NavigationLink {
-                                    TVSeasonView(id: tmdbTVShow.id, seasonNumber: season)
+                                    TVSeasonView(id: tmdbTVShow.id, seasonNumber: seasonNumber)
                                 } label: {
-                                    ZStack {
-                                        Circle()
-                                            .stroke(lineWidth: 4.0)
-                                            .foregroundColor(.accentColor)
-                                        Text(String(season))
-                                            .font(.title2)
-                                            .bold()
-                                    }
-                                    .padding(2)
-                                    .frame(width: 40, height: 40)
+                                    SeasonProgressView(tvShow: tmdbTVShow, seasonNumber: seasonNumber)
+                                        .frame(width: 50)
                                 }
+                                .buttonStyle(.plain)
                             }
                         }
                     }

@@ -7,28 +7,34 @@
 
 import SwiftUI
 
-struct CircularProgressBar: View {
+struct CircularProgressBar<Content>: View where Content: View {
     private let progress: Double
-    private let progressText: String
+    private let strokeWidth: CGFloat
+    private let content: () -> Content
     
-    init(progress: Double, text: String) {
+    init(progress: Double, strokeWidth: CGFloat = 10, @ViewBuilder content: @escaping () -> Content) {
         self.progress = progress
-        self.progressText = text
+        self.strokeWidth = strokeWidth
+        self.content = content
     }
     
     var body: some View {
         ZStack {
             Circle()
-                .stroke(Color.gray.opacity(0.2), style: StrokeStyle(lineWidth: 10))
+                .stroke(Color.background3, style: StrokeStyle(lineWidth: strokeWidth))
+                .background {
+                    Circle()
+                        .foregroundStyle(Color.background2)
+                }
             
             Circle()
                 .trim(from: 0, to: CGFloat(min(self.progress, 1.0)))
-                .stroke(Color.accentColor, style: StrokeStyle(lineWidth: 10, lineCap: .round))
+                .stroke(Color.accentColor, style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round))
                 .rotationEffect(Angle(degrees: -90))
                 .animation(.linear, value: progress)
-            
-            Text(progressText)
-                .font(.title)
+
+            content()
         }
+        .padding(strokeWidth / 2)
     }
 }
