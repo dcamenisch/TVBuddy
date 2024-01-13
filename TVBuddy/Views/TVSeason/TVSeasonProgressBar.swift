@@ -24,18 +24,23 @@ struct SeasonProgressView: View {
     
     var body: some View {
         CircularProgressBar(progress: progress, strokeWidth: 5) {
-            Text(String(seasonNumber))
+            Text(seasonNumber == 0 ? "S" : String(seasonNumber))
                 .foregroundStyle(Color.foreground2)
                 .font(.title2)
                 .bold()
         }
         .task {
             let allPredicate = #Predicate<TVBuddyTVEpisode> { $0.tvShow?.id ?? 0 == tvShow.id && $0.seasonNumber == seasonNumber }
-            let watchedPredicate = #Predicate<TVBuddyTVEpisode> { $0.tvShow?.id ?? 0 == tvShow.id && $0.seasonNumber == seasonNumber && $0.watched }
-            
             let totalCount = (try? context.fetchCount(FetchDescriptor(predicate: allPredicate))) ?? 0
-            let watchedCount = (try? context.fetchCount(FetchDescriptor(predicate: watchedPredicate))) ?? 0
             
+            if totalCount == 0 {
+                progress = 0.0
+                return
+            }
+            
+            let watchedPredicate = #Predicate<TVBuddyTVEpisode> { $0.tvShow?.id ?? 0 == tvShow.id && $0.seasonNumber == seasonNumber && $0.watched }
+            let watchedCount = (try? context.fetchCount(FetchDescriptor(predicate: watchedPredicate))) ?? 0
+                        
             progress = Double(watchedCount) / Double(totalCount)
         }
     }
