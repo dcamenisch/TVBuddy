@@ -54,6 +54,18 @@ struct ProfilView: View {
                     .cornerRadius(10)
                 }
                 
+                HStack(spacing: 10) {
+                    CircularProgressBar(progress: 0.5) {
+                        Text("S0")
+                            .font(.title)
+                            .foregroundStyle(Color.foreground2)
+                    }
+                    
+                    Text("This placeholder will later be replace with the percentage of the watchlist that the user completed")
+                }
+            
+    
+                
                 MediaCollection(title: "Archived TV Shows (\(archivedTVShows.count))", media: archivedTVShows)
                 MediaCollection(title: "Watched TV Shows (\(watchedTVShows.count))", media: watchedTVShows)
                 MediaCollection(title: "Watched Movies (\(watchedMovies.count))", media: watchedMovies)

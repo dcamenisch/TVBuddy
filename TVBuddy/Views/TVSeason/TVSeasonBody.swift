@@ -27,11 +27,12 @@ struct TVSeasonBody: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Button {
-                if tvBuddyTVShow != nil {
+                if let tvBuddyTVShow = tvBuddyTVShow {
                     let newValue = !watchedAll
                     episodes.forEach { episode in
                         episode.watched = newValue
                     }
+                    tvBuddyTVShow.checkWatching()
                 } else {
                     insertTVShow(id: tmdbTVShow.id, watched: false, isFavorite: false)
                 }

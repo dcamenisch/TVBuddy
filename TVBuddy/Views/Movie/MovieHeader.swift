@@ -16,31 +16,6 @@ struct MovieHeader: View {
     
     let initialHeaderHeight: CGFloat = 350.0
     
-    private var metadata: [String] {
-        var items = [String]()
-        
-        if let runtime = movie.runtime, runtime > 0 {
-            let hours = Int(runtime / 60)
-            let minutes = Int(runtime % 60)
-            
-            if hours == 0 {
-                items.append("\(minutes) min")
-            } else {
-                items.append("\(hours) hr \(minutes) min")
-            }
-        }
-        
-        if let releaseDate = movie.releaseDate {
-            items.append(DateFormatter.year.string(from: releaseDate))
-        }
-        
-        if let status = movie.status {
-            items.append(status.rawValue)
-        }
-        
-        return items
-    }
-    
     var body: some View {
         ZStack(alignment: .bottomLeading) {
             VStack {
@@ -54,7 +29,7 @@ struct MovieHeader: View {
                     Text(movie.title)
                         .font(.system(size: 25, weight: .bold))
                     
-                    Text("\(metadata.joined(separator: "・"))")
+                    Text("\(movie.metadata.joined(separator: "・"))")
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, PosterStyle.Size.medium.width() + 15)

@@ -14,21 +14,7 @@ struct TVShowHeader: View {
     let poster: URL?
     let backdrop: URL?
 
-    var initialHeaderHeight: CGFloat = 350.0
-
-    private var metadata: [String] {
-        var items = [String]()
-
-        if let releaseDate = show.firstAirDate {
-            items.append(DateFormatter.year.string(from: releaseDate))
-        }
-
-        if let status = show.status {
-            items.append(status)
-        }
-
-        return items
-    }
+    let initialHeaderHeight: CGFloat = 350.0
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
@@ -59,7 +45,7 @@ struct TVShowHeader: View {
                         .font(.system(size: 25, weight: .bold))
 
                     HStack {
-                        Text("\(metadata.joined(separator: "・"))")
+                        Text("\(show.metadata.joined(separator: "・"))")
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
