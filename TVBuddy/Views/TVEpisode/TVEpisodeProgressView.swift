@@ -16,6 +16,8 @@ struct TVEpisodeProgressView: View {
     
     @State private var releasedEpisodes: [TVBuddyTVEpisode] = []
     @State private var upcomingEpisodes: [TVBuddyTVEpisode] = []
+    
+    private var updateView: Bool { releasedEpisodes.allSatisfy({ !$0.watched }) }
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -47,7 +49,7 @@ struct TVEpisodeProgressView: View {
                 }
             }
         }
-        .task {
+        .task(id: updateView) {
             let now = Date.now
             let future = Date.distantFuture
             
