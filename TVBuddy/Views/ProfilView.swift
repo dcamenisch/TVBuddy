@@ -66,9 +66,9 @@ struct ProfilView: View {
             
     
                 
-                MediaCollection(title: "Archived TV Shows (\(archivedTVShows.count))", media: archivedTVShows)
-                MediaCollection(title: "Watched TV Shows (\(watchedTVShows.count))", media: watchedTVShows)
-                MediaCollection(title: "Watched Movies (\(watchedMovies.count))", media: watchedMovies)
+                MediaCollection(title: "Archived TV Shows (\(archivedTVShows.count))", media: archivedTVShows).id(archivedTVShows)
+                MediaCollection(title: "Watched TV Shows (\(watchedTVShows.count))", media: watchedTVShows).id(watchedTVShows)
+                MediaCollection(title: "Watched Movies (\(watchedMovies.count))", media: watchedMovies).id(watchedMovies)
             }
             .padding(.horizontal)
         }
