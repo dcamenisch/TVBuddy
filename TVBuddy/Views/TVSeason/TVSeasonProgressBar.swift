@@ -12,15 +12,10 @@ import TMDb
 struct SeasonProgressView: View {
     @Environment(\.modelContext) private var context
     
-    private let tvShow: TVSeries
-    private let seasonNumber: Int
+    let tvShow: TVSeries
+    let seasonNumber: Int
     
     @State private var progress: Double = 0.0
-    
-    init(tvShow: TVSeries, seasonNumber: Int) {
-        self.tvShow = tvShow
-        self.seasonNumber = seasonNumber
-    }
     
     var body: some View {
         CircularProgressBar(progress: progress, strokeWidth: 5) {
