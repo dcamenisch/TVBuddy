@@ -10,12 +10,7 @@ import SwiftUI
 
 struct ImageView: View {
     let url: URL?
-    let placeholder: String
-    
-    init(url: URL?, placeholder: String = "") {
-        self.url = url
-        self.placeholder = placeholder
-    }
+    var placeholder: String = ""
 
     var body: some View {
         LazyImage(url: url) { state in

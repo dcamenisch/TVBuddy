@@ -79,7 +79,7 @@ struct TVSeasonView: View {
             } content: {
                 TVSeasonHeader(season: tmdbSeason, poster: poster, backdrop: backdrop)
                     .padding(.bottom, 10)
-                TVSeasonBody(tmdbTVShow: tmdbTVShow, tmdbSeason: tmdbSeason, tvBuddyTVShow: _show)
+                TVSeasonBody(tvShow: tmdbTVShow, tvSeason: tmdbSeason, tvBuddyTVShow: _show)
                     .padding(.horizontal)
             }
         } else {

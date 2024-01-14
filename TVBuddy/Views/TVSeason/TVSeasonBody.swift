@@ -12,16 +12,16 @@ import TMDb
 struct TVSeasonBody: View {
     @Environment(\.modelContext) private var context
 
-    let tmdbTVShow: TVSeries
-    let tmdbSeason: TVSeason
+    let tvShow: TVSeries
+    let tvSeason: TVSeason
     let tvBuddyTVShow: TVBuddyTVShow?
     
-    @State private var episodes: [TVBuddyTVEpisode] = []
+    @State private var tvBuddyTVEpisodes: [TVBuddyTVEpisode] = []
     
     private var watchedAll: Bool {
-        episodes.allSatisfy {
-            $0.seasonNumber != tmdbSeason.seasonNumber || $0.watched
-        } && episodes.count > 0
+        tvBuddyTVEpisodes.allSatisfy {
+            $0.seasonNumber != tvSeason.seasonNumber || $0.watched
+        } && tvBuddyTVEpisodes.count > 0
     }
 
     var body: some View {
@@ -29,12 +29,12 @@ struct TVSeasonBody: View {
             Button {
                 if let tvBuddyTVShow = tvBuddyTVShow {
                     let newValue = !watchedAll
-                    episodes.forEach { episode in
+                    tvBuddyTVEpisodes.forEach { episode in
                         episode.watched = newValue
                     }
                     tvBuddyTVShow.checkWatching()
                 } else {
-                    insertTVShow(id: tmdbTVShow.id, watched: false, isFavorite: false)
+                    insertTVShow(id: tvShow.id, watched: false, isFavorite: false)
                 }
             } label: {
                 Label(watchedAll ? "Mark as unseen" : "Mark as seen", systemImage: watchedAll ? "eye.fill" : "eye")
@@ -44,14 +44,14 @@ struct TVSeasonBody: View {
             .bold()
             .buttonStyle(.bordered)
 
-            if let overview = tmdbSeason.overview, !overview.isEmpty {
+            if let overview = tvSeason.overview, !overview.isEmpty {
                 Text("Storyline")
                     .font(.title2)
                     .bold()
                 Text(overview)
             }
 
-            if let tmdbEpisodes = tmdbSeason.episodes {
+            if let tmdbEpisodes = tvSeason.episodes {
                 Group {
                     Text("Episodes")
                         .font(.title2)
@@ -59,7 +59,7 @@ struct TVSeasonBody: View {
                     Text(" - seen")
                         .font(.subheadline)
                         .bold() +
-                    Text(" \(episodes.filter { $0.watched }.count)")
+                    Text(" \(tvBuddyTVEpisodes.filter { $0.watched }.count)")
                         .font(.subheadline)
                         .foregroundColor(.accentColor)
                         .bold() +
@@ -68,12 +68,8 @@ struct TVSeasonBody: View {
                         .bold()
                 }
                 
-                ForEach(tmdbEpisodes) { episode in
-                    TVEpisodeRowNonClickable(
-                        tvShow: tmdbTVShow,
-                        tvEpisode: episode,
-                        tvBuddyTVEpisode: episodes.first(where: {$0.id == episode.id})
-                    )
+                ForEach(tmdbEpisodes) { tvEpisode in
+                    TVEpisodeRow(tvShow: tvShow, tvEpisode: tvEpisode, tvBuddyTVEpisode: tvBuddyTVEpisodes.first(where: { $0.id == tvEpisode.id }))
                 }
             }
         }
@@ -81,11 +77,11 @@ struct TVSeasonBody: View {
             // This task is triggered a first time when the show gets inserted (without episodes)
             // and a second time when the episodes are added
             
-            let id = tmdbTVShow.id
-            let seasonNumber = tmdbSeason.seasonNumber
+            let id = tvShow.id
+            let seasonNumber = tvSeason.seasonNumber
             
             do {
-                episodes = try context.fetch(FetchDescriptor<TVBuddyTVEpisode>(predicate: #Predicate<TVBuddyTVEpisode> {$0.tvShow?.id == id && $0.seasonNumber == seasonNumber}))
+                tvBuddyTVEpisodes = try context.fetch(FetchDescriptor<TVBuddyTVEpisode>(predicate: #Predicate<TVBuddyTVEpisode> {$0.tvShow?.id == id && $0.seasonNumber == seasonNumber}))
             } catch {
                 print("Error: \(error)")
             }

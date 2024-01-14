@@ -9,42 +9,113 @@ import SwiftData
 import SwiftUI
 import TMDb
 
-struct TVEpisodeRowNonClickable: View {
-    let tvShow: TVSeries
-    let tvEpisode: TVEpisode
-    let tvBuddyTVEpisode: TVBuddyTVEpisode?
-
+struct TVEpisodeRow: View {
     @Environment(\.modelContext) private var context
+    
+    private let tvShowID: TVSeries.ID
+    private let tvShowName: String
+    
+    private let clickable: Bool
+    private let showOverview: Bool
+    
+    private let tvBuddyTVEpisode: TVBuddyTVEpisode?
+    
+    private var seasonNumber: Int {
+        tvEpisode?.seasonNumber ?? tvBuddyTVEpisode?.seasonNumber ?? 0
+    }
+    
+    private var episodeNumber: Int {
+        tvEpisode?.episodeNumber ?? tvBuddyTVEpisode?.episodeNumber ?? 0
+    }
 
-    @State var backdrop: URL?
+    @State private var tvEpisode: TVEpisode?
+    @State private var backdrop: URL?
+    
+    init(tvShow: TVSeries, tvEpisode: TVEpisode, tvBuddyTVEpisode: TVBuddyTVEpisode? = nil, clickable: Bool  = false, showOverview: Bool = true) {
+        self.tvShowID = tvShow.id
+        self.tvShowName = tvShow.name
+        
+        self._tvEpisode = State(initialValue: tvEpisode)
+        self.tvBuddyTVEpisode = tvBuddyTVEpisode
+        
+        self.clickable = clickable
+        self.showOverview = showOverview
+    }
+    
+    init(tvBuddyTVShow: TVBuddyTVShow, tvBuddyTVEpisode: TVBuddyTVEpisode? = nil, clickable: Bool  = false, showOverview: Bool = true) {
+        self.tvShowID = tvBuddyTVShow.id
+        self.tvShowName = tvBuddyTVShow.name
+        
+        self.tvBuddyTVEpisode = tvBuddyTVEpisode
+        
+        self.clickable = clickable
+        self.showOverview = showOverview
+    }
     
     var body: some View {
+        Group {
+            if clickable {
+                NavigationLink {
+                    TVShowView(id: tvShowID)
+                } label: {
+                    content
+                }
+                .buttonStyle(.plain)
+            } else {
+                content
+            }
+        }
+        .task {
+            tvEpisode = await TVStore.shared.episode(episodeNumber, season: seasonNumber, forTVSeries: tvShowID)
+            backdrop = await TVStore.shared.backdrop(withID: tvShowID, season: seasonNumber, episode: episodeNumber)
+        }
+    }
+
+    var content: some View {
         HStack {
-            ImageView(url: backdrop, placeholder: tvEpisode.name)
+            ImageView(url: backdrop, placeholder: tvEpisode?.name ?? "")
                 .frame(width: 130)
                 .aspectRatio(1.77, contentMode: .fit)
                 .cornerRadius(5.0)
-
+            
             VStack(alignment: .leading) {
-                Text(tvEpisode.name )
-                    .font(.headline)
-                    .lineLimit(1)
-                    .bold()
+                if showOverview {
+                    Text(tvEpisode?.name ?? "")
+                        .font(.headline)
+                        .lineLimit(1)
+                        .bold()
+                    
+                    Text(tvEpisode?.overview ?? "")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(3)
+                        .bold()
+                } else {
+                    Text(tvShowName)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .bold()
 
-                Text(tvEpisode.overview ?? "")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(3)
-                    .bold()
+                    Text(tvEpisode?.name ?? "")
+                        .font(.headline)
+                        .lineLimit(1)
+                        .bold()
+
+                    Text("S\(String(format: "%02d", seasonNumber ))E\(String(format: "%02d", episodeNumber ))")
+                        .font(.subheadline)
+                        .lineLimit(1)
+                        .bold()
+                }
             }
-
+            
             Spacer()
-
+            
             Button(action: {
                 if let episode = tvBuddyTVEpisode {
                     episode.toggleWatched()
                 } else {
-                    insertTVShow(id: tvShow.id, watched: false, isFavorite: false, episodeID: tvEpisode.id)
+                    insertTVShow(id: tvShowID, watched: false, isFavorite: false, episodeID: tvEpisode?.id ?? 0)
                 }
             }, label: {
                 Image(systemName: tvBuddyTVEpisode?.watched ?? false ? "checkmark.circle" : "plus.circle")
@@ -54,9 +125,6 @@ struct TVEpisodeRowNonClickable: View {
                     .padding(8)
             })
         }
-        .task {
-            backdrop = await TVStore.shared.backdrop(withID: tvShow.id, season: tvEpisode.seasonNumber, episode: tvEpisode.episodeNumber)
-        }
     }
     
     func insertTVShow(id: TVSeries.ID, watched: Bool, isFavorite: Bool, episodeID: TVEpisode.ID) {
@@ -64,71 +132,6 @@ struct TVEpisodeRowNonClickable: View {
             let container = context.container
             let actor = TVShowActor(modelContainer: container)
             await actor.insertTVShow(id: id, watched: watched, isFavorite: isFavorite, episodeID: episodeID)
-        }
-    }
-}
-
-struct TVEpisodeRowClickable: View {
-    let tvBuddyTVShow: TVBuddyTVShow
-    let tvBuddyTVEpisode: TVBuddyTVEpisode
-    
-    @State var backdrop: URL?
-    @State var tvEpisode: TVEpisode?
-    
-    init(tvBuddyTVShow: TVBuddyTVShow, tvBuddyTVEpisode: TVBuddyTVEpisode) {
-        self.tvBuddyTVShow = tvBuddyTVShow
-        self.tvBuddyTVEpisode = tvBuddyTVEpisode
-    }
-
-    var body: some View {
-        NavigationLink {
-            TVShowView(id: tvBuddyTVShow.id)
-        } label: {
-            label
-        }
-        .buttonStyle(.plain)
-        .task(id: tvBuddyTVEpisode) {
-            backdrop = await TVStore.shared.backdrop(withID: tvBuddyTVShow.id, season: tvBuddyTVEpisode.seasonNumber, episode: tvBuddyTVEpisode.episodeNumber)
-            tvEpisode = await TVStore.shared.episode(tvBuddyTVEpisode.episodeNumber, season: tvBuddyTVEpisode.seasonNumber, forTVSeries: tvBuddyTVShow.id)
-        }
-    }
-
-    var label: some View {
-        HStack {
-            ImageView(url: backdrop)
-                .frame(width: 130)
-                .aspectRatio(1.77, contentMode: .fit)
-                .cornerRadius(5.0)
-
-            VStack(alignment: .leading) {
-                Text(tvBuddyTVShow.name)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .bold()
-
-                Text(tvEpisode?.name ?? "")
-                    .font(.headline)
-                    .lineLimit(1)
-                    .bold()
-
-                Text("S\(String(format: "%02d", tvBuddyTVEpisode.seasonNumber ))E\(String(format: "%02d", tvBuddyTVEpisode.episodeNumber ))")
-                    .font(.subheadline)
-                    .lineLimit(1)
-                    .bold()
-            }
-
-            Spacer()
-
-            Button(action: {
-                tvBuddyTVEpisode.toggleWatched()
-            }, label: {
-                Image(systemName: tvBuddyTVEpisode.watched ? "checkmark.circle" : "plus.circle")
-                    .font(.title)
-                    .bold()
-                    .foregroundStyle(.gray)
-                    .padding(8)
-            })
         }
     }
 }

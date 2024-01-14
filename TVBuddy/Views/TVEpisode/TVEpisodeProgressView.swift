@@ -27,10 +27,7 @@ struct TVEpisodeProgressView: View {
                     .bold()
                 ForEach(releasedEpisodes) { tvEpisode in
                     if let tvShow = tvEpisode.tvShow {
-                        TVEpisodeRowClickable(
-                            tvBuddyTVShow: tvShow,
-                            tvBuddyTVEpisode: tvEpisode
-                        )
+                        TVEpisodeRow(tvBuddyTVShow: tvShow, tvBuddyTVEpisode: tvEpisode, clickable: true, showOverview: false)
                     }
                 }
             }
@@ -41,10 +38,7 @@ struct TVEpisodeProgressView: View {
                     .bold()
                 ForEach(upcomingEpisodes) { tvEpisode in
                     if let tvShow = tvEpisode.tvShow {
-                        TVEpisodeRowClickable(
-                            tvBuddyTVShow: tvShow,
-                            tvBuddyTVEpisode: tvEpisode
-                        )
+                        TVEpisodeRow(tvBuddyTVShow: tvShow, tvBuddyTVEpisode: tvEpisode, clickable: true, showOverview: false)
                     }
                 }
             }
