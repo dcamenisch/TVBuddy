@@ -49,11 +49,6 @@ struct MediaCarousel: View {
             timer.upstream.connect().cancel()
         })
         .task {
-            
-            
-            
-            
-            
             if trendingMedia.isEmpty {
                 let trendingMovies = await MovieStore.shared.trending().prefix(6)
                 let trendingTVShows = await TVStore.shared.trending().prefix(6)

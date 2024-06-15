@@ -86,7 +86,7 @@ struct TVShowView: View {
             .task {
                 tmdbTVShow = await TVStore.shared.show(withID: id)
                 poster = await TVStore.shared.poster(withID: id)
-                backdrop = await TVStore.shared.backdrop(withID: id)
+                backdrop = await TVStore.shared.backdrop(withID: id)                
             }
     }
 

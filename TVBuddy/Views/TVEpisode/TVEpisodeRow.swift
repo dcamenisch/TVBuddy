@@ -86,7 +86,7 @@ struct TVEpisodeRow: View {
                         .bold()
                     
                     Text(tvEpisode?.overview ?? "")
-                        .font(.subheadline)
+                        .font(.system(size: 16))
                         .foregroundStyle(.secondary)
                         .lineLimit(3)
                         .bold()
@@ -111,19 +111,32 @@ struct TVEpisodeRow: View {
             
             Spacer()
             
-            Button(action: {
-                if let episode = tvBuddyTVEpisode {
-                    episode.toggleWatched()
-                } else {
-                    insertTVShow(id: tvShowID, watched: false, isFavorite: false, episodeID: tvEpisode?.id ?? 0)
+            if tvEpisode?.airDate ?? Date.now > Date.now {
+                VStack {
+                    Text("\(Calendar.current.dateComponents([.day], from: Date.now, to: (tvEpisode?.airDate)!).day ?? 0)")
+                        .font(.title)
+                        .bold()
+                    Text("days")
+                        .bold()
                 }
-            }, label: {
-                Image(systemName: tvBuddyTVEpisode?.watched ?? false ? "checkmark.circle" : "plus.circle")
-                    .font(.title)
-                    .bold()
-                    .foregroundStyle(.gray)
-                    .padding(8)
-            })
+                .foregroundStyle(.gray)
+                .padding(.horizontal, 8)
+                
+            } else {
+                Button(action: {
+                    if let episode = tvBuddyTVEpisode {
+                        episode.toggleWatched()
+                    } else {
+                        insertTVShow(id: tvShowID, watched: false, isFavorite: false, episodeID: tvEpisode?.id ?? 0)
+                    }
+                }, label: {
+                    Image(systemName: tvBuddyTVEpisode?.watched ?? false ? "checkmark.circle" : "plus.circle")
+                        .font(.title)
+                        .bold()
+                        .foregroundStyle(.gray)
+                        .padding(8)
+                })
+            }
         }
     }
     
