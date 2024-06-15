@@ -15,11 +15,12 @@ class TVManager {
         category: String(describing: TVManager.self)
     )
     
-    private let tvSeriesService = TVSeriesService()
-    private let tvSeasonService = TVSeasonService()
-    private let tvEpisodeService = TVEpisodeService()
-    private let discoverService = AppConstants.discoverService
-    private let trendingService = AppConstants.trendingService
+    private let tvSeriesService = AppConstants.tmdbClient.tvSeries
+    private let tvSeasonService = AppConstants.tmdbClient.tvSeasons
+    private let tvEpisodeService = AppConstants.tmdbClient.tvEpisodes
+    
+    private let discoverService = AppConstants.tmdbClient.discover
+    private let trendingService = AppConstants.tmdbClient.trending
 
     private var imageService: ImagesConfiguration? {
         AppConstants.apiConfiguration?.images
@@ -170,7 +171,7 @@ class TVManager {
 
     func fetchTrending(page: Int = 1) async -> [TVSeries]? {
         do {
-            return try await trendingService.tvSeries(inTimeWindow: .week, page: page).results
+            return try await trendingService.tvSeries(inTimeWindow: .day, page: page).results
         } catch {
             handleError(error)
             return nil

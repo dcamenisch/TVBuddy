@@ -15,9 +15,9 @@ class MovieManager {
         category: String(describing: MovieManager.self)
     )
     
-    private let movieService = MovieService()
-    private let discoverService = AppConstants.discoverService
-    private let trendingService = AppConstants.trendingService
+    private let movieService = AppConstants.tmdbClient.movies
+    private let discoverService = AppConstants.tmdbClient.discover
+    private let trendingService = AppConstants.tmdbClient.trending
 
     private var imageService: ImagesConfiguration? {
         AppConstants.apiConfiguration?.images
@@ -116,7 +116,7 @@ class MovieManager {
 
     func fetchTrending(page: Int = 1) async -> [Movie]? {
         do {
-            return try await trendingService.movies(inTimeWindow: .week, page: page).results
+            return try await trendingService.movies(inTimeWindow: .day, page: page).results
         } catch {
             handleError(error)
             return nil

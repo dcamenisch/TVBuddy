@@ -15,7 +15,7 @@ class SearchManager {
         category: String(describing: SearchManager.self)
     )
     
-    let searchService = SearchService()
+    let searchService = AppConstants.tmdbClient.search
 
     func search(query: String, page: Int = 1) async -> [Media]? {
         do {

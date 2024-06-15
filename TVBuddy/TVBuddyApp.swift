@@ -20,11 +20,8 @@ struct TVBuddyApp: App {
     var container: ModelContainer
 
     init() {
-        let tmdbConfiguration = TMDbConfiguration(apiKey: AppConstants.apiKey)
-        TMDb.configure(tmdbConfiguration)
-
         Task {
-            AppConstants.apiConfiguration = try await AppConstants.configurationService.apiConfiguration()
+            AppConstants.apiConfiguration = try await AppConstants.tmdbClient.configurations.apiConfiguration()
         }
 
         do {

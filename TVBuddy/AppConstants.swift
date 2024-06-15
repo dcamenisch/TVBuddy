@@ -26,10 +26,7 @@ enum AppConstants {
         }
         return value
     }
-
-    static let configurationService = ConfigurationService()
+    
+    static let tmdbClient = TMDbClient(apiKey: apiKey)
     static var apiConfiguration: APIConfiguration?
-
-    static let discoverService = DiscoverService()
-    static let trendingService = TrendingService()
 }

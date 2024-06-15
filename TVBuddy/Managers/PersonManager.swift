@@ -15,7 +15,7 @@ class PersonManager {
         category: String(describing: PersonManager.self)
     )
     
-    private let personService = PersonService()
+    private let personService = AppConstants.tmdbClient.people
 
     private var imageService: ImagesConfiguration? {
         AppConstants.apiConfiguration?.images
