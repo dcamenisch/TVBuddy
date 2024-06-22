@@ -17,12 +17,12 @@ struct TVEpisodeProgressView: View {
     @State private var releasedEpisodes: [TVBuddyTVEpisode] = []
     @State private var upcomingEpisodes: [TVBuddyTVEpisode] = []
     
-    private var updateView: Bool { releasedEpisodes.allSatisfy({ !$0.watched }) }
+    private var updateView: Bool { releasedEpisodes.allSatisfy { !$0.watched } }
 
     var body: some View {
         VStack(alignment: .leading) {
             if !releasedEpisodes.isEmpty {
-                Text("TV Show Progress")
+                Text("Continue Watching")
                     .font(.title2)
                     .bold()
                 ForEach(releasedEpisodes) { tvEpisode in
@@ -44,29 +44,25 @@ struct TVEpisodeProgressView: View {
             }
         }
         .task(id: updateView) {
-            let now = Date.now
-            let future = Date.distantFuture
-            
             var releasedEpisodes = [TVBuddyTVEpisode]()
             var upcomingEpisodes = [TVBuddyTVEpisode]()
             
-            tvShows.forEach { tvShow in
+            for tvShow in tvShows {
                 let id = tvShow.id
-                let sortDescriptor = [SortDescriptor(\TVBuddyTVEpisode.seasonNumber), SortDescriptor(\TVBuddyTVEpisode.episodeNumber)]
-                
-                let releasedEpisodesPredicate = #Predicate<TVBuddyTVEpisode> { $0.tvShow?.id == id && $0.seasonNumber > 0 && !$0.watched && $0.airDate ?? future <= now }
-                let releasedEpisode = try? context.fetch(FetchDescriptor(predicate: releasedEpisodesPredicate, sortBy: sortDescriptor)).first
-                
-                if let releasedEpisode = releasedEpisode {
-                    releasedEpisodes.append(releasedEpisode)
-                    return
-                }
-                
-                let upcomingEpisodesPredicate = #Predicate<TVBuddyTVEpisode> { $0.tvShow?.id == id && $0.seasonNumber > 0 && !$0.watched && $0.airDate ?? future >= now }
-                let upcomingEpisode = try? context.fetch(FetchDescriptor(predicate: upcomingEpisodesPredicate, sortBy: sortDescriptor)).first
-                
-                if let upcomingEpisode = upcomingEpisode {
-                    upcomingEpisodes.append(upcomingEpisode)
+                let sortDescriptor = [
+                    SortDescriptor(\TVBuddyTVEpisode.seasonNumber),
+                    SortDescriptor(\TVBuddyTVEpisode.episodeNumber)
+                ]
+                                
+                let episodesPredicate = #Predicate<TVBuddyTVEpisode> { $0.tvShow?.id == id && $0.seasonNumber > 0 && !$0.watched }
+                let episode = try? context.fetch(FetchDescriptor(predicate: episodesPredicate, sortBy: sortDescriptor)).first
+                                
+                if let episode = episode, let airDate = episode.airDate {
+                    if airDate <= Date.now {
+                        releasedEpisodes.append(episode)
+                    } else {
+                        upcomingEpisodes.append(episode)
+                    }
                 }
             }
             

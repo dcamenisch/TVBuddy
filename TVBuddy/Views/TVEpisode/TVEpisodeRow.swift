@@ -53,21 +53,15 @@ struct TVEpisodeRow: View {
     }
     
     var body: some View {
-        Group {
-            if clickable {
-                NavigationLink {
-                    TVShowView(id: tvShowID)
-                } label: {
-                    content
-                }
-                .buttonStyle(.plain)
-            } else {
-                content
-            }
+        NavigationLink {
+            TVEpisodeView(episodeNumber: episodeNumber, seasonNumber: seasonNumber, id: tvShowID)
+        } label: {
+            content
         }
+        .buttonStyle(.plain)
         .task {
             tvEpisode = await TVStore.shared.episode(episodeNumber, season: seasonNumber, forTVSeries: tvShowID)
-            backdrop = await TVStore.shared.backdrop(withID: tvShowID, season: seasonNumber, episode: episodeNumber)
+            backdrop = await TVStore.shared.stills(episode: episodeNumber, season: seasonNumber, id: tvShowID).first
         }
     }
 
@@ -111,9 +105,9 @@ struct TVEpisodeRow: View {
             
             Spacer()
             
-            if tvEpisode?.airDate ?? Date.now > Date.now {
+            if tvEpisode?.airDate ?? Date.distantFuture > Date.now {
                 VStack {
-                    Text("\(Calendar.current.dateComponents([.day], from: Date.now, to: (tvEpisode?.airDate)!).day ?? 0)")
+                    Text("\(Calendar.current.dateComponents([.day], from: Date.now, to: (tvEpisode?.airDate ?? Date.now)).day ?? -1)")
                         .font(.title)
                         .bold()
                     Text("days")
