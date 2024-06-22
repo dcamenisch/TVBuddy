@@ -49,21 +49,26 @@ struct MediaCollection<T:TVBuddyMediaItem>: View {
     
     var upperBar: some View {
         HStack(alignment: .bottom) {
-            Text(title)
-                .font(.title2)
-                .bold()
-
-            Spacer()
-
             if showAllButton {
                 NavigationLink {
-                    verticalGrid
-                        .navigationTitle(title)
+                verticalGrid
+                    .navigationTitle(title)
                 } label: {
-                    Text("Show all")
-                        .foregroundStyle(.secondary)
+                    HStack(spacing: 5) {
+                        Text(title)
+                            .font(.title2)
+                            .bold()
+                        
+                        Image(systemName: "chevron.right")
+                            .bold()
+                            .foregroundColor(.secondary)
+                    }
                 }
                 .buttonStyle(.plain)
+            } else {
+                Text(title)
+                    .font(.title2)
+                    .bold()
             }
         }
     }
@@ -87,7 +92,7 @@ struct MediaCollection<T:TVBuddyMediaItem>: View {
     
     var verticalGrid: some View {
         ScrollView {
-            LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 4), spacing: 10) {
+            LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 3), spacing: 10) {
                 ForEach(Array(media.enumerated()), id: \.element) { index, element in
                     MediaListItem(mediaItem: element)
                         .posterStyle()
