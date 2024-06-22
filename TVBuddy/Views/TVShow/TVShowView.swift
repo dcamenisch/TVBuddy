@@ -104,6 +104,7 @@ struct TVShowView: View {
                     .padding(.bottom, 10)
                 TVShowBody(tmdbTVShow: tmdbTVShow, tvBuddyTVShow: _show)
                     .padding(.horizontal)
+                Spacer()
             }
         } else {
             ProgressView()

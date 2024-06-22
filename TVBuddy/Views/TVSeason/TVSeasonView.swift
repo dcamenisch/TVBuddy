@@ -15,8 +15,8 @@ struct TVSeasonView: View {
 
     @Environment(\.presentationMode) private var presentationMode
 
-    @State var offset: CGFloat = 0.0
-    @State var visibility: Visibility = .hidden
+    @State private var offset: CGFloat = 0.0
+    @State private var visibility: Visibility = .hidden
 
     @State var tmdbTVShow: TVSeries?
     @State var tmdbSeason: TVSeason?
@@ -67,7 +67,8 @@ struct TVSeasonView: View {
             }
     }
 
-    @ViewBuilder private var content: some View {
+    @ViewBuilder 
+    private var content: some View {
         if let tmdbSeason = tmdbSeason, let tmdbTVShow = tmdbTVShow {
             OffsettableScrollView(showsIndicators: false) { point in
                 offset = -point.y
@@ -81,6 +82,7 @@ struct TVSeasonView: View {
                     .padding(.bottom, 10)
                 TVSeasonBody(tvShow: tmdbTVShow, tvSeason: tmdbSeason, tvBuddyTVShow: _show)
                     .padding(.horizontal)
+                Spacer()
             }
         } else {
             ProgressView()

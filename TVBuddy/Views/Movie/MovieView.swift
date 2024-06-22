@@ -93,6 +93,7 @@ struct MovieView: View {
                     .padding(.bottom, 10)
                 MovieBody(movie: movie, tvbMovie: tvbMovie)
                     .padding(.horizontal)
+                Spacer()
             }
         } else {
             ProgressView()
