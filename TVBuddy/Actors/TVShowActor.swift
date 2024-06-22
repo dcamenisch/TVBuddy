@@ -62,7 +62,6 @@ actor TVShowActor {
     func updateTVShows() async {
         do {
             let now = Date.now
-            let past = Date.distantPast
             let future = Date.distantFuture
             
             let tvbTVShows = try modelContext.fetch(FetchDescriptor<TVBuddyTVShow>())
@@ -73,9 +72,8 @@ actor TVShowActor {
                     continue
                 }
                 
-                if tvbTVShow.lastAirDate ?? past < tvShow.lastAirDate ?? future {
+                if tvShow.isInProduction ?? true {
                     tvbTVShow.update(tvShow: tvShow)
-                    TVShowActor.logger.info("Updated tv show: \(tvShow.name)")
                     
                     for season in tvShow.seasons ?? [] {
                         let season = await TVStore.shared.season(season.seasonNumber, forTVSeries: tvShow.id)
@@ -88,12 +86,12 @@ actor TVShowActor {
                             if !tvbTVShow.episodes.contains(where: { $0.seasonNumber == episode.seasonNumber && $0.episodeNumber == episode.episodeNumber }) {
                                 tvbTVShow.episodes.append(TVBuddyTVEpisode(episode: episode))
                                 tvbTVShow.checkWatching()
-                                TVShowActor.logger.info("Added new episodes for tv show: \(tvShow.name)")
                             }
                         }
                     }
                 }
             }
+            TVShowActor.logger.info("Updated \(tvbTVShows.count) tv shows")
             
             let predicate = #Predicate<TVBuddyTVEpisode> {$0.airDate ?? future >= now}
             let tvbTVEpisodes = try modelContext.fetch(FetchDescriptor<TVBuddyTVEpisode>(predicate: predicate))
@@ -105,8 +103,8 @@ actor TVShowActor {
                 }
                 
                 tvbTVEpisode.update(episode: episode)
-                TVShowActor.logger.info("Updated episodes: \(episode.name)")
             }
+            TVShowActor.logger.info("Updated \(tvbTVEpisodes.count) episodes")
             
             try modelContext.save()
             UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "LastMediaUpdate")

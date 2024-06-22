@@ -43,9 +43,10 @@ actor MovieActor {
             for tvbMovie in tvbMovies {
                 if let movie = await MovieStore.shared.movie(withID: tvbMovie.id) {
                     tvbMovie.update(movie: movie)
-                    MovieActor.logger.info("Updated movie: \(movie.title)")
                 }
             }
+        
+            MovieActor.logger.info("Updated \(tvbMovies.count) movies")
         } catch {
             MovieActor.logger.error("\(error.localizedDescription)")
         }
