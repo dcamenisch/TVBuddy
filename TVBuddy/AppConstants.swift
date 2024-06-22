@@ -9,7 +9,7 @@ import Foundation
 import TMDb
 
 enum AppConstants {
-    static let languageCode = "en"
+    static let languageCode = String((Locale.preferredLanguages.first ?? "en").split(separator: "-").first ?? "en")
     static let idealPosterWidth = 100
     static let idealBackdropWidth = 400
     static let nextPageOffset = 10
