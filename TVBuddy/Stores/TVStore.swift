@@ -102,6 +102,17 @@ class TVStore: ObservableObject {
     }
     
     @MainActor
+    func logos(id: TVSeries.ID) async -> [URL] {
+        guard let images = await seriesImages(id: id) else { return [] }
+        
+        return images.logos.compactMap { logo in
+            imageService?.logoURL(
+                for: logo.filePath
+            )
+        }
+    }
+    
+    @MainActor
     func posters(id: TVSeries.ID, season: Int? = nil) async -> [URL] {
         if let season = season, let images = await seasonImages(season: season, id: id) {
             var posters = images.posters.filter { $0.languageCode != nil }

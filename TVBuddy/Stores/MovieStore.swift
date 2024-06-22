@@ -41,7 +41,7 @@ class MovieStore {
     }
 
     @MainActor
-    func images(withID id: Movie.ID) async -> ImageCollection? {
+    func images(id: Movie.ID) async -> ImageCollection? {
         if images[id] == nil {
             let imageCollection = await moviesManager.fetchImages(id: id)
             guard let imageCollection = imageCollection else { return nil }
@@ -51,10 +51,21 @@ class MovieStore {
 
         return images[id]
     }
+    
+    @MainActor
+    func logos(id: Movie.ID) async -> [URL] {
+        guard let images = await images(id: id) else { return [] }
+        
+        return images.logos.compactMap { logo in
+            imageService?.logoURL(
+                for: logo.filePath
+            )
+        }
+    }
 
     @MainActor
     func posters(withID id: Movie.ID) async -> [URL] {
-        guard let images = await images(withID: id) else { return [] }
+        guard let images = await images(id: id) else { return [] }
         
         var posters = images.posters.filter { $0.languageCode != nil }
         posters = posters.isEmpty ? images.posters : posters
@@ -69,7 +80,7 @@ class MovieStore {
 
     @MainActor
     func backdrops(withID id: Movie.ID) async -> [URL] {
-        guard let images = await images(withID: id) else { return [] }
+        guard let images = await images(id: id) else { return [] }
         let backdrops = images.backdrops.filter { $0.languageCode == nil }
 
         return backdrops.compactMap { backdrop in
@@ -82,7 +93,7 @@ class MovieStore {
 
     @MainActor
     func backdropsWithText(withID id: Movie.ID) async -> [URL] {
-        guard let images = await images(withID: id) else { return [] }
+        guard let images = await images(id: id) else { return [] }
 
         var backdrops = images.backdrops.filter { $0.languageCode != nil }
         backdrops = backdrops.isEmpty ? images.backdrops : backdrops
