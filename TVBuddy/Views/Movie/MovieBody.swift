@@ -24,7 +24,7 @@ struct MovieBody: View {
             watchButtons
             overview
             genres
-            creditsAndCast
+            castAndCrew
             similarMovies
         }
         .task {
@@ -90,9 +90,38 @@ struct MovieBody: View {
     }
     
     @ViewBuilder
-    private var creditsAndCast: some View {
-        if let credits = credits, !credits.cast.isEmpty {
-            PeopleList(credits: credits)
+    private var castAndCrew: some View {
+        if let credits = credits, !credits.cast.isEmpty || !credits.crew.isEmpty {
+            Text("Cast & Crew")
+                .font(.title2)
+                .bold()
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                ZStack {
+                    // Needed for SwiftUI to correctly calculate the height when the first
+                    // CreditsItem has a name that only spans one line
+                    CreditsItem(id: 0, name: "Lorem ipsum dolor sit amet", role: "-")
+                        .hidden()
+                    
+                    LazyHStack(alignment: .top, spacing: 10) {
+                        ForEach(credits.cast) { cast in
+                            CreditsItem(
+                                id: cast.id,
+                                name: cast.name,
+                                role: cast.character
+                            )
+                        }
+                                
+                        ForEach(credits.crew, id: \.uniqueId) { crew in
+                            CreditsItem(
+                                id: crew.id,
+                                name: crew.name,
+                                role: crew.job
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
     

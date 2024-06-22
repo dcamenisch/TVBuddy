@@ -10,6 +10,7 @@
 		6F0B493C2B42FC9200557884 /* CircularProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F0B493B2B42FC9200557884 /* CircularProgressBar.swift */; };
 		6F1C0FD02B45CCA500C67DB2 /* WrappingHStack in Frameworks */ = {isa = PBXBuildFile; productRef = 6F1C0FCF2B45CCA500C67DB2 /* WrappingHStack */; };
 		6F1C0FD22B45D05900C67DB2 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6F1C0FD12B45D05900C67DB2 /* Colors.xcassets */; };
+		6F1F8C7C2C23492600D5FBB9 /* CreditsItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1F8C7B2C23492600D5FBB9 /* CreditsItem.swift */; };
 		6F21624A2AFFDFF000DBD6CB /* TVEpisodeProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F2162492AFFDFF000DBD6CB /* TVEpisodeProgressView.swift */; };
 		6F21624E2AFFF0B300DBD6CB /* TVBuddyMediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F21624D2AFFF0B300DBD6CB /* TVBuddyMediaItem.swift */; };
 		6F2162502AFFF99F00DBD6CB /* TVShowBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F21624F2AFFF99F00DBD6CB /* TVShowBody.swift */; };

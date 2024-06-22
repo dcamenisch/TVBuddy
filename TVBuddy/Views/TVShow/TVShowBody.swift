@@ -14,7 +14,7 @@ import WrappingHStack
 struct TVShowBody: View {
     @Environment(\.modelContext) private var context
 
-    @State var credits: ShowCredits?
+    @State var credits: TVSeriesAggregateCredits?
     @State var recommendations: [TVSeries]?
 
     let tmdbTVShow: TVSeries
@@ -35,15 +35,11 @@ struct TVShowBody: View {
             overview
             genres
             seasons
-
-            if let credits = credits, !credits.cast.isEmpty {
-                PeopleList(credits: credits)
-            }
-
+            castAndCrew
             similarTVShows
         }
         .task {
-            credits = await TVStore.shared.credits(forTVSeries: tmdbTVShow.id)
+            credits = await TVStore.shared.aggregateCredits(forTVSeries: tmdbTVShow.id)
             recommendations = await TVStore.shared.recommendations(forTVSeries: tmdbTVShow.id)
         }
     }
@@ -133,6 +129,45 @@ struct TVShowBody: View {
         }
     }
 
+    private var castAndCrew: some View {
+        Group {
+            if let credits = credits, !credits.cast.isEmpty || !credits.crew.isEmpty {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("Cast & Crew")
+                        .font(.title2)
+                        .bold()
+                        
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        ZStack {
+                            // Needed for SwiftUI to correctly calculate the height when the first
+                            // CreditsItem has a name that only spans one line
+                            CreditsItem(id: 0, name: "Lorem ipsum dolor sit amet", role: "-")
+                                .hidden()
+                            
+                            LazyHStack(alignment: .top, spacing: 10) {
+                                ForEach(credits.cast) { cast in
+                                    CreditsItem(
+                                        id: cast.id,
+                                        name: cast.name,
+                                        role: cast.roles[0].character
+                                    )
+                                }
+                                        
+                                ForEach(credits.crew, id: \.uniqueId) { crew in
+                                    CreditsItem(
+                                        id: crew.id, 
+                                        name: crew.name,
+                                        role: crew.jobs[0].job
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     private var similarTVShows: some View {
         Group {
             if let tmdbTVShows = recommendations, !tmdbTVShows.isEmpty {
