@@ -102,7 +102,7 @@ struct CastItem: View {
             }
         }
         .task {
-            image = await PersonStore.shared.image(forPerson: castMember.id)
+            image = await PersonStore.shared.images(forPerson: castMember.id).first
         }
     }
 }
@@ -129,7 +129,7 @@ struct CrewItem: View {
             }
         }
         .task {
-            image = await PersonStore.shared.image(forPerson: crewMember.id)
+            image = await PersonStore.shared.images(forPerson: crewMember.id).first
         }
     }
 }

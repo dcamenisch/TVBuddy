@@ -10,23 +10,23 @@ import TMDb
 
 class MovieStore {
     static let shared = MovieStore()
-    
+
     private let moviesManager: MovieManager = MovieManager()
 
-    var movies: [Movie.ID: Movie] = [:]
-    var posters: [Movie.ID: URL] = [:]
-    var backdrops: [Movie.ID: URL] = [:]
-    var backdropsWithText: [Movie.ID: URL] = [:]
-    var credits: [Movie.ID: ShowCredits] = [:]
-    var recommendationsIDs: [Movie.ID: [Movie.ID]] = [:]
-    var similarIDs: [Movie.ID: [Movie.ID]] = [:]
-    var discoverIDs: [Movie.ID] = []
-    var trendingIDs: [Movie.ID] = []
+    private var imageService: ImagesConfiguration? {
+        AppConstants.apiConfiguration?.images
+    }
+
+    private var movies: [Movie.ID: Movie] = [:]
+    private var images: [Movie.ID: ImageCollection] = [:]
+    private var credits: [Movie.ID: ShowCredits] = [:]
+    private var recommendationsIDs: [Movie.ID: [Movie.ID]] = [:]
+    private var similarIDs: [Movie.ID: [Movie.ID]] = [:]
+    private var discoverIDs: [Movie.ID] = []
+    private var trendingIDs: [Movie.ID] = []
 
     private var discoverPage: Int = 0
     private var trendingPage: Int = 0
-
-    private init() {}
 
     @MainActor
     func movie(withID id: Movie.ID) async -> Movie? {
@@ -41,39 +41,58 @@ class MovieStore {
     }
 
     @MainActor
-    func poster(withID id: Movie.ID) async -> URL? {
-        if posters[id] == nil {
-            let url = await moviesManager.fetchPoster(id: id)
-            guard let url = url else { return nil }
+    func images(withID id: Movie.ID) async -> ImageCollection? {
+        if images[id] == nil {
+            let imageCollection = await moviesManager.fetchImages(id: id)
+            guard let imageCollection = imageCollection else { return nil }
 
-            posters[id] = url
+            images[id] = imageCollection
         }
 
-        return posters[id]
+        return images[id]
     }
 
     @MainActor
-    func backdrop(withID id: Movie.ID) async -> URL? {
-        if backdrops[id] == nil {
-            let url = await moviesManager.fetchBackdrop(id: id)
-            guard let url = url else { return nil }
+    func posters(withID id: Movie.ID) async -> [URL] {
+        guard let images = await images(withID: id) else { return [] }
+        
+        var posters = images.posters.filter { $0.languageCode != nil }
+        posters = posters.isEmpty ? images.posters : posters
 
-            backdrops[id] = url
+        return posters.compactMap { poster in
+            imageService?.posterURL(
+                for: poster.filePath,
+                idealWidth: AppConstants.idealPosterWidth
+            )
         }
-
-        return backdrops[id]
     }
 
     @MainActor
-    func backdropWithText(withID id: Movie.ID) async -> URL? {
-        if backdropsWithText[id] == nil {
-            let url = await moviesManager.fetchBackdropWithText(id: id)
-            guard let url = url else { return nil }
+    func backdrops(withID id: Movie.ID) async -> [URL] {
+        guard let images = await images(withID: id) else { return [] }
+        let backdrops = images.backdrops.filter { $0.languageCode == nil }
 
-            backdropsWithText[id] = url
+        return backdrops.compactMap { backdrop in
+            imageService?.backdropURL(
+                for: backdrop.filePath,
+                idealWidth: AppConstants.idealBackdropWidth
+            )
         }
+    }
 
-        return backdropsWithText[id]
+    @MainActor
+    func backdropsWithText(withID id: Movie.ID) async -> [URL] {
+        guard let images = await images(withID: id) else { return [] }
+
+        var backdrops = images.backdrops.filter { $0.languageCode != nil }
+        backdrops = backdrops.isEmpty ? images.backdrops : backdrops
+
+        return backdrops.compactMap { backdrop in
+            imageService?.backdropURL(
+                for: backdrop.filePath,
+                idealWidth: AppConstants.idealBackdropWidth
+            )
+        }
     }
 
     @MainActor

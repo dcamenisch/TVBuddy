@@ -12,7 +12,7 @@ import TMDb
 struct TVShowRow: View {
     @Environment(\.modelContext) private var context
     
-    @State var poster: URL?
+    @State var url: URL?
     
     @Query
     private var tvShows: [TVBuddyTVShow]
@@ -29,7 +29,7 @@ struct TVShowRow: View {
             tvShow.detailView
         } label: {
             HStack {
-                ImageView(url: poster, placeholder: tvShow.name)
+                ImageView(url: url, placeholder: tvShow.name)
                     .posterStyle(size: .tiny)
                 
                 VStack(alignment: .leading, spacing: 5) {
@@ -56,7 +56,7 @@ struct TVShowRow: View {
         }
         .buttonStyle(.plain)
         .task(id: tvShow) {
-            poster = await TVStore.shared.poster(withID: tvShow.id)
+            url = await TVStore.shared.posters(id: tvShow.id).first
         }
     }
     

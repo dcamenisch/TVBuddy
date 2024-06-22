@@ -11,14 +11,14 @@ import TMDb
 class PersonStore {
     static let shared = PersonStore()
     
-    private let personManager: PersonManager
-
-    var persons: [Person.ID: Person] = [:]
-    var images: [Person.ID: URL] = [:]
-
-    private init() {
-        personManager = PersonManager()
+    private let personManager: PersonManager = PersonManager()
+    
+    private var imageService: ImagesConfiguration? {
+        AppConstants.apiConfiguration?.images
     }
+
+    private var persons: [Person.ID: Person] = [:]
+    private var images: [Person.ID: PersonImageCollection] = [:]
 
     @MainActor
     func person(withID id: Person.ID) async -> Person? {
@@ -33,14 +33,19 @@ class PersonStore {
     }
 
     @MainActor
-    func image(forPerson id: Person.ID) async -> URL? {
+    func images(forPerson id: Person.ID) async -> [URL] {
         if images[id] == nil {
-            let url = await personManager.fetchImage(withID: id)
-            guard let url = url else { return nil }
+            let imageCollection = await personManager.fetchImages(withID: id)
+            guard let imageCollection = imageCollection else { return [] }
 
-            images[id] = url
+            images[id] = imageCollection
         }
-
-        return images[id]
+        
+        return images[id]?.profiles.compactMap { profile in
+            imageService?.profileURL(
+                for: profile.filePath,
+                idealWidth: AppConstants.idealPosterWidth
+            )
+        } ?? []
     }
 }

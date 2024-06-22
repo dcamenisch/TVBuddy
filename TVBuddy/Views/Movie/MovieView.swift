@@ -73,8 +73,8 @@ struct MovieView: View {
             }
             .task {
                 movie = await MovieStore.shared.movie(withID: id)
-                poster = await MovieStore.shared.poster(withID: id)
-                backdrop = await MovieStore.shared.backdrop(withID: id)
+                poster = await MovieStore.shared.posters(withID: id).first
+                backdrop = await MovieStore.shared.backdrops(withID: id).first
             }
     }
     

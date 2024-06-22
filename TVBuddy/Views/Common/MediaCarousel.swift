@@ -68,7 +68,7 @@ struct MediaCarousel: View {
 }
 
 struct MediaCarouselItem: View {
-    @State var backdropWithText: URL?
+    @State var url: URL?
 
     let media: Media
 
@@ -78,25 +78,25 @@ struct MediaCarouselItem: View {
             NavigationLink {
                 MovieView(id: movie.id)
             } label: {
-                ImageView(url: backdropWithText, placeholder: movie.title)
+                ImageView(url: url, placeholder: movie.title)
                     .cornerRadius(15)
                     .padding(5)
             }
             .buttonStyle(.plain)
             .task {
-                backdropWithText = await MovieStore.shared.backdropWithText(withID: movie.id)
+                url = await MovieStore.shared.backdropsWithText(withID: movie.id).first
             }
         case let .tvSeries(tvSeries):
             NavigationLink {
                 TVShowView(id: tvSeries.id)
             } label: {
-                ImageView(url: backdropWithText, placeholder: tvSeries.name)
+                ImageView(url: url, placeholder: tvSeries.name)
                     .cornerRadius(15)
                     .padding(5)
             }
             .buttonStyle(.plain)
             .task {
-                backdropWithText = await TVStore.shared.backdropWithText(withID: tvSeries.id)
+                url = await TVStore.shared.backdropsWithText(id: tvSeries.id).first
             }
         case .person:
             Group {}

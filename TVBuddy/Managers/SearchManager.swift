@@ -19,7 +19,11 @@ class SearchManager {
 
     func search(query: String, page: Int = 1) async -> [Media]? {
         do {
-            return try await searchService.searchAll(query: query, page: page).results
+            return try await searchService.searchAll(
+                query: query,
+                page: page,
+                language: AppConstants.languageCode
+            ).results
         } catch {
             handleError(error)
             return nil

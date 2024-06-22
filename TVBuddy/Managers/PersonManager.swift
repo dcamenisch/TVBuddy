@@ -30,13 +30,9 @@ class PersonManager {
         }
     }
 
-    func fetchImage(withID id: Person.ID) async -> URL? {
+    func fetchImages(withID id: Person.ID) async -> PersonImageCollection? {
         do {
-            let images = try await personService.images(forPerson: id)
-            return imageService?.profileURL(
-                for: images.profiles.first?.filePath,
-                idealWidth: AppConstants.idealPosterWidth
-            )
+            return try await personService.images(forPerson: id)
         } catch {
             handleError(error)
             return nil

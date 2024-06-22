@@ -25,7 +25,7 @@ struct PersonRow: View {
             }
         }
         .task(id: person) {
-            image = await PersonStore.shared.image(forPerson: person.id)
+            image = await PersonStore.shared.images(forPerson: person.id).first
         }
     }
 }

@@ -14,6 +14,6 @@ extension TVBuddyTVShow: TVBuddyMediaItem {
     }
     
     func getPosterURL() async -> URL? {
-        await TVStore.shared.poster(withID: self.id)
+        await TVStore.shared.posters(id: self.id).first
     }
 }

@@ -12,22 +12,25 @@ class TVStore: ObservableObject {
     static let shared = TVStore()
     
     private let tvManager: TVManager = TVManager()
+    
+    private var imageService: ImagesConfiguration? {
+            AppConstants.apiConfiguration?.images
+        }
 
-    var shows: [TVSeries.ID: TVSeries] = [:]
-    var seasons: [TVSeries.ID: [Int: TVSeason]] = [:]
-    var posters: [[Int?]: URL] = [:]
-    var backdrops: [[Int?]: URL] = [:]
-    var backdropsWithText: [TVSeries.ID: URL] = [:]
-    var credits: [TVSeries.ID: ShowCredits] = [:]
-    var recommendationsIDs: [TVSeries.ID: [TVSeries.ID]] = [:]
-    var similarIDs: [TVSeries.ID: [TVSeries.ID]] = [:]
-    var discoverIDs: [TVSeries.ID] = []
-    var trendingIDs: [TVSeries.ID] = []
+    private var shows: [TVSeries.ID: TVSeries] = [:]
+    private var seasons: [TVSeries.ID: [Int: TVSeason]] = [:]
+    private var seriesImages: [TVSeries.ID: ImageCollection] = [:]
+    private var seasonImages: [[Int?]: TVSeasonImageCollection] = [:]
+    private var episodeImages: [[Int?]: TVEpisodeImageCollection] = [:]
+    private var credits: [TVSeries.ID: ShowCredits] = [:]
+    private var aggregateCredits: [TVSeries.ID: TVSeriesAggregateCredits] = [:]
+    private var recommendationsIDs: [TVSeries.ID: [TVSeries.ID]] = [:]
+    private var similarIDs: [TVSeries.ID: [TVSeries.ID]] = [:]
+    private var discoverIDs: [TVSeries.ID] = []
+    private var trendingIDs: [TVSeries.ID] = []
 
     private var discoverPage: Int = 0
     private var trendingPage: Int = 0
-
-    private init() {}
 
     @MainActor
     func show(withID id: TVSeries.ID) async -> TVSeries? {
@@ -61,41 +64,110 @@ class TVStore: ObservableObject {
             tvEpisode.episodeNumber == episode
         })
     }
-
+    
     @MainActor
-    func poster(withID id: TVSeries.ID, season: Int? = nil) async -> URL? {
-        if posters[[id, season]] == nil {
-            let url = await tvManager.fetchPoster(id: id, season: season)
-            guard let url = url else { return nil }
+    func seriesImages(id: TVSeries.ID) async -> ImageCollection? {
+        if seriesImages[id] == nil {
+            let imageCollection = await tvManager.fetchImages(id: id)
+            guard let imageCollection = imageCollection else { return nil }
 
-            posters[[id, season]] = url
+            seriesImages[id] = imageCollection
         }
+        
+        return seriesImages[id]
+    }
+    
+    @MainActor
+    func seasonImages(season: Int, id: TVSeries.ID) async -> TVSeasonImageCollection? {
+        if seasonImages[[id, season]] == nil {
+            let imageCollection = await tvManager.fetchImages(season: season, id: id)
+            guard let imageCollection = imageCollection else { return nil }
 
-        return posters[[id, season]]
+            seasonImages[[id, season]] = imageCollection
+        }
+        
+        return seasonImages[[id, season]]
+    }
+    
+    @MainActor
+    func episodeImages(episode: Int, season: Int, id: TVSeries.ID) async -> TVEpisodeImageCollection? {
+        if episodeImages[[id, season, episode]] == nil {
+            let imageCollection = await tvManager.fetchImages(episode: episode, season: season, id: id)
+            guard let imageCollection = imageCollection else { return nil }
+
+            episodeImages[[id, season, episode]] = imageCollection
+        }
+        
+        return episodeImages[[id, season, episode]]
+    }
+    
+    @MainActor
+    func posters(id: TVSeries.ID, season: Int? = nil) async -> [URL] {
+        if let season = season, let images = await seasonImages(season: season, id: id) {
+            var posters = images.posters.filter { $0.languageCode != nil }
+            posters = posters.isEmpty ? images.posters : posters
+            
+            return posters.compactMap { poster in
+                imageService?.posterURL(
+                    for: poster.filePath,
+                    idealWidth: AppConstants.idealPosterWidth
+                )
+            }
+        }
+        
+        guard let images = await seriesImages(id: id) else { return [] }
+        
+        var posters = images.posters.filter { $0.languageCode != nil }
+        posters = posters.isEmpty ? images.posters : posters
+        
+        return posters.compactMap { poster in
+            imageService?.posterURL(
+                for: poster.filePath,
+                idealWidth: AppConstants.idealPosterWidth
+            )
+        }
     }
 
     @MainActor
-    func backdrop(withID id: TVSeries.ID, season: Int? = nil, episode: Int? = nil) async -> URL? {
-        if backdrops[[id, season, episode]] == nil {
-            let url = await tvManager.fetchBackdrop(id: id, season: season, episode: episode)
-            guard let url = url else { return nil }
-
-            backdrops[[id, season, episode]] = url
+    func backdrops(id: TVSeries.ID) async -> [URL] {
+        guard let images = await seriesImages(id: id) else { return [] }
+        let backdrops = images.backdrops.filter { $0.languageCode == nil }
+        
+        return backdrops.compactMap { backdrop in
+            imageService?.backdropURL(
+                for: backdrop.filePath,
+                idealWidth: AppConstants.idealBackdropWidth
+            )
         }
-
-        return backdrops[[id, season, episode]]
     }
 
     @MainActor
-    func backdropWithText(withID id: TVSeries.ID) async -> URL? {
-        if backdropsWithText[id] == nil {
-            let url = await tvManager.fetchBackdropWithText(id: id)
-            guard let url = url else { return nil }
-
-            backdropsWithText[id] = url
+    func backdropsWithText(id: TVSeries.ID) async -> [URL] {
+        guard let images = await seriesImages(id: id) else { return [] }
+        
+        var backdrops = images.backdrops.filter { $0.languageCode != nil }
+        backdrops = backdrops.isEmpty ? images.backdrops : backdrops
+    
+        return backdrops.compactMap { backdrop in
+            imageService?.backdropURL(
+                for: backdrop.filePath,
+                idealWidth: AppConstants.idealBackdropWidth
+            )
         }
-
-        return backdropsWithText[id]
+    }
+    
+    @MainActor
+    func stills(episode: Int, season: Int, id: TVSeries.ID)async -> [URL] {
+        guard let images = await episodeImages(episode: episode, season: season, id: id) else {
+            return []
+        }
+        
+        return images.stills.compactMap { still in
+            imageService?.backdropURL(
+                for: still.filePath,
+                idealWidth: AppConstants.idealBackdropWidth
+            )
+        }
     }
 
     @MainActor
@@ -108,6 +180,18 @@ class TVStore: ObservableObject {
         }
 
         return credits[id]
+    }
+    
+    @MainActor
+    func aggregateCredits(forTVSeries id: TVSeries.ID) async -> TVSeriesAggregateCredits? {
+        if aggregateCredits[id] == nil {
+            let aggregateCredits = await tvManager.fetchAggregateCredits(id: id)
+            guard let aggregateCredits = aggregateCredits else { return nil }
+
+            self.aggregateCredits[id] = aggregateCredits
+        }
+
+        return aggregateCredits[id]
     }
 
     @MainActor

@@ -57,7 +57,7 @@ struct MovieRow: View {
         }
         .buttonStyle(.plain)
         .task(id: movie) {
-            poster = await MovieStore.shared.poster(withID: movie.id)
+            poster = await MovieStore.shared.posters(withID: movie.id).first
         }
     }
     
