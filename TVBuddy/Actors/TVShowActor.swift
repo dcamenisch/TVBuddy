@@ -5,10 +5,10 @@
 //  Created by Danny on 06.01.2024.
 //
 
-import os
 import SwiftData
 import SwiftUI
 import TMDb
+import os
 
 /// An actor responsible for managing TV show-related operations in the TVBuddy app.
 /// Utilizes concurrency to safely access and modify TV show data.
@@ -28,7 +28,7 @@ actor TVShowActor {
     ///   - episodeID: An optional episode ID to mark a specific episode as watched. Defaults to -1.
     func insertTVSeries(id: TVSeries.ID, watched: Bool, isFavorite: Bool, episodeID: TVEpisode.ID = -1) async {
         do {
-            let series = await TVStore.shared.show(withID: id)
+            let series = try? await TVStore.shared.show(withID: id)
             
             guard let series = series else { return }
             let tvbSeries = TVBuddyTVShow(
@@ -41,10 +41,10 @@ actor TVShowActor {
             modelContext.insert(tvbSeries)
             try modelContext.save()
             
-            let episodes = await withTaskGroup(of: TVSeason?.self, returning: [TVEpisode].self) { group in
+            let episodes = await withTaskGroup(of: TVSeason?.self, returning: [TVBuddyTVEpisode].self) { group in
                 for season in series.seasons ?? [] {
                     group.addTask {
-                        await TVStore.shared.season(season.seasonNumber, forTVSeries: id)
+                        try? await TVStore.shared.season(season.seasonNumber, forTVSeries: id)
                     }
                 }
             
@@ -52,14 +52,13 @@ actor TVShowActor {
                 for await result in group {
                     childTaskResults.append(contentsOf: result?.episodes ?? [])
                 }
-            
-                return childTaskResults
-            }.compactMap {
-                TVBuddyTVEpisode(episode: $0, watched: watched)
+                
+                return childTaskResults.compactMap {
+                    TVBuddyTVEpisode(episode: $0, watched: watched)
+                }
             }
             
             tvbSeries.episodes.append(contentsOf: episodes)
-            
             TVShowActor.logger.info("Inserted tv series \(series.name) with \(episodes.count) episodes")
         } catch {
             TVShowActor.logger.error("\(error.localizedDescription)")
@@ -91,7 +90,15 @@ actor TVShowActor {
         do {
             // Update the TV Series
             let tvbTVSeries = try modelContext.fetch(FetchDescriptor<TVBuddyTVShow>())
-            for tvbSeries in tvbTVSeries { await updateTVSeries(tvbSeries) }
+            for tvbSeries in tvbTVSeries {
+                do {
+                    try await updateTVSeries(tvbSeries)
+                }
+                catch TMDbError.notFound {
+                    TVShowActor.logger.error("TV series \(tvbSeries.name) not found, removing from database")
+                    await deleteTVShow(id: tvbSeries.id)
+                }
+            }
             
             // Update the TV Episodes
             let now = Date.now
@@ -102,18 +109,22 @@ actor TVShowActor {
             )
             
             for tvbEpisode in tvbEpisodes {
-                let episode = await TVStore.shared.episode(
+                let episode = try? await TVStore.shared.episode(
                     tvbEpisode.episodeNumber,
                     season: tvbEpisode.seasonNumber,
                     forTVSeries: tvbEpisode.tvShow?.id ?? 0
                 )
-                
-                guard let episode = episode else { continue }
+                    
+                guard let episode = episode else {
+                    TVShowActor.logger.error("TV episode \(tvbEpisode.episodeNumber), season \(tvbEpisode.seasonNumber) for TV series \(tvbEpisode.tvShow?.name ?? "") not found, removing from database")
+                    modelContext.delete(tvbEpisode)
+                    try modelContext.save()
+                    continue
+                }
                 tvbEpisode.update(episode: episode)
             }
             
             try modelContext.save()
-            UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "LastMediaUpdate")
             
             TVShowActor.logger.info("Updated \(tvbTVSeries.count) tv shows")
             TVShowActor.logger.info("Updated \(tvbEpisodes.count) episodes")
@@ -124,15 +135,13 @@ actor TVShowActor {
     
     /// Updates a single TV series with the latest details and episodes.
     /// - Parameter tvbSeries: The TVBuddyTVShow object to update.
-    private func updateTVSeries(_ tvbSeries: TVBuddyTVShow) async {
-        let series = await TVStore.shared.show(withID: tvbSeries.id)
-                        
+    private func updateTVSeries(_ tvbSeries: TVBuddyTVShow) async throws {
+        let series = try await TVStore.shared.show(withID: tvbSeries.id)
         guard let series = series, series.isInProduction ?? true else { return }
         
         tvbSeries.update(tvShow: series)
         for season in series.seasons ?? [] {
-            let season = await TVStore.shared.season(season.seasonNumber, forTVSeries: series.id)
-            
+            let season = try? await TVStore.shared.season(season.seasonNumber, forTVSeries: series.id)
             guard let season = season else { continue }
             
             season.episodes?.forEach({ episode in

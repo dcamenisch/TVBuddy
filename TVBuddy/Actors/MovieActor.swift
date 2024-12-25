@@ -70,12 +70,14 @@ actor MovieActor {
                 FetchDescriptor<TVBuddyMovie>(predicate: predicate)
             )
 
-            for tvbMovie in tvbMovies {
+            for tvbMovie in tvbMovies {                
                 guard let movie = await MovieStore.shared.movie(withID: tvbMovie.id) else {
                     continue
                 }
                 tvbMovie.update(movie: movie)
             }
+            
+            try modelContext.save()
 
             MovieActor.logger.info("Updated \(tvbMovies.count) movies")
         } catch {

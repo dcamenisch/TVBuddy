@@ -11,7 +11,7 @@ import SwiftUI
 struct TVEpisodeProgressView: View {
     @Environment(\.modelContext) private var context
     
-    @Query(filter: #Predicate<TVBuddyTVShow> { $0.startedWatching && !$0.finishedWatching && !$0.isArchived })
+    @Query(filter: #Predicate<TVBuddyTVShow> { $0.startedWatching && !$0.finishedWatching && !$0.isArchived }, sort: \TVBuddyTVShow.name)
     private var tvShows: [TVBuddyTVShow]
     
     @State private var releasedEpisodes: [TVBuddyTVEpisode] = []
@@ -65,6 +65,8 @@ struct TVEpisodeProgressView: View {
                     }
                 }
             }
+            
+            upcomingEpisodes.sort { $0.airDate ?? .distantFuture < $1.airDate ?? .distantFuture }
             
             self.releasedEpisodes = releasedEpisodes
             self.upcomingEpisodes = upcomingEpisodes

@@ -23,7 +23,7 @@ struct TVBuddyApp: App {
         Task {
             AppConstants.apiConfiguration = try await AppConstants.tmdbClient.configurations.apiConfiguration()
         }
-
+        
         do {
             let schema = Schema(TVBuddyMediaSchema.models)
             let config = ModelConfiguration(schema: schema)
@@ -62,6 +62,7 @@ struct TVBuddyApp: App {
         await MovieActor(modelContainer: container).updateMovies()
         await TVShowActor(modelContainer: container).updateTVShows()
         
+        UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "LastMediaUpdate")
         TVBuddyApp.logger.info("Finished updating media items")
     }
 }
