@@ -37,10 +37,22 @@ struct FeedView: View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 10) {
                 TVEpisodeProgressView()
-                MediaCollection(title: "TV Show Watchlist", media: tvShows).id(tvShows)
-                MediaCollection(title: "Upcoming TV Shows", media: unreleasedTVShows).id(unreleasedTVShows)
-                MediaCollection(title: "Movie Watchlist", media: movies).id(movies)
-                MediaCollection(title: "Upcoming Movies", media: unreleasedMovies).id(unreleasedMovies)
+                
+                if !tvShows.isEmpty {
+                    MediaCollection(title: "TV Show Watchlist", media: tvShows).id(tvShows)
+                }
+                
+                if !unreleasedTVShows.isEmpty {
+                    MediaCollection(title: "Upcoming TV Shows", media: unreleasedTVShows).id(unreleasedTVShows)
+                }
+                
+                if !movies.isEmpty {
+                    MediaCollection(title: "Movie Watchlist", media: movies).id(movies)
+                }
+                
+                if !unreleasedMovies.isEmpty {
+                    MediaCollection(title: "Upcoming Movies", media: unreleasedMovies).id(unreleasedMovies)
+                }
             }
             .padding(.horizontal)
             Spacer()
