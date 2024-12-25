@@ -60,8 +60,8 @@ struct TVSeasonView: View {
                 }
             }
             .task {
-                tmdbTVShow = await TVStore.shared.show(withID: id)
-                tmdbSeason = await TVStore.shared.season(seasonNumber, forTVSeries: id)
+                tmdbTVShow = try? await TVStore.shared.show(withID: id)
+                tmdbSeason = try? await TVStore.shared.season(seasonNumber, forTVSeries: id)
                 poster = await TVStore.shared.posters(id: id, season: seasonNumber).first
                 backdrop = await TVStore.shared.backdrops(id: id).first
             }

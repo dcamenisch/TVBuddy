@@ -84,7 +84,7 @@ struct TVShowView: View {
                 }
             }
             .task {
-                tmdbTVShow = await TVStore.shared.show(withID: id)
+                tmdbTVShow = try? await TVStore.shared.show(withID: id)
                 poster = await TVStore.shared.posters(id: id).first
                 backdrop = await TVStore.shared.backdrops(id: id).first
             }
@@ -115,7 +115,7 @@ struct TVShowView: View {
         Task {
             let container = context.container
             let actor = TVShowActor(modelContainer: container)
-            await actor.insertTVShow(id: id, watched: watched, isFavorite: isFavorite)
+            await actor.insertTVSeries(id: id, watched: watched, isFavorite: isFavorite)
         }
     }
 }

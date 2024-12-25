@@ -22,27 +22,35 @@ class TVManager {
     private let discoverService = AppConstants.tmdbClient.discover
     private let trendingService = AppConstants.tmdbClient.trending
 
-    func fetchShow(id: TVSeries.ID) async -> TVSeries? {
+    func fetchShow(id: TVSeries.ID) async throws -> TVSeries? {
         do {
             return try await tvSeriesService.details(
                 forTVSeries: id,
                 language: AppConstants.languageCode
             )
-        } catch {
+        } catch{
             handleError(error)
+            
+            if let tmdbError = error as? TMDbError, tmdbError == .notFound {
+                throw TMDbError.notFound
+            }
             return nil
         }
     }
 
-    func fetchSeason(season: Int, id: TVSeries.ID) async -> TVSeason? {
+    func fetchSeason(season: Int, id: TVSeries.ID) async throws -> TVSeason? {
         do {
             return try await tvSeasonService.details(
                 forSeason: season,
                 inTVSeries: id,
                 language: AppConstants.languageCode
             )
-        } catch {
+        } catch{
             handleError(error)
+                        
+            if let tmdbError = error as? TMDbError, tmdbError == .notFound {
+                throw TMDbError.notFound
+            }
             return nil
         }
     }

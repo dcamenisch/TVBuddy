@@ -26,7 +26,8 @@ struct TVBuddyApp: App {
         
         do {
             let schema = Schema(TVBuddyMediaSchema.models)
-            let config = ModelConfiguration(schema: schema)
+            let storeURL = URL.documentsDirectory.appending(path: "database.sqlite")
+            let config = ModelConfiguration(schema: schema, url: storeURL)
             container = try ModelContainer(
                 for: schema,
                 migrationPlan: TVBuddyMediaMigrationPlan.self,

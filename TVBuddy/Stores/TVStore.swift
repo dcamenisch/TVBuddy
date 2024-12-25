@@ -33,9 +33,9 @@ class TVStore: ObservableObject {
     private var trendingPage: Int = 0
 
     @MainActor
-    func show(withID id: TVSeries.ID) async -> TVSeries? {
+    func show(withID id: TVSeries.ID) async throws -> TVSeries? {
         if shows[id] == nil {
-            let show = await tvManager.fetchShow(id: id)
+            let show = try await tvManager.fetchShow(id: id)
             guard let show = show else { return nil }
 
             shows[id] = show
@@ -45,9 +45,9 @@ class TVStore: ObservableObject {
     }
 
     @MainActor
-    func season(_ season: Int, forTVSeries id: TVSeries.ID) async -> TVSeason? {
+    func season(_ season: Int, forTVSeries id: TVSeries.ID) async throws -> TVSeason? {
         if seasons[id]?[season] == nil {
-            let result = await tvManager.fetchSeason(season: season, id: id)
+            let result = try await tvManager.fetchSeason(season: season, id: id)
             guard let result = result else { return nil }
 
             var tmpSeasons = seasons[id] ?? [:]
@@ -59,8 +59,9 @@ class TVStore: ObservableObject {
     }
 
     @MainActor
-    func episode(_ episode: Int, season: Int, forTVSeries id: TVSeries.ID) async -> TVEpisode? {
-        return await self.season(season, forTVSeries: id)?.episodes?.first(where: { tvEpisode in
+    func episode(_ episode: Int, season: Int, forTVSeries id: TVSeries.ID) async throws -> TVEpisode? {
+        let season = try await self.season(season, forTVSeries: id)
+        return season?.episodes?.first(where: { tvEpisode in
             tvEpisode.episodeNumber == episode
         })
     }
@@ -214,7 +215,7 @@ class TVStore: ObservableObject {
             await withTaskGroup(of: Void.self) { taskGroup in
                 for show in shows {
                     taskGroup.addTask {
-                        _ = await self.show(withID: show.id)
+                        _ = try? await self.show(withID: show.id)
                     }
                 }
             }
@@ -234,7 +235,7 @@ class TVStore: ObservableObject {
             await withTaskGroup(of: Void.self) { taskGroup in
                 for show in shows {
                     taskGroup.addTask {
-                        _ = await self.show(withID: show.id)
+                        _ = try? await self.show(withID: show.id)
                     }
                 }
             }
@@ -259,7 +260,7 @@ class TVStore: ObservableObject {
         await withTaskGroup(of: Void.self) { taskGroup in
             for show in page {
                 taskGroup.addTask {
-                    _ = await self.show(withID: show.id)
+                    _ = try? await self.show(withID: show.id)
                 }
             }
         }
@@ -286,7 +287,7 @@ class TVStore: ObservableObject {
         await withTaskGroup(of: Void.self) { taskGroup in
             for show in page {
                 taskGroup.addTask {
-                    _ = await self.show(withID: show.id)
+                    _ = try? await self.show(withID: show.id)
                 }
             }
         }

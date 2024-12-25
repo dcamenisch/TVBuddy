@@ -180,7 +180,7 @@ struct TVShowBody: View {
         Task {
             let container = context.container
             let actor = TVShowActor(modelContainer: container)
-            await actor.insertTVShow(id: id, watched: watched, isFavorite: isFavorite)
+            await actor.insertTVSeries(id: id, watched: watched, isFavorite: isFavorite)
         }
     }
 }

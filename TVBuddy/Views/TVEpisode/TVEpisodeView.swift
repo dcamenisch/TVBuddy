@@ -6,23 +6,23 @@
 //
 
 import SwiftUI
+import SwiftData
 import TMDb
 
 struct TVEpisodeView: View {
-    let episodeNumber: Int
-    let seasonNumber: Int
-    let id: TVSeries.ID
+    @State private var viewModel: ViewModel
     
     @Environment(\.presentationMode) private var presentationMode
     
     @State private var offset: CGFloat = 0.0
     @State private var visibility: Visibility = .hidden
     
-    @State private var tvSeries: TVSeries?
-    @State private var tvEpisode: TVEpisode?
-    @State private var backdropUrl: URL?
+    private var progress: CGFloat { viewModel.stillURL != nil ? (offset - 300) / 20 : (offset - 30) / 20}
     
-    private var progress: CGFloat { backdropUrl != nil ? (offset - 300) / 20 : (offset - 30) / 20}
+    init(episodeNumber: Int, seasonNumber: Int, id: TVSeries.ID) {
+        let viewModel = ViewModel(seriesID: id, seasonNumber: seasonNumber, episodeNumber: episodeNumber)
+        _viewModel = State(initialValue: viewModel)
+    }
     
     var body: some View {
         content
@@ -41,49 +41,74 @@ struct TVEpisodeView: View {
                 }
 
                 ToolbarItem(placement: .principal) {
-                    Text(tvEpisode?.name ?? "")
+                    Text(viewModel.episode?.name ?? "")
                         .font(.system(size: 18, weight: .semibold))
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
                         .opacity(progress)
                 }
             }
-            .task {
-                tvSeries = await TVStore.shared.show(
-                    withID: id
-                )
-                tvEpisode = await TVStore.shared.episode(
-                    episodeNumber,
-                    season: seasonNumber,
-                    forTVSeries: id
-                )
-                backdropUrl = await TVStore.shared.stills(
-                    episode: episodeNumber,
-                    season: seasonNumber,
-                    id: id
-                ).first
-            }
     }
     
     @ViewBuilder
     private var content: some View {
-        if let tvEpisode = tvEpisode, let tvSeries = tvSeries {
+        if let episode = viewModel.episode, let series = viewModel.series {
             OffsettableScrollView(showsIndicators: false) { point in
                 offset = -point.y
-                if backdropUrl == nil {
+                if viewModel.stillURL == nil {
                     visibility = offset > 0 ? .visible : .hidden
                 } else {
                     visibility = offset > 270 ? .visible : .hidden
                 }
             } content: {
-                TVEpisodeHeader(series: tvSeries, episode: tvEpisode, backdropUrl: backdropUrl)
+                TVEpisodeHeader(series: series, episode: episode, backdropUrl: viewModel.stillURL)
                     .padding(.bottom, 10)
-                TVEpisodeBody(series: tvSeries, episode: tvEpisode)
+                TVEpisodeBody(series: series, episode: episode)
                     .padding(.horizontal)
                 Spacer()
             }
         } else {
             ProgressView()
+        }
+    }
+}
+
+//
+// MARK: ViewModel
+//
+
+extension TVEpisodeView {
+    @MainActor @Observable
+    class ViewModel {
+        let seriesID: TVSeries.ID
+        let seasonNumber: Int
+        let episodeNumber: Int
+        
+        private(set) var series: TVSeries?
+        private(set) var episode: TVEpisode?
+        private(set) var stillURL: URL?
+        
+        init(seriesID: TVSeries.ID, seasonNumber: Int, episodeNumber: Int) {
+            self.seriesID = seriesID
+            self.seasonNumber = seasonNumber
+            self.episodeNumber = episodeNumber
+            fetchData()
+        }
+        
+        func fetchData() {
+            Task {
+                series = try? await TVStore.shared.show(withID: seriesID)
+                episode = try? await TVStore.shared.episode(
+                    episodeNumber,
+                    season: seasonNumber,
+                    forTVSeries: seriesID
+                )
+                stillURL = await TVStore.shared.stills(
+                    episode: episodeNumber,
+                    season: seasonNumber,
+                    id: seriesID
+                ).first
+            }
         }
     }
 }

@@ -239,16 +239,16 @@
 		6FBBBB9A2AB5D3A500D081FE /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				6FD8B4C72B10F27C00F19FE9 /* TVBuddyMediaSchema.swift */,
-				6FD8B4C52B10F20600F19FE9 /* TVBuddyMediaMigrationPlan.swift */,
-				6F21624D2AFFF0B300DBD6CB /* TVBuddyMediaItem.swift */,
-				6FC3DB392AC0690C00A724A8 /* TVBuddyMovie.swift */,
-				6F4459ED2B4AE60F00E2FBEE /* TVBuddyMovie+Extensions.swift */,
-				6FC3DB352AC068D700A724A8 /* TVBuddyTVShow.swift */,
-				6F4459EF2B4AE61D00E2FBEE /* TVBuddyTVShow+Extensions.swift */,
-				6FC3DB372AC068F900A724A8 /* TVBuddyTVEpisode.swift */,
 				6F4459F32B4AE6B200E2FBEE /* Movie+Extensions.swift */,
 				6F4459F52B4AE6E000E2FBEE /* TVSeries+Extensions.swift */,
+				6F21624D2AFFF0B300DBD6CB /* TVBuddyMediaItem.swift */,
+				6FD8B4C52B10F20600F19FE9 /* TVBuddyMediaMigrationPlan.swift */,
+				6FD8B4C72B10F27C00F19FE9 /* TVBuddyMediaSchema.swift */,
+				6FC3DB392AC0690C00A724A8 /* TVBuddyMovie.swift */,
+				6F4459ED2B4AE60F00E2FBEE /* TVBuddyMovie+Extensions.swift */,
+				6FC3DB372AC068F900A724A8 /* TVBuddyTVEpisode.swift */,
+				6FC3DB352AC068D700A724A8 /* TVBuddyTVShow.swift */,
+				6F4459EF2B4AE61D00E2FBEE /* TVBuddyTVShow+Extensions.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -571,6 +571,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
 		};
@@ -626,6 +627,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 6.0;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -638,7 +640,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"tvBuddy/Preview Content\"";
-				DEVELOPMENT_TEAM = 372TAJ6XCS;
+				DEVELOPMENT_TEAM = F2XKQN9YY8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TVBuddy/Info.plist;
@@ -655,11 +657,15 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ch.dcamenisch.tvBuddy;
+				PRODUCT_BUNDLE_IDENTIFIER = ch.capslockag.tvBuddy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -671,7 +677,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"tvBuddy/Preview Content\"";
-				DEVELOPMENT_TEAM = 372TAJ6XCS;
+				DEVELOPMENT_TEAM = F2XKQN9YY8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TVBuddy/Info.plist;
@@ -688,11 +694,15 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ch.dcamenisch.tvBuddy;
+				PRODUCT_BUNDLE_IDENTIFIER = ch.capslockag.tvBuddy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

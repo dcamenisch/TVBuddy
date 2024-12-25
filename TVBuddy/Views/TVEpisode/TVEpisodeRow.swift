@@ -60,8 +60,12 @@ struct TVEpisodeRow: View {
         }
         .buttonStyle(.plain)
         .task {
-            tvEpisode = await TVStore.shared.episode(episodeNumber, season: seasonNumber, forTVSeries: tvShowID)
+            tvEpisode = try? await TVStore.shared.episode(episodeNumber, season: seasonNumber, forTVSeries: tvShowID)
             backdrop = await TVStore.shared.stills(episode: episodeNumber, season: seasonNumber, id: tvShowID).first
+            
+            if backdrop == nil {
+                backdrop = await TVStore.shared.backdropsWithText(id: tvShowID).first
+            }
         }
     }
 
@@ -138,7 +142,7 @@ struct TVEpisodeRow: View {
         Task {
             let container = context.container
             let actor = TVShowActor(modelContainer: container)
-            await actor.insertTVShow(id: id, watched: watched, isFavorite: isFavorite, episodeID: episodeID)
+            await actor.insertTVSeries(id: id, watched: watched, isFavorite: isFavorite, episodeID: episodeID)
         }
     }
 }

@@ -10,54 +10,58 @@ import SwiftUI
 import TMDb
 
 struct MovieRow: View {
+    @State private var viewModel: ViewModel
+    
     @Environment(\.modelContext) private var context
-    
-    @State private var poster: URL?
-    
+        
     @Query
     private var tvbMovies: [TVBuddyMovie]
     private var tvbMovie: TVBuddyMovie? { tvbMovies.first }
-    
-    let movie: Movie
-    
+        
     init(movie: Movie) {
-        self.movie = movie
         _tvbMovies = Query(filter: #Predicate<TVBuddyMovie> { $0.id == movie.id })
+        
+        let viewModel = ViewModel(forMovie: movie.id)
+        _viewModel = State(initialValue: viewModel)
     }
     
     var body: some View {
-        NavigationLink {
-            movie.detailView
-        } label: {
-            HStack {
-                ImageView(url: poster, placeholder: movie.title)
+        if let movie = viewModel.movie {
+            NavigationLink {
+                movie.detailView
+            } label: {
+                HStack {
+                    ImageView(
+                        url: viewModel.posterURL,
+                        placeholder: movie.title
+                    )
                     .posterStyle(size: .tiny)
-                
-                VStack(alignment: .leading, spacing: 5) {
-                    if let releaseDate = movie.releaseDate {
-                        Text(DateFormatter.year.string(from: releaseDate))
-                            .foregroundColor(.gray)
+                    
+                    VStack(alignment: .leading, spacing: 5) {
+                        if let releaseDate = movie.releaseDate {
+                            Text(DateFormatter.year.string(from: releaseDate))
+                                .foregroundColor(.gray)
+                        }
+                        
+                        Text(movie.title)
+                            .font(.system(size: 22, weight: .bold))
+                            .lineLimit(2)
                     }
                     
-                    Text(movie.title)
-                        .font(.system(size: 22, weight: .bold))
-                        .lineLimit(2)
-                }
-                
-                Spacer()
-                
-                Button(action: toggleMovieInWatchlist) {
-                    Image(systemName: buttonImage())
-                        .font(.title)
-                        .bold()
-                        .foregroundStyle(.gray)
-                        .padding(8)
+                    Spacer()
+                    
+                    Button(action: toggleMovieInWatchlist) {
+                        Image(systemName: buttonImage())
+                            .font(.title)
+                            .bold()
+                            .foregroundStyle(.gray)
+                            .padding(8)
+                    }
                 }
             }
-        }
-        .buttonStyle(.plain)
-        .task(id: movie) {
-            poster = await MovieStore.shared.posters(withID: movie.id).first
+            .buttonStyle(.plain)
+        } else {
+            ProgressView()
         }
     }
     
@@ -65,7 +69,7 @@ struct MovieRow: View {
         if let tvbMovie = tvbMovie {
             context.delete(tvbMovie)
             try? context.save()
-        } else {
+        } else if let movie = viewModel.movie {
             context.insert(TVBuddyMovie(movie: movie, watched: false))
             try? context.save()
         }
@@ -76,6 +80,28 @@ struct MovieRow: View {
             return tvbMovie.watched ? "eye.circle" : "checkmark.circle"
         } else {
             return "plus.circle"
+        }
+    }
+}
+
+extension MovieRow {
+    @MainActor @Observable
+    class ViewModel {
+        let id: Movie.ID
+        
+        private(set) var movie: Movie?
+        private(set) var posterURL: URL?
+        
+        init(forMovie id: Movie.ID) {
+            self.id = id
+            fetchData()
+        }
+        
+        func fetchData() {
+            Task {
+                movie = await MovieStore.shared.movie(withID: id)
+                posterURL = await MovieStore.shared.posters(withID: id).first
+            }
         }
     }
 }

@@ -15,7 +15,7 @@ extension TVBuddyMediaSchemaV1 {
     @Model
     final class TVBuddyMovie: Identifiable, Equatable, Hashable {
         @Attribute(.unique)
-        let id: Int
+        private(set) var id: Int
 
         var title: String
         var releaseDate: Date?
