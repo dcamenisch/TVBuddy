@@ -31,11 +31,6 @@ struct SearchView: View {
         .listStyle(.plain)
         .overlay(overlay)
         .searchable(text: $searchText)
-        //        .searchScopes($searchStore.searchScope) {
-        //            ForEach(SearchScope.allCases) { category in
-        //                Text(category.rawValue).tag(SearchScope(rawValue: category.rawValue))
-        //            }
-        //        }
         .scrollIndicators(.never)
         .navigationTitle("Search")
         .task(id: searchText) {

@@ -53,7 +53,7 @@ class MovieManager {
         }
     }
 
-    func fetchRecommendations(id: Movie.ID, page: Int = 1) async -> [Movie]? {
+    func fetchRecommendations(id: Movie.ID, page: Int = 1) async -> [MovieListItem]? {
         do {
             return try await movieService.recommendations(
                 forMovie: id,
@@ -66,7 +66,7 @@ class MovieManager {
         }
     }
 
-    func fetchSimilar(id: Movie.ID, page: Int = 1) async -> [Movie]? {
+    func fetchSimilar(id: Movie.ID, page: Int = 1) async -> [MovieListItem]? {
         do {
             return try await movieService.similar(
                 toMovie: id,
@@ -79,7 +79,7 @@ class MovieManager {
         }
     }
 
-    func fetchDiscover(page: Int = 1) async -> [Movie]? {
+    func fetchDiscover(page: Int = 1) async -> [MovieListItem]? {
         do {
             return try await discoverService.movies(
                 sortedBy: .popularity(descending: true),
@@ -92,7 +92,7 @@ class MovieManager {
         }
     }
 
-    func fetchTrending(page: Int = 1) async -> [Movie]? {
+    func fetchTrending(page: Int = 1) async -> [MovieListItem]? {
         do {
             return try await trendingService.movies(
                 inTimeWindow: .week,

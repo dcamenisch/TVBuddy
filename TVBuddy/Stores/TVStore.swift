@@ -270,7 +270,7 @@ class TVStore: ObservableObject {
         }
 
         trendingPage = max(nextPageNumber, trendingPage)
-        return trendingIDs.compactMap { shows[$0] }
+        return trendingIDs.compactMap { self.shows[$0] }
     }
 
     @MainActor
@@ -297,6 +297,6 @@ class TVStore: ObservableObject {
         }
 
         discoverPage = max(nextPageNumber, discoverPage)
-        return discoverIDs.compactMap { shows[$0] }
+        return discoverIDs.compactMap { self.shows[$0] }
     }
 }

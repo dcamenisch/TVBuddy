@@ -131,7 +131,7 @@ class TVManager {
             }
         }
     
-    func fetchRecommendations(id: TVSeries.ID, page: Int = 1) async -> [TVSeries]? {
+    func fetchRecommendations(id: TVSeries.ID, page: Int = 1) async -> [TVSeriesListItem]? {
         do {
             return try await tvSeriesService.recommendations(
                 forTVSeries: id,
@@ -144,7 +144,7 @@ class TVManager {
         }
     }
 
-    func fetchSimilar(id: TVSeries.ID, page: Int = 1) async -> [TVSeries]? {
+    func fetchSimilar(id: TVSeries.ID, page: Int = 1) async -> [TVSeriesListItem]? {
         do {
             return try await tvSeriesService.similar(
                 toTVSeries: id,
@@ -157,7 +157,7 @@ class TVManager {
         }
     }
 
-    func fetchDiscover(page: Int = 1) async -> [TVSeries]? {
+    func fetchDiscover(page: Int = 1) async -> [TVSeriesListItem]? {
         do {
             return try await discoverService.tvSeries(
                 sortedBy: .popularity(descending: true),
@@ -170,7 +170,7 @@ class TVManager {
         }
     }
 
-    func fetchTrending(page: Int = 1) async -> [TVSeries]? {
+    func fetchTrending(page: Int = 1) async -> [TVSeriesListItem]? {
         do {
             return try await trendingService.tvSeries(
                 inTimeWindow: .week,

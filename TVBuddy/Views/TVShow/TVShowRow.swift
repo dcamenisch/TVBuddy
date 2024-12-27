@@ -10,53 +10,57 @@ import SwiftUI
 import TMDb
 
 struct TVShowRow: View {
+    @State private var viewModel: ViewModel
+    
     @Environment(\.modelContext) private var context
-    
-    @State var url: URL?
-    
+        
     @Query
     private var tvShows: [TVBuddyTVShow]
     
-    let tvShow: TVSeries
+    let id: TVSeries.ID
     
-    init(tvShow: TVSeries) {
-        self.tvShow = tvShow
-        _tvShows = Query(filter: #Predicate<TVBuddyTVShow> { $0.id == tvShow.id })
+    init(id: TVSeries.ID) {
+        self.id = id
+        _tvShows = Query(filter: #Predicate<TVBuddyTVShow> { $0.id == id })
+        
+        let viewModel = ViewModel(forTVSeries: id)
+        _viewModel = State(initialValue: viewModel)
     }
     
     var body: some View {
-        NavigationLink {
-            tvShow.detailView
-        } label: {
-            HStack {
-                ImageView(url: url, placeholder: tvShow.name)
-                    .posterStyle(size: .tiny)
-                
-                VStack(alignment: .leading, spacing: 5) {
-                    if let releaseDate = tvShow.firstAirDate {
-                        Text(DateFormatter.year.string(from: releaseDate))
-                            .foregroundColor(.gray)
+        if let tvSeries = viewModel.tvShow {
+            NavigationLink {
+                tvSeries.detailView
+            } label: {
+                HStack {
+                    ImageView(url: viewModel.posterURL, placeholder: tvSeries.name)
+                        .posterStyle(size: .tiny)
+                    
+                    VStack(alignment: .leading, spacing: 5) {
+                        if let releaseDate = tvSeries.firstAirDate {
+                            Text(DateFormatter.year.string(from: releaseDate))
+                                .foregroundColor(.gray)
+                        }
+                        
+                        Text(tvSeries.name)
+                            .font(.system(size: 22, weight: .bold))
+                            .lineLimit(2)
                     }
                     
-                    Text(tvShow.name)
-                        .font(.system(size: 22, weight: .bold))
-                        .lineLimit(2)
-                }
-                
-                Spacer()
-                
-                Button(action: toggleTVShowInWatchlist) {
-                    Image(systemName: buttonImage())
-                        .font(.title)
-                        .bold()
-                        .foregroundStyle(.gray)
-                        .padding(8)
+                    Spacer()
+                    
+                    Button(action: toggleTVShowInWatchlist) {
+                        Image(systemName: buttonImage())
+                            .font(.title)
+                            .bold()
+                            .foregroundStyle(.gray)
+                            .padding(8)
+                    }
                 }
             }
-        }
-        .buttonStyle(.plain)
-        .task(id: tvShow) {
-            url = await TVStore.shared.posters(id: tvShow.id).first
+            .buttonStyle(.plain)
+        } else {
+            ProgressView()
         }
     }
     
@@ -65,7 +69,7 @@ struct TVShowRow: View {
             context.delete(tvShow)
             try? context.save()
         } else {
-            insertTVShow(id: tvShow.id, watched: false, isFavorite: false)
+            insertTVShow(id: id, watched: false, isFavorite: false)
         }
     }
     
@@ -82,6 +86,28 @@ struct TVShowRow: View {
             let container = context.container
             let actor = TVShowActor(modelContainer: container)
             await actor.insertTVSeries(id: id, watched: watched, isFavorite: isFavorite)
+        }
+    }
+}
+
+extension TVShowRow {
+    @MainActor @Observable
+    class ViewModel {
+        let id: TVSeries.ID
+        
+        private(set) var tvShow: TVSeries?
+        private(set) var posterURL: URL?
+        
+        init(forTVSeries id: TVSeries.ID) {
+            self.id = id
+            fetchData()
+        }
+        
+        func fetchData() {
+            Task {
+                tvShow = try? await TVStore.shared.show(withID: id)
+                posterURL = await tvShow?.getPosterURL()
+            }
         }
     }
 }

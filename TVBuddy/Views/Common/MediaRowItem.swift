@@ -14,9 +14,9 @@ struct MediaRowItem: View {
     var body: some View {
         switch mediaItem {
         case let .movie(movie):
-            MovieRow(movie: movie)
+            MovieRow(id: movie.id)
         case let .tvSeries(tvShow):
-            TVShowRow(tvShow: tvShow)
+            TVShowRow(id: tvShow.id)
         case let .person(person):
             PersonRow(person: person)
         }

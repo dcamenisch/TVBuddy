@@ -18,10 +18,10 @@ struct MovieRow: View {
     private var tvbMovies: [TVBuddyMovie]
     private var tvbMovie: TVBuddyMovie? { tvbMovies.first }
         
-    init(movie: Movie) {
-        _tvbMovies = Query(filter: #Predicate<TVBuddyMovie> { $0.id == movie.id })
+    init(id: Movie.ID) {
+        _tvbMovies = Query(filter: #Predicate<TVBuddyMovie> { $0.id == id })
         
-        let viewModel = ViewModel(forMovie: movie.id)
+        let viewModel = ViewModel(forMovie: id)
         _viewModel = State(initialValue: viewModel)
     }
     
@@ -100,7 +100,7 @@ extension MovieRow {
         func fetchData() {
             Task {
                 movie = await MovieStore.shared.movie(withID: id)
-                posterURL = await MovieStore.shared.posters(withID: id).first
+                posterURL = await movie?.getPosterURL()
             }
         }
     }

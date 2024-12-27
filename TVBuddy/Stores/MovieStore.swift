@@ -182,7 +182,7 @@ class MovieStore {
         }
 
         trendingPage = max(nextPageNumber, trendingPage)
-        return trendingIDs.compactMap { movies[$0] }
+        return trendingIDs.compactMap { self.movies[$0] }
     }
 
     @MainActor
@@ -209,6 +209,6 @@ class MovieStore {
         }
 
         discoverPage = max(nextPageNumber, discoverPage)
-        return discoverIDs.compactMap { movies[$0] }
+        return discoverIDs.compactMap { self.movies[$0] }
     }
 }
