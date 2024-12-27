@@ -35,7 +35,6 @@
 		6F8577A12B494F7A005AEF24 /* MovieActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8577A02B494F7A005AEF24 /* MovieActor.swift */; };
 		6F8577A32B49500C005AEF24 /* TVShowActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8577A22B49500C005AEF24 /* TVShowActor.swift */; };
 		6F890B712B01057800AA2D91 /* TVSeasonBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F890B702B01057800AA2D91 /* TVSeasonBody.swift */; };
-		6F890B752B013E5100AA2D91 /* TMDb in Frameworks */ = {isa = PBXBuildFile; productRef = 6F890B742B013E5100AA2D91 /* TMDb */; };
 		6F8B4C0C2B441B940002F48C /* MovieRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8B4C0B2B441B940002F48C /* MovieRow.swift */; };
 		6F8B4C0E2B44261C0002F48C /* TVShowRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8B4C0D2B44261C0002F48C /* TVShowRow.swift */; };
 		6F8B4C102B4426F10002F48C /* PersonRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8B4C0F2B4426F10002F48C /* PersonRow.swift */; };
@@ -150,7 +149,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				6F47815A2AB5CCCA006846C9 /* Nuke in Frameworks */,
-				6F890B752B013E5100AA2D91 /* TMDb in Frameworks */,
 				6FA552F32B0E82DA00EBE2A4 /* TMDb in Frameworks */,
 				6FBBBBB42AB5EADF00D081FE /* SwiftUIPager in Frameworks */,
 				6F1C0FD02B45CCA500C67DB2 /* WrappingHStack in Frameworks */,
@@ -382,7 +380,6 @@
 				6F47815D2AB5CCCA006846C9 /* NukeUI */,
 				6F47815F2AB5CCCA006846C9 /* NukeVideo */,
 				6FBBBBB32AB5EADF00D081FE /* SwiftUIPager */,
-				6F890B742B013E5100AA2D91 /* TMDb */,
 				6FA552F22B0E82DA00EBE2A4 /* TMDb */,
 				6F1C0FCF2B45CCA500C67DB2 /* WrappingHStack */,
 			);
@@ -788,10 +785,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 6F4781582AB5CCCA006846C9 /* XCRemoteSwiftPackageReference "Nuke" */;
 			productName = NukeVideo;
-		};
-		6F890B742B013E5100AA2D91 /* TMDb */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = TMDb;
 		};
 		6FA552F22B0E82DA00EBE2A4 /* TMDb */ = {
 			isa = XCSwiftPackageProductDependency;

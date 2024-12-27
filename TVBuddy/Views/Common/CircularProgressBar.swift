@@ -19,22 +19,22 @@ struct CircularProgressBar<Content>: View where Content: View {
     }
     
     var body: some View {
-        ZStack {
-            Circle()
-                .stroke(Color.background3, style: StrokeStyle(lineWidth: strokeWidth))
-                .background {
-                    Circle()
-                        .foregroundStyle(Color.background2)
-                }
-            
-            Circle()
-                .trim(from: 0, to: CGFloat(min(self.progress, 1.0)))
-                .stroke(Color.accentColor, style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round))
-                .rotationEffect(Angle(degrees: -90))
-                .animation(.linear, value: progress)
+            ZStack {
+                // Background circle
+                Circle()
+                    .stroke(Color(.systemGray5), style: StrokeStyle(lineWidth: strokeWidth))
 
-            content()
+                // Foreground progress circle
+                Circle()
+                    .trim(from: 0, to: CGFloat(min(self.progress, 1.0)))
+                    .stroke(Color.accentColor, style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round))
+                    .rotationEffect(Angle(degrees: -90))
+                    .animation(.easeInOut(duration: 0.5), value: progress)
+
+                // Content overlay
+                content()
+            }
+            .aspectRatio(1, contentMode: .fit) // Ensures it stays circular
+            .padding(strokeWidth / 2)
         }
-        .padding(strokeWidth / 2)
-    }
 }
