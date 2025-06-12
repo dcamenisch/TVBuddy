@@ -158,134 +158,124 @@ struct ProfilView: View {
 
     func backupData() {
         let fileManager = FileManager.default
-        guard let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            print("Error: Could not access documents directory.")
+
+        // Determine the source URL of the database
+        var sourceDatabaseURL: URL?
+        if #available(iOS 17.0, *) {
+            if let appSupportDir = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+                let storeURL = appSupportDir.appendingPathComponent("default.store")
+                if fileManager.fileExists(atPath: storeURL.path) {
+                    sourceDatabaseURL = storeURL
+                    print("Identified source database (iOS 17+): \(storeURL.path)")
+                }
+            }
+        }
+
+        // Fallback or if not found in App Support
+        if sourceDatabaseURL == nil {
+            if let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first {
+                let docStoreURL = documentsDirectory.appendingPathComponent("database.sqlite")
+                if fileManager.fileExists(atPath: docStoreURL.path) {
+                    sourceDatabaseURL = docStoreURL
+                    print("Identified source database (fallback/pre-iOS 17): \(docStoreURL.path)")
+                }
+            }
+        }
+
+        // Check if source database exists
+        guard let actualSourceURL = sourceDatabaseURL else {
+            print("Error: Source database file not found. Looked in Application Support (default.store) and Documents (database.sqlite).")
+            // self.backupAlertMessage = "Error: Database file not found to backup." // Example for an alert
+            // self.showBackupAlert = true // Example for an alert
             return
         }
 
-        let sourceURL = documentsDirectory.appendingPathComponent("database.sqlite")
-        // Attempt to get the default store URL for SwiftData
-        // Note: This is a common convention, but might need adjustment if the app uses a custom store configuration.
-        // For a default setup, SwiftData often creates a persistence store in Application Support directory.
-        // Let's try to find the default store URL if possible, otherwise fallback to a known name.
-
-        var actualSourceURL = sourceURL // Default to documentsDirectory/database.sqlite
-
-        if #available(iOS 17.0, *) { // ModelContainer is available from iOS 17
-            // A more robust way for SwiftData would be to get the URL from the ModelContainer
-            // However, accessing ModelContainer directly here in View might be tricky without environment setup.
-            // For now, we'll stick to a common path, but ideally this should be passed from where ModelContainer is initialized.
-            // This is a placeholder to indicate where a more robust solution would go.
-             if let appSupportDir = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
-                let storeURL = appSupportDir.appendingPathComponent("default.store") // Default store name
-                if fileManager.fileExists(atPath: storeURL.path) {
-                    actualSourceURL = storeURL
-                    print("Using SwiftData default store URL: \(actualSourceURL.path)")
-                } else {
-                     print("Default SwiftData store not found at \(storeURL.path), falling back to \(sourceURL.path)")
-                     // Check if the fallback exists
-                     if !fileManager.fileExists(atPath: sourceURL.path) {
-                        print("Error: database.sqlite not found at \(sourceURL.path) either.")
-                        // Consider showing an alert to the user
-                        return
-                     }
-                }
-            }
-        } else {
-            // Fallback for older iOS versions if necessary, or if not using iOS 17 specific features.
-            // Check if the database.sqlite exists in documents directory for older versions or non-standard setups
-            if !fileManager.fileExists(atPath: sourceURL.path) {
-                 print("Error: database.sqlite not found at \(sourceURL.path).")
-                 // Consider showing an alert to the user
-                 return
-            }
+        // Ensure it really exists (though guard above should suffice if sourceDatabaseURL is only set if fileExists)
+        if !fileManager.fileExists(atPath: actualSourceURL.path) {
+            print("Error: Source database file confirmed missing at \(actualSourceURL.path) just before copy.")
+            // self.backupAlertMessage = "Error: Database file disappeared before backup." // Example for an alert
+            // self.showBackupAlert = true // Example for an alert
+            return
         }
 
-
         let temporaryDirectoryURL = fileManager.temporaryDirectory
-        let backupURL = temporaryDirectoryURL.appendingPathComponent("TVBuddy_Backup_\(Date().timeIntervalSince1970).sqlite")
+        let backupFileName = "TVBuddy_Backup_\(String(format: "%.0f", Date().timeIntervalSince1970)).sqlite"
+        let backupURL = temporaryDirectoryURL.appendingPathComponent(backupFileName)
 
         do {
             if fileManager.fileExists(atPath: backupURL.path) {
                 try fileManager.removeItem(at: backupURL)
+                print("Removed existing temporary backup file at: \(backupURL.path)")
             }
             try fileManager.copyItem(at: actualSourceURL, to: backupURL)
+            print("Successfully copied database from \(actualSourceURL.path) to \(backupURL.path)")
+
+            // Ensure backupURL is set before showing the sheet
             self.backupFileURL = backupURL
-            self.showShareSheet = true
-            print("Backup successful: \(backupURL.path)")
+            self.showShareSheet = true // Now it's safe to set this
+            print("Backup successful, file ready at: \(backupURL.path). Share sheet will be shown.")
+
         } catch {
-            print("Error backing up data: \(error)")
-            // Optionally, show an alert to the user
+            print("Error backing up data: \(error.localizedDescription)")
+            // self.backupAlertMessage = "Error backing up data: \(error.localizedDescription)" // Example for an alert
+            // self.showBackupAlert = true // Example for an alert
         }
     }
 
-    func restoreData(from backupURL: URL) {
-        // startAccessingSecurityScopedResource should have been called by the caller (.fileImporter completion)
-        // and stopAccessingSecurityScopedResource should be called by the caller as well.
-        // However, to be safe, we ensure it's handled if not done by the caller.
-        // For this implementation, we assume the caller (fileImporter block) handles start/stop.
-        // If not, it should be:
-        // guard backupURL.startAccessingSecurityScopedResource() else { ... return }
-        // defer { backupURL.stopAccessingSecurityScopedResource() }
+    // Constants for the restore process
+    private let incomingRestoreFilename = "incoming_restore.sqlite"
+    private let pendingRestoreKey = "pendingRestoreFilePath"
+
+    func restoreData(from selectedBackupURL: URL) {
+        // selectedBackupURL is the URL from the fileImporter, e.g., a file in Inbox or iCloud.
+        // startAccessingSecurityScopedResource() should have been called by the fileImporter's completion handler.
 
         let fileManager = FileManager.default
 
-        // Determine the destination URL (same logic as in backupData for finding the store)
-        var destinationURL: URL?
-        if #available(iOS 17.0, *) {
-            if let appSupportDir = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
-                let storeURL = appSupportDir.appendingPathComponent("default.store")
-                // Check if this is the actual store path used by the app or if there's a fallback
-                // This logic assumes 'default.store' is the primary or only store.
-                // If the app could be using 'database.sqlite' in Documents even on iOS 17+, this needs adjustment.
-                destinationURL = storeURL
-                // To be robust, one might need to check if the app is currently using 'default.store' or the documentsDirectory one.
-                // For now, we prioritize 'default.store' on iOS 17+.
-                if !fileManager.fileExists(atPath: appSupportDir.path) { // Ensure appSupportDir exists
-                    try? fileManager.createDirectory(at: appSupportDir, withIntermediateDirectories: true, attributes: nil)
-                }
-            }
-        }
-
-        if destinationURL == nil { // Fallback or older iOS
-            if let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first {
-                destinationURL = documentsDirectory.appendingPathComponent("database.sqlite")
-            }
-        }
-
-        guard let finalDestinationURL = destinationURL else {
-            restoreAlertMessage = "Could not determine the database destination URL."
+        guard let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            restoreAlertMessage = "Error: Could not access app's documents directory."
             showRestoreAlert = true
-            backupURL.stopAccessingSecurityScopedResource() // Stop access if started by caller
+            selectedBackupURL.stopAccessingSecurityScopedResource()
             return
         }
 
-        print("Attempting to restore to: \(finalDestinationURL.path)")
+        let targetIncomingRestoreURL = documentsDirectory.appendingPathComponent(incomingRestoreFilename)
 
         do {
-            // Optional: Backup current database before overwriting
-            // let currentDBBackupURL = ...
-            // if fileManager.fileExists(atPath: finalDestinationURL.path) {
-            //     try fileManager.moveItem(at: finalDestinationURL, to: currentDBBackupURL) // move or copy
-            // }
-
-            if fileManager.fileExists(atPath: finalDestinationURL.path) {
-                try fileManager.removeItem(at: finalDestinationURL)
-                print("Removed existing database at: \(finalDestinationURL.path)")
+            // If a previous incoming_restore.sqlite exists, remove it.
+            if fileManager.fileExists(atPath: targetIncomingRestoreURL.path) {
+                try fileManager.removeItem(at: targetIncomingRestoreURL)
+                print("Removed existing incoming restore file: \(targetIncomingRestoreURL.path)")
             }
 
-            try fileManager.copyItem(at: backupURL, to: finalDestinationURL)
+            // Copy the selected backup file to the well-known "incoming_restore.sqlite" path.
+            // This copy operation is crucial. The selectedBackupURL might be in a location not accessible at next app launch (e.g. iCloud temp).
+            // By copying it into our app's documents directory, we ensure it's available.
+            try fileManager.copyItem(at: selectedBackupURL, to: targetIncomingRestoreURL)
+            print("Successfully copied selected backup from \(selectedBackupURL.path) to \(targetIncomingRestoreURL.path)")
 
-            restoreAlertMessage = "Data restored successfully from \(backupURL.lastPathComponent). Please restart the app for the changes to take effect."
+            // If copy is successful, store the path of this "incoming_restore.sqlite" in UserDefaults.
+            UserDefaults.standard.set(targetIncomingRestoreURL.path, forKey: pendingRestoreKey)
+            print("Saved pending restore path to UserDefaults: \(targetIncomingRestoreURL.path)")
+
+            // Update alert message to instruct user to restart.
+            restoreAlertMessage = "Backup file prepared successfully. Please CLOSE and RESTART the app to complete the restore process. Your current data is still active until you restart."
             showRestoreAlert = true
-            print("Data restored from: \(backupURL.path) to \(finalDestinationURL.path)")
 
         } catch {
-            print("Error restoring data: \(error)")
-            restoreAlertMessage = "Error restoring data: \(error.localizedDescription). Your existing data has not been changed."
+            print("Error during restore preparation: \(error.localizedDescription)")
+            restoreAlertMessage = "Error preparing restore: \(error.localizedDescription). Please try again."
             showRestoreAlert = true
+            // Ensure no pending restore path is saved if any step failed.
+            UserDefaults.standard.removeObject(forKey: pendingRestoreKey)
+            // Attempt to clean up partial incoming file if it exists
+            if fileManager.fileExists(atPath: targetIncomingRestoreURL.path) {
+                try? fileManager.removeItem(at: targetIncomingRestoreURL)
+            }
         }
-        backupURL.stopAccessingSecurityScopedResource() // Ensure security scope is released
+
+        // Release security-scoped access to the original selected backup URL.
+        selectedBackupURL.stopAccessingSecurityScopedResource()
     }
 }
 
