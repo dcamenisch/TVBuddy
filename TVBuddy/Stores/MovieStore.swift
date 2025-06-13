@@ -9,6 +9,14 @@ import Foundation
 import TMDb
 
 class MovieStore {
+    private let movieCache = CacheService<Movie.ID, Movie>()
+    private let imageCache = CacheService<Movie.ID, ImageCollection>()
+    private let creditCache = CacheService<Movie.ID, ShowCredits>()
+    private let recommendationsCache = CacheService<Movie.ID, [Movie.ID]>()
+    private let similarMoviesCache = CacheService<Movie.ID, [Movie.ID]>()
+    private let discoverMoviesCache = CacheService<String, [Movie.ID]>()
+    private let trendingMoviesCache = CacheService<String, [Movie.ID]>()
+
     static let shared = MovieStore()
 
     private let moviesManager: MovieManager = MovieManager()
@@ -51,11 +59,11 @@ class MovieStore {
 
         return images[id]
     }
-    
+
     @MainActor
     func logos(id: Movie.ID) async -> [URL] {
         guard let images = await images(id: id) else { return [] }
-        
+
         return images.logos.compactMap { logo in
             imageService?.logoURL(
                 for: logo.filePath
@@ -66,7 +74,7 @@ class MovieStore {
     @MainActor
     func posters(withID id: Movie.ID) async -> [URL] {
         guard let images = await images(id: id) else { return [] }
-        
+
         var posters = images.posters.filter { $0.languageCode != nil }
         posters = posters.isEmpty ? images.posters : posters
 
@@ -178,7 +186,9 @@ class MovieStore {
         }
 
         page.forEach { movie in
-            if !self.trendingIDs.contains(movie.id) { self.trendingIDs.append(movie.id) }
+            if !self.trendingIDs.contains(movie.id) {
+                self.trendingIDs.append(movie.id)
+            }
         }
 
         trendingPage = max(nextPageNumber, trendingPage)
@@ -205,7 +215,9 @@ class MovieStore {
         }
 
         page.forEach { movie in
-            if !self.discoverIDs.contains(movie.id) { self.discoverIDs.append(movie.id) }
+            if !self.discoverIDs.contains(movie.id) {
+                self.discoverIDs.append(movie.id)
+            }
         }
 
         discoverPage = max(nextPageNumber, discoverPage)
