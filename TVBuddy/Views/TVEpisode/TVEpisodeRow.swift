@@ -28,6 +28,10 @@ struct TVEpisodeRow: View {
         tvEpisode?.episodeNumber ?? tvBuddyTVEpisode?.episodeNumber ?? 0
     }
 
+    @Query
+    private var tvbEpisodes: [TVBuddyTVEpisode]
+    private var tvbEpisode: TVBuddyTVEpisode? { tvbEpisodes.first }
+
     @State private var tvEpisode: TVEpisode?
     @State private var backdrop: URL?
 
@@ -46,6 +50,8 @@ struct TVEpisodeRow: View {
 
         self.clickable = clickable
         self.showOverview = showOverview
+
+        _tvbEpisodes = Query(filter: #Predicate<TVBuddyTVEpisode> { $0.id == tvEpisode.id })
     }
 
     init(
@@ -61,6 +67,9 @@ struct TVEpisodeRow: View {
 
         self.clickable = clickable
         self.showOverview = showOverview
+
+        let episodeID = tvBuddyTVEpisode?.id ?? 0
+        _tvbEpisodes = Query(filter: #Predicate<TVBuddyTVEpisode> { $0.id == episodeID })
     }
 
     var body: some View {
@@ -159,7 +168,7 @@ struct TVEpisodeRow: View {
                     },
                     label: {
                         Image(
-                            systemName: tvBuddyTVEpisode?.watched ?? false
+                            systemName: tvbEpisode?.watched ?? false
                                 ? "checkmark.circle" : "plus.circle"
                         )
                         .font(.title)
