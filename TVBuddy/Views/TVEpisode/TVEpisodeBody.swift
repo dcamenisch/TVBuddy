@@ -6,21 +6,32 @@
 //
 
 import Foundation
+import NukeUI
 import SwiftData
 import SwiftUI
 import TMDb
 import WrappingHStack
-import NukeUI
 
 struct TVEpisodeBody: View {
     @Environment(\.modelContext) private var context
 
     let series: TVSeries
     let episode: TVEpisode
-    
+
+    @Query
+    private var episodes: [TVBuddyTVEpisode]
+    private var tvbEpisode: TVBuddyTVEpisode? { episodes.first }
+
     @State var urls: [URL] = []
 
-    var body: some View {        
+    init(series: TVSeries, episode: TVEpisode) {
+        self.series = series
+        self.episode = episode
+
+        _episodes = Query(filter: #Predicate<TVBuddyTVEpisode> { $0.id == episode.id })
+    }
+
+    var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             watchButtons
             Divider()
@@ -39,10 +50,21 @@ struct TVEpisodeBody: View {
     private var watchButtons: some View {
         VStack(alignment: .center) {
             Button {
-                // Button action here
+                let container = context.container
+                let actor = TVShowActor(modelContainer: container)
+                Task {
+                    await actor.toggleEpisodeWatched(
+                        showID: series.id,
+                        seasonNumber: episode.seasonNumber,
+                        episodeNumber: episode.episodeNumber,
+                        episodeID: episode.id
+                    )
+                }
             } label: {
-//                    Label("Watched", systemImage: tvBuddyTVShow?.finishedWatching ?? false ? "eye.fill" : "eye")
-                Label("Watched", systemImage: "eye")
+                Label(
+                    "Watched",
+                    systemImage: tvbEpisode?.watched ?? false ? "eye.fill" : "eye"
+                )
                     .padding(.vertical, 5)
                     .frame(width: UIScreen.main.bounds.width * 2 / 3)
             }
@@ -57,19 +79,19 @@ struct TVEpisodeBody: View {
             if let overview = episode.overview, !overview.isEmpty {
                 Text("S\(episode.seasonNumber), E\(episode.episodeNumber ):")
                     .bold()
-                + Text(" ")
-                + Text(overview)
+                    + Text(" ")
+                    + Text(overview)
             }
         }
     }
-    
+
     private var stills: some View {
         Group {
             if !urls.isEmpty {
                 Text("Stills")
                     .font(.title2)
                     .bold()
-                
+
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 10) {
                         ForEach(urls, id: \.self) { url in
