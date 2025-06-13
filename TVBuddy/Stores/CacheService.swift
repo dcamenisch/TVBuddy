@@ -10,9 +10,8 @@ import Foundation
 class CacheService<Key: Hashable & Equatable, Value> {
     private let cache = NSCache<WrappedKey, Entry>()
     
-    init() {
-        // Limit cache size to 50MB
-        cache.totalCostLimit = 50 * 1024 * 1024
+    init(cacheSize: Int = 50 * 1024 * 1024) {
+        cache.totalCostLimit = cacheSize
     }
     
     func setObject(_ object: Value, forKey key: Key) {

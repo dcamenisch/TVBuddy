@@ -30,10 +30,11 @@ struct ProfilView: View {
     private var watchedTVEpisodes: [TVBuddyTVEpisode]
 
     private var watchlistProgress: CGFloat {
-        if allMovies.count + allTVEpisodes.count == 0 { return 0.0 }
-        
-        return Double(watchedMovies.count + watchedTVEpisodes.count)
-            / Double(allMovies.count + allTVEpisodes.count)
+        let totalItems = allMovies.count + allTVEpisodes.count
+        if totalItems == 0 {
+            return 0.0
+        }
+        return Double(watchedMovies.count + watchedTVEpisodes.count) / Double(totalItems)
     }
 
     var body: some View {

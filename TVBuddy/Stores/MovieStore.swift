@@ -21,43 +21,35 @@ class MovieStore {
 
     private let moviesManager: MovieManager = MovieManager()
 
-    private var imageService: ImagesConfiguration? {
-        AppConstants.apiConfiguration?.images
-    }
-
-    private var movies: [Movie.ID: Movie] = [:]
-    private var images: [Movie.ID: ImageCollection] = [:]
-    private var credits: [Movie.ID: ShowCredits] = [:]
-    private var recommendationsIDs: [Movie.ID: [Movie.ID]] = [:]
-    private var similarIDs: [Movie.ID: [Movie.ID]] = [:]
-    private var discoverIDs: [Movie.ID] = []
-    private var trendingIDs: [Movie.ID] = []
+    private var imageService: ImagesConfiguration? { AppConstants.apiConfiguration?.images }
 
     private var discoverPage: Int = 0
     private var trendingPage: Int = 0
 
     @MainActor
     func movie(withID id: Movie.ID) async -> Movie? {
-        if movies[id] == nil {
-            let movie = await moviesManager.fetchMovie(id: id)
-            guard let movie = movie else { return nil }
-
-            movies[id] = movie
+        if let cachedMovie = movieCache.object(forKey: id) {
+            return cachedMovie
         }
 
-        return movies[id]
+        let movie = await moviesManager.fetchMovie(id: id)
+        guard let movie else { return nil }
+
+        movieCache.setObject(movie, forKey: id)
+        return movie
     }
 
     @MainActor
     func images(id: Movie.ID) async -> ImageCollection? {
-        if images[id] == nil {
-            let imageCollection = await moviesManager.fetchImages(id: id)
-            guard let imageCollection = imageCollection else { return nil }
-
-            images[id] = imageCollection
+        if let cachedImages = imageCache.object(forKey: id) {
+            return cachedImages
         }
 
-        return images[id]
+        let imageCollection = await moviesManager.fetchImages(id: id)
+        guard let imageCollection = imageCollection else { return nil }
+
+        imageCache.setObject(imageCollection, forKey: id)
+        return imageCollection
     }
 
     @MainActor
@@ -116,111 +108,175 @@ class MovieStore {
 
     @MainActor
     func credits(forMovie id: Movie.ID) async -> ShowCredits? {
-        if credits[id] == nil {
-            let credits = await moviesManager.fetchCredits(id: id)
-            guard let credits = credits else { return nil }
-
-            self.credits[id] = credits
+        if let cachedCredits = creditCache.object(forKey: id) {
+            return cachedCredits
         }
 
-        return credits[id]
+        let credits = await moviesManager.fetchCredits(id: id)
+        guard let credits = credits else { return nil }
+
+        creditCache.setObject(credits, forKey: id)
+        return credits
     }
 
     @MainActor
     func recommendations(forMovie id: Movie.ID) async -> [Movie]? {
-        if recommendationsIDs[id] == nil {
-            let movies = await moviesManager.fetchRecommendations(id: id)
-            guard let movies = movies else { return nil }
+        var movieIDs: [Movie.ID]? = recommendationsCache.object(forKey: id)
+
+        if movieIDs == nil {
+            let fetchedMovies = await moviesManager.fetchRecommendations(id: id)
+            guard let fetchedMovies = fetchedMovies else { return nil }
 
             await withTaskGroup(of: Void.self) { taskGroup in
-                for movie in movies {
+                for movie in fetchedMovies {
                     taskGroup.addTask {
+                        // This will populate movieCache
                         _ = await self.movie(withID: movie.id)
                     }
                 }
             }
-
-            recommendationsIDs[id] = movies.compactMap { $0.id }
+            let ids = fetchedMovies.map { $0.id }
+            recommendationsCache.setObject(ids, forKey: id)
+            movieIDs = ids
         }
 
-        return recommendationsIDs[id]!.compactMap { self.movies[$0] }
+        guard let finalMovieIDs = movieIDs else { return [] }
+
+        var resultMovies: [Movie] = []
+        for movieID in finalMovieIDs {
+            if let movie = await self.movie(withID: movieID) {
+                resultMovies.append(movie)
+            }
+        }
+        return resultMovies
     }
 
     @MainActor
     func similar(toMovie id: Movie.ID) async -> [Movie]? {
-        if similarIDs[id] == nil {
-            let movies = await moviesManager.fetchSimilar(id: id)
-            guard let movies = movies else { return nil }
+        var movieIDs: [Movie.ID]? = similarMoviesCache.object(forKey: id)
+
+        if movieIDs == nil {
+            let fetchedMovies = await moviesManager.fetchSimilar(id: id)
+            guard let fetchedMovies = fetchedMovies else { return nil }
 
             await withTaskGroup(of: Void.self) { taskGroup in
-                for movie in movies {
+                for movie in fetchedMovies {
                     taskGroup.addTask {
+                        // This will populate movieCache
+                        _ = await self.movie(withID: movie.id)
+                    }
+                }
+            }
+            let ids = fetchedMovies.map { $0.id }
+            similarMoviesCache.setObject(ids, forKey: id)
+            movieIDs = ids
+        }
+
+        guard let finalMovieIDs = movieIDs else { return [] }
+
+        var resultMovies: [Movie] = []
+        for movieID in finalMovieIDs {
+            if let movie = await self.movie(withID: movieID) {
+                resultMovies.append(movie)
+            }
+        }
+        return resultMovies
+    }
+
+    func trending(newPage: Bool = false) async -> [Movie] {
+        let cacheKey = "trendingMovies"
+        var trendingIDs: [Movie.ID]? = trendingMoviesCache.object(forKey: cacheKey)
+
+        if newPage || trendingIDs == nil {
+            if newPage && trendingIDs == nil {
+                // e.g. cache expired and requesting new page
+                // don't increment page if cache expired and not explicitly requesting new page
+            } else if newPage {
+                trendingPage += 1
+            } else {
+                trendingPage = 1
+            }
+
+            let pageItems = await moviesManager.fetchTrending(page: trendingPage)
+            guard let pageItems = pageItems else {
+                if trendingIDs == nil { trendingMoviesCache.removeObject(forKey: cacheKey) }
+                return []
+            }
+
+            await withTaskGroup(of: Void.self) { taskGroup in
+                for movie in pageItems {
+                    taskGroup.addTask {
+                        // Populates movieCache
                         _ = await self.movie(withID: movie.id)
                     }
                 }
             }
 
-            similarIDs[id] = movies.compactMap { $0.id }
+            var currentTrendingIDs = newPage ? (trendingIDs ?? []) : []
+            pageItems.forEach { movie in
+                if !currentTrendingIDs.contains(movie.id) { currentTrendingIDs.append(movie.id) }
+            }
+            trendingMoviesCache.setObject(currentTrendingIDs, forKey: cacheKey)
+            trendingIDs = currentTrendingIDs
         }
 
-        return similarIDs[id]!.compactMap { self.movies[$0] }
-    }
+        guard let finalTrendingIDs = trendingIDs else { return [] }
 
-    @MainActor
-    func trending(newPage: Bool = false) async -> [Movie] {
-        if !newPage && trendingPage != 0 {
-            return trendingIDs.compactMap { movies[$0] }
-        }
-
-        let nextPageNumber = trendingPage + 1
-
-        let page = await moviesManager.fetchTrending(page: nextPageNumber)
-        guard let page = page else { return [] }
-
-        await withTaskGroup(of: Void.self) { taskGroup in
-            for movie in page {
-                taskGroup.addTask {
-                    _ = await self.movie(withID: movie.id)
-                }
+        var resultMovies: [Movie] = []
+        for movieID in finalTrendingIDs {
+            if let movie = await self.movie(withID: movieID) {
+                resultMovies.append(movie)
             }
         }
-
-        page.forEach { movie in
-            if !self.trendingIDs.contains(movie.id) {
-                self.trendingIDs.append(movie.id)
-            }
-        }
-
-        trendingPage = max(nextPageNumber, trendingPage)
-        return trendingIDs.compactMap { self.movies[$0] }
+        return resultMovies
     }
 
     @MainActor
     func discover(newPage: Bool = false) async -> [Movie] {
-        if !newPage && discoverPage != 0 {
-            return discoverIDs.compactMap { movies[$0] }
-        }
+        let cacheKey = "discoverMovies"
+        var discoverIDs: [Movie.ID]? = discoverMoviesCache.object(forKey: cacheKey)
 
-        let nextPageNumber = discoverPage + 1
+        if newPage || discoverIDs == nil {
+            if newPage && discoverIDs == nil {
+                // e.g. cache expired and requesting new page
+                // don't increment page if cache expired and not explicitly requesting new page
+            } else if newPage {
+                discoverPage += 1
+            } else {
+                discoverPage = 1
+            }
 
-        let page = await moviesManager.fetchDiscover(page: nextPageNumber)
-        guard let page = page else { return [] }
+            let pageItems = await moviesManager.fetchDiscover(page: discoverPage)
+            guard let pageItems = pageItems else {
+                if discoverIDs == nil { discoverMoviesCache.removeObject(forKey: cacheKey) }
+                return []
+            }
 
-        await withTaskGroup(of: Void.self) { taskGroup in
-            for movie in page {
-                taskGroup.addTask {
-                    _ = await self.movie(withID: movie.id)
+            await withTaskGroup(of: Void.self) { taskGroup in
+                for movie in pageItems {
+                    taskGroup.addTask {
+                        // Populates movieCache
+                        _ = await self.movie(withID: movie.id)
+                    }
                 }
             }
+
+            var currentDiscoverIDs = newPage ? (discoverIDs ?? []) : []
+            pageItems.forEach { movie in
+                if !currentDiscoverIDs.contains(movie.id) { currentDiscoverIDs.append(movie.id) }
+            }
+            discoverMoviesCache.setObject(currentDiscoverIDs, forKey: cacheKey)
+            discoverIDs = currentDiscoverIDs
         }
 
-        page.forEach { movie in
-            if !self.discoverIDs.contains(movie.id) {
-                self.discoverIDs.append(movie.id)
+        guard let finalDiscoverIDs = discoverIDs else { return [] }
+
+        var resultMovies: [Movie] = []
+        for movieID in finalDiscoverIDs {
+            if let movie = await self.movie(withID: movieID) {
+                resultMovies.append(movie)
             }
         }
-
-        discoverPage = max(nextPageNumber, discoverPage)
-        return discoverIDs.compactMap { self.movies[$0] }
+        return resultMovies
     }
 }

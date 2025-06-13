@@ -9,116 +9,128 @@ import Foundation
 import TMDb
 
 class TVStore: ObservableObject {
-    static let shared = TVStore()
-    
-    private let tvManager: TVManager = TVManager()
-    
-    private var imageService: ImagesConfiguration? {
-            AppConstants.apiConfiguration?.images
-        }
+    private let showCache = CacheService<TVSeries.ID, TVSeries>()
+    private let seasonCache = CacheService<TVSeasonCacheKey, TVSeason>()
+    private let seriesImageCache = CacheService<TVSeries.ID, ImageCollection>()
+    private let seasonImageCache = CacheService<TVSeasonImageCacheKey, TVSeasonImageCollection>()
+    private let episodeImageCache = CacheService<TVEpisodeImageCacheKey, TVEpisodeImageCollection>()
+    private let creditCache = CacheService<TVSeries.ID, ShowCredits>()
+    private let aggregateCreditCache = CacheService<TVSeries.ID, TVSeriesAggregateCredits>()
+    private let recommendationsCache = CacheService<TVSeries.ID, [TVSeries.ID]>()
+    private let similarShowsCache = CacheService<TVSeries.ID, [TVSeries.ID]>()
+    private let discoverShowsCache = CacheService<String, [TVSeries.ID]>()
+    private let trendingShowsCache = CacheService<String, [TVSeries.ID]>()
 
-    private var shows: [TVSeries.ID: TVSeries] = [:]
-    private var seasons: [TVSeries.ID: [Int: TVSeason]] = [:]
-    private var seriesImages: [TVSeries.ID: ImageCollection] = [:]
-    private var seasonImages: [[Int?]: TVSeasonImageCollection] = [:]
-    private var episodeImages: [[Int?]: TVEpisodeImageCollection] = [:]
-    private var credits: [TVSeries.ID: ShowCredits] = [:]
-    private var aggregateCredits: [TVSeries.ID: TVSeriesAggregateCredits] = [:]
-    private var recommendationsIDs: [TVSeries.ID: [TVSeries.ID]] = [:]
-    private var similarIDs: [TVSeries.ID: [TVSeries.ID]] = [:]
-    private var discoverIDs: [TVSeries.ID] = []
-    private var trendingIDs: [TVSeries.ID] = []
+    static let shared = TVStore()
+
+    private let tvManager: TVManager = TVManager()
+
+    private var imageService: ImagesConfiguration? { AppConstants.apiConfiguration?.images }
 
     private var discoverPage: Int = 0
     private var trendingPage: Int = 0
 
     @MainActor
     func show(withID id: TVSeries.ID) async throws -> TVSeries? {
-        if shows[id] == nil {
-            let show = try await tvManager.fetchShow(id: id)
-            guard let show = show else { return nil }
-
-            shows[id] = show
+        if let cachedShow = showCache.object(forKey: id) {
+            return cachedShow
         }
 
-        return shows[id]
+        let show = try await tvManager.fetchShow(id: id)
+        guard let show = show else { return nil }
+
+        showCache.setObject(show, forKey: id)
+        return show
     }
 
     @MainActor
-    func season(_ season: Int, forTVSeries id: TVSeries.ID) async throws -> TVSeason? {
-        if seasons[id]?[season] == nil {
-            let result = try await tvManager.fetchSeason(season: season, id: id)
-            guard let result = result else { return nil }
-
-            var tmpSeasons = seasons[id] ?? [:]
-            tmpSeasons[season] = result
-            seasons[id] = tmpSeasons
+    func season(_ seasonNumber: Int, forTVSeries id: TVSeries.ID) async throws -> TVSeason? {
+        let cacheKey = TVSeasonCacheKey(seriesID: id, seasonNumber: seasonNumber)
+        if let cachedSeason = seasonCache.object(forKey: cacheKey) {
+            return cachedSeason
         }
 
-        return seasons[id]?[season]
+        let result = try await tvManager.fetchSeason(season: seasonNumber, id: id)
+        guard let result = result else { return nil }
+
+        seasonCache.setObject(result, forKey: cacheKey)
+        return result
     }
 
     @MainActor
-    func episode(_ episode: Int, season: Int, forTVSeries id: TVSeries.ID) async throws -> TVEpisode? {
+    func episode(_ episode: Int, season: Int, forTVSeries id: TVSeries.ID) async throws
+        -> TVEpisode?
+    {
         let season = try await self.season(season, forTVSeries: id)
         return season?.episodes?.first(where: { tvEpisode in
             tvEpisode.episodeNumber == episode
         })
     }
-    
+
     @MainActor
     func seriesImages(id: TVSeries.ID) async -> ImageCollection? {
-        if seriesImages[id] == nil {
-            let imageCollection = await tvManager.fetchImages(id: id)
-            guard let imageCollection = imageCollection else { return nil }
-
-            seriesImages[id] = imageCollection
+        if let cachedImages = seriesImageCache.object(forKey: id) {
+            return cachedImages
         }
-        
-        return seriesImages[id]
+
+        let imageCollection = await tvManager.fetchImages(id: id)
+        guard let imageCollection = imageCollection else { return nil }
+
+        seriesImageCache.setObject(imageCollection, forKey: id)
+        return imageCollection
     }
-    
+
     @MainActor
     func seasonImages(season: Int, id: TVSeries.ID) async -> TVSeasonImageCollection? {
-        if seasonImages[[id, season]] == nil {
-            let imageCollection = await tvManager.fetchImages(season: season, id: id)
-            guard let imageCollection = imageCollection else { return nil }
-
-            seasonImages[[id, season]] = imageCollection
+        let cacheKey = TVSeasonImageCacheKey(seriesID: id, seasonNumber: season)
+        if let cachedImages = seasonImageCache.object(forKey: cacheKey) {
+            return cachedImages
         }
-        
-        return seasonImages[[id, season]]
+
+        let imageCollection = await tvManager.fetchImages(season: season, id: id)
+        guard let imageCollection = imageCollection else { return nil }
+
+        seasonImageCache.setObject(imageCollection, forKey: cacheKey)
+        return imageCollection
     }
-    
+
     @MainActor
-    func episodeImages(episode: Int, season: Int, id: TVSeries.ID) async -> TVEpisodeImageCollection? {
-        if episodeImages[[id, season, episode]] == nil {
-            let imageCollection = await tvManager.fetchImages(episode: episode, season: season, id: id)
-            guard let imageCollection = imageCollection else { return nil }
-
-            episodeImages[[id, season, episode]] = imageCollection
+    func episodeImages(episode: Int, season: Int, id: TVSeries.ID) async
+        -> TVEpisodeImageCollection?
+    {
+        let cacheKey = TVEpisodeImageCacheKey(
+            seriesID: id,
+            seasonNumber: season,
+            episodeNumber: episode
+        )
+        if let cachedImages = episodeImageCache.object(forKey: cacheKey) {
+            return cachedImages
         }
-        
-        return episodeImages[[id, season, episode]]
+
+        let imageCollection = await tvManager.fetchImages(episode: episode, season: season, id: id)
+        guard let imageCollection = imageCollection else { return nil }
+
+        episodeImageCache.setObject(imageCollection, forKey: cacheKey)
+        return imageCollection
     }
-    
+
     @MainActor
     func logos(id: TVSeries.ID) async -> [URL] {
         guard let images = await seriesImages(id: id) else { return [] }
-        
+
         return images.logos.compactMap { logo in
             imageService?.logoURL(
                 for: logo.filePath
             )
         }
     }
-    
+
     @MainActor
     func posters(id: TVSeries.ID, season: Int? = nil) async -> [URL] {
         if let season = season, let images = await seasonImages(season: season, id: id) {
             var posters = images.posters.filter { $0.languageCode != nil }
             posters = posters.isEmpty ? images.posters : posters
-            
+
             return posters.compactMap { poster in
                 imageService?.posterURL(
                     for: poster.filePath,
@@ -126,12 +138,12 @@ class TVStore: ObservableObject {
                 )
             }
         }
-        
+
         guard let images = await seriesImages(id: id) else { return [] }
-        
+
         var posters = images.posters.filter { $0.languageCode != nil }
         posters = posters.isEmpty ? images.posters : posters
-        
+
         return posters.compactMap { poster in
             imageService?.posterURL(
                 for: poster.filePath,
@@ -144,7 +156,7 @@ class TVStore: ObservableObject {
     func backdrops(id: TVSeries.ID) async -> [URL] {
         guard let images = await seriesImages(id: id) else { return [] }
         let backdrops = images.backdrops.filter { $0.languageCode == nil }
-        
+
         return backdrops.compactMap { backdrop in
             imageService?.backdropURL(
                 for: backdrop.filePath,
@@ -156,10 +168,10 @@ class TVStore: ObservableObject {
     @MainActor
     func backdropsWithText(id: TVSeries.ID) async -> [URL] {
         guard let images = await seriesImages(id: id) else { return [] }
-        
+
         var backdrops = images.backdrops.filter { $0.languageCode != nil }
         backdrops = backdrops.isEmpty ? images.backdrops : backdrops
-    
+
         return backdrops.compactMap { backdrop in
             imageService?.backdropURL(
                 for: backdrop.filePath,
@@ -167,13 +179,13 @@ class TVStore: ObservableObject {
             )
         }
     }
-    
+
     @MainActor
-    func stills(episode: Int, season: Int, id: TVSeries.ID)async -> [URL] {
+    func stills(episode: Int, season: Int, id: TVSeries.ID) async -> [URL] {
         guard let images = await episodeImages(episode: episode, season: season, id: id) else {
             return []
         }
-        
+
         return images.stills.compactMap { still in
             imageService?.backdropURL(
                 for: still.filePath,
@@ -184,119 +196,200 @@ class TVStore: ObservableObject {
 
     @MainActor
     func credits(forTVSeries id: TVSeries.ID) async -> ShowCredits? {
-        if credits[id] == nil {
-            let credits = await tvManager.fetchCredits(id: id)
-            guard let credits = credits else { return nil }
-
-            self.credits[id] = credits
+        if let cachedCredits = creditCache.object(forKey: id) {
+            return cachedCredits
         }
 
-        return credits[id]
+        let fetchedCredits = await tvManager.fetchCredits(id: id)
+        guard let fetchedCredits = fetchedCredits else { return nil }
+
+        creditCache.setObject(fetchedCredits, forKey: id)
+        return fetchedCredits
     }
-    
+
     @MainActor
     func aggregateCredits(forTVSeries id: TVSeries.ID) async -> TVSeriesAggregateCredits? {
-        if aggregateCredits[id] == nil {
-            let aggregateCredits = await tvManager.fetchAggregateCredits(id: id)
-            guard let aggregateCredits = aggregateCredits else { return nil }
-
-            self.aggregateCredits[id] = aggregateCredits
+        if let cachedCredits = aggregateCreditCache.object(forKey: id) {
+            return cachedCredits
         }
 
-        return aggregateCredits[id]
+        let fetchedCredits = await tvManager.fetchAggregateCredits(id: id)
+        guard let fetchedCredits = fetchedCredits else { return nil }
+
+        aggregateCreditCache.setObject(fetchedCredits, forKey: id)
+        return fetchedCredits
     }
 
     @MainActor
     func recommendations(forTVSeries id: TVSeries.ID) async -> [TVSeries]? {
-        if recommendationsIDs[id] == nil {
-            let shows = await tvManager.fetchRecommendations(id: id)
-            guard let shows = shows else { return nil }
+        var showIDs: [TVSeries.ID]? = recommendationsCache.object(forKey: id)
+
+        if showIDs == nil {
+            let fetchedShows = await tvManager.fetchRecommendations(id: id)
+            guard let fetchedShows = fetchedShows else { return nil }
 
             await withTaskGroup(of: Void.self) { taskGroup in
-                for show in shows {
+                for show in fetchedShows {
                     taskGroup.addTask {
-                        _ = try? await self.show(withID: show.id)
+                        _ = try? await self.show(withID: show.id)  // Populates showCache
                     }
                 }
             }
-
-            recommendationsIDs[id] = shows.compactMap { $0.id }
+            let ids = fetchedShows.map { $0.id }
+            recommendationsCache.setObject(ids, forKey: id)
+            showIDs = ids
         }
 
-        return recommendationsIDs[id]!.compactMap { self.shows[$0] }
+        guard let finalShowIDs = showIDs else { return [] }
+
+        var resultShows: [TVSeries] = []
+        for showID in finalShowIDs {
+            if let show = try? await self.show(withID: showID) {
+                resultShows.append(show)
+            }
+        }
+        return resultShows
     }
 
     @MainActor
     func similar(toTVSeries id: TVSeries.ID) async -> [TVSeries]? {
-        if similarIDs[id] == nil {
-            let shows = await tvManager.fetchSimilar(id: id)
-            guard let shows = shows else { return nil }
+        var showIDs: [TVSeries.ID]? = similarShowsCache.object(forKey: id)
+
+        if showIDs == nil {
+            let fetchedShows = await tvManager.fetchSimilar(id: id)
+            guard let fetchedShows = fetchedShows else { return nil }
 
             await withTaskGroup(of: Void.self) { taskGroup in
-                for show in shows {
+                for show in fetchedShows {
                     taskGroup.addTask {
-                        _ = try? await self.show(withID: show.id)
+                        _ = try? await self.show(withID: show.id)  // Populates showCache
                     }
                 }
             }
-
-            similarIDs[id] = shows.compactMap { $0.id }
+            let ids = fetchedShows.map { $0.id }
+            similarShowsCache.setObject(ids, forKey: id)
+            showIDs = ids
         }
 
-        return similarIDs[id]!.compactMap { self.shows[$0] }
+        guard let finalShowIDs = showIDs else { return [] }
+
+        var resultShows: [TVSeries] = []
+        for showID in finalShowIDs {
+            if let show = try? await self.show(withID: showID) {
+                resultShows.append(show)
+            }
+        }
+        return resultShows
     }
 
     @MainActor
     func trending(newPage: Bool = false) async -> [TVSeries] {
-        if !newPage && trendingPage != 0 {
-            return trendingIDs.compactMap { shows[$0] }
-        }
+        let cacheKey = "trendingShows"
+        var trendingIDs: [TVSeries.ID]? = trendingShowsCache.object(forKey: cacheKey)
 
-        let nextPageNumber = trendingPage + 1
+        if newPage || trendingIDs == nil {
+            if newPage && trendingIDs == nil {
+                // No change to trendingPage if cache expired and new page requested
+            } else if newPage {
+                trendingPage += 1
+            } else {
+                trendingPage = 1
+            }
 
-        let page = await tvManager.fetchTrending(page: nextPageNumber)
-        guard let page = page else { return [] }
+            let pageItems = await tvManager.fetchTrending(page: trendingPage)
+            guard let pageItems = pageItems else {
+                if trendingIDs == nil { trendingShowsCache.removeObject(forKey: cacheKey) }
+                return []
+            }
 
-        await withTaskGroup(of: Void.self) { taskGroup in
-            for show in page {
-                taskGroup.addTask {
-                    _ = try? await self.show(withID: show.id)
+            await withTaskGroup(of: Void.self) { taskGroup in
+                for show in pageItems {
+                    taskGroup.addTask {
+                        _ = try? await self.show(withID: show.id)  // Populates showCache
+                    }
                 }
             }
+
+            var currentTrendingIDs = newPage ? (trendingIDs ?? []) : []
+            pageItems.forEach { show in
+                if !currentTrendingIDs.contains(show.id) { currentTrendingIDs.append(show.id) }
+            }
+            trendingShowsCache.setObject(currentTrendingIDs, forKey: cacheKey)
+            trendingIDs = currentTrendingIDs
         }
 
-        page.forEach { show in
-            if !self.trendingIDs.contains(show.id) { self.trendingIDs.append(show.id) }
-        }
+        guard let finalTrendingIDs = trendingIDs else { return [] }
 
-        trendingPage = max(nextPageNumber, trendingPage)
-        return trendingIDs.compactMap { self.shows[$0] }
+        var resultShows: [TVSeries] = []
+        for showID in finalTrendingIDs {
+            if let show = try? await self.show(withID: showID) {
+                resultShows.append(show)
+            }
+        }
+        return resultShows
     }
 
     @MainActor
     func discover(newPage: Bool = false) async -> [TVSeries] {
-        if !newPage && discoverPage != 0 {
-            return discoverIDs.compactMap { shows[$0] }
-        }
+        let cacheKey = "discoverShows"
+        var discoverIDs: [TVSeries.ID]? = discoverShowsCache.object(forKey: cacheKey)
 
-        let nextPageNumber = discoverPage + 1
+        if newPage || discoverIDs == nil {
+            if newPage && discoverIDs == nil {
+                // No change to discoverPage if cache expired and new page requested
+            } else if newPage {
+                discoverPage += 1
+            } else {
+                discoverPage = 1
+            }
 
-        let page = await tvManager.fetchDiscover(page: nextPageNumber)
-        guard let page = page else { return [] }
+            let pageItems = await tvManager.fetchDiscover(page: discoverPage)
+            guard let pageItems = pageItems else {
+                if discoverIDs == nil { discoverShowsCache.removeObject(forKey: cacheKey) }
+                return []
+            }
 
-        await withTaskGroup(of: Void.self) { taskGroup in
-            for show in page {
-                taskGroup.addTask {
-                    _ = try? await self.show(withID: show.id)
+            await withTaskGroup(of: Void.self) { taskGroup in
+                for show in pageItems {
+                    taskGroup.addTask {
+                        _ = try? await self.show(withID: show.id)  // Populates showCache
+                    }
                 }
             }
+
+            var currentDiscoverIDs = newPage ? (discoverIDs ?? []) : []
+            pageItems.forEach { show in
+                if !currentDiscoverIDs.contains(show.id) { currentDiscoverIDs.append(show.id) }
+            }
+            discoverShowsCache.setObject(currentDiscoverIDs, forKey: cacheKey)
+            discoverIDs = currentDiscoverIDs
         }
 
-        page.forEach { show in
-            if !self.discoverIDs.contains(show.id) { self.discoverIDs.append(show.id) }
-        }
+        guard let finalDiscoverIDs = discoverIDs else { return [] }
 
-        discoverPage = max(nextPageNumber, discoverPage)
-        return discoverIDs.compactMap { self.shows[$0] }
+        var resultShows: [TVSeries] = []
+        for showID in finalDiscoverIDs {
+            if let show = try? await self.show(withID: showID) {
+                resultShows.append(show)
+            }
+        }
+        return resultShows
     }
+}
+
+// MARK: - Cache Key Structures
+struct TVSeasonCacheKey: Hashable {
+    let seriesID: TVSeries.ID
+    let seasonNumber: Int
+}
+
+struct TVSeasonImageCacheKey: Hashable {
+    let seriesID: TVSeries.ID
+    let seasonNumber: Int
+}
+
+struct TVEpisodeImageCacheKey: Hashable {
+    let seriesID: TVSeries.ID
+    let seasonNumber: Int
+    let episodeNumber: Int
 }
