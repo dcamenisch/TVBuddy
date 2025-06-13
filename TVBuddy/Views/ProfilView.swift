@@ -12,7 +12,7 @@ import TMDb
 struct ProfilView: View {
 
     @Query
-    private var alldMovies: [TVBuddyMovie]
+    private var allMovies: [TVBuddyMovie]
 
     @Query(filter: #Predicate<TVBuddyMovie> { $0.watched })
     private var watchedMovies: [TVBuddyMovie]
@@ -31,7 +31,7 @@ struct ProfilView: View {
 
     private var watchlistProgress: CGFloat {
         Double(watchedMovies.count + watchedTVEpisodes.count)
-            / Double(alldMovies.count + allTVEpisodes.count)
+            / Double(allMovies.count + allTVEpisodes.count)
     }
 
     var body: some View {

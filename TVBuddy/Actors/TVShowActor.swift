@@ -39,7 +39,6 @@ actor TVShowActor {
             )
             
             modelContext.insert(tvbSeries)
-            try modelContext.save()
             
             let episodes = await withTaskGroup(of: TVSeason?.self, returning: [TVBuddyTVEpisode].self) { group in
                 for season in series.seasons ?? [] {
@@ -59,6 +58,8 @@ actor TVShowActor {
             }
             
             tvbSeries.episodes.append(contentsOf: episodes)
+            
+            try modelContext.save()
             TVShowActor.logger.info("Inserted tv series \(series.name) with \(episodes.count) episodes")
         } catch {
             TVShowActor.logger.error("\(error.localizedDescription)")
