@@ -18,7 +18,8 @@ struct MediaRowItem: View {
         case let .tvSeries(tvShow):
             TVShowRow(id: tvShow.id)
         case let .person(person):
-            PersonRow(person: person)
+            Color.red
+//            PersonRow(person: person)
         }
     }
 }

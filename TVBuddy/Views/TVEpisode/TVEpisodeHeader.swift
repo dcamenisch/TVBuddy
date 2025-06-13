@@ -79,10 +79,11 @@ struct TVEpisodeHeader: View {
 
             items.append(dateFormatter.string(from: airDate))
         }
-        
-        if let runtime = episode.runtime {
-            items.append(runtime.description + " min")
-        }
+
+        // TODO: Reenable runtime by adding it to the tmdb package
+//        if let runtime = episode.runtime {
+//            items.append(runtime.description + " min")
+//        }
         
         return items
     }

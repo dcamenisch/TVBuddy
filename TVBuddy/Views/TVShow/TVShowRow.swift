@@ -49,7 +49,13 @@ struct TVShowRow: View {
                     
                     Spacer()
                     
-                    Button(action: toggleTVShowInWatchlist) {
+                    Button {
+                        let container = context.container
+                        let actor = TVShowActor(modelContainer: container)
+                        Task {
+                            await actor.toggleShowWatchlist(showID: id)
+                        }
+                    } label: {
                         Image(systemName: buttonImage())
                             .font(.title)
                             .bold()
@@ -64,28 +70,11 @@ struct TVShowRow: View {
         }
     }
     
-    private func toggleTVShowInWatchlist() {
-        if let tvShow = tvShows.first {
-            context.delete(tvShow)
-            try? context.save()
-        } else {
-            insertTVShow(id: id, watched: false, isFavorite: false)
-        }
-    }
-    
     private func buttonImage() -> String {
         if let tvShow = tvShows.first {
             return tvShow.finishedWatching ? "eye.circle" : "checkmark.circle"
         } else {
             return "plus.circle"
-        }
-    }
-    
-    func insertTVShow(id: TVSeries.ID, watched: Bool, isFavorite: Bool) {
-        Task {
-            let container = context.container
-            let actor = TVShowActor(modelContainer: container)
-            await actor.insertTVSeries(id: id, watched: watched, isFavorite: isFavorite)
         }
     }
 }

@@ -12,27 +12,27 @@ import TMDb
 struct MovieView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.presentationMode) private var presentationMode
-    
+
     @State private var offset: CGFloat = 0.0
     @State private var visibility: Visibility = .hidden
-    
+
     @State private var movie: Movie?
     @State private var poster: URL?
     @State private var backdrop: URL?
-    
+
     @Query
     private var tvbMovies: [TVBuddyMovie]
     private var tvbMovie: TVBuddyMovie? { tvbMovies.first }
-    
-    private var progress: CGFloat { backdrop != nil ? offset / 350.0 : offset / 100.0}
+
+    private var progress: CGFloat { backdrop != nil ? offset / 350.0 : offset / 100.0 }
 
     private let id: Movie.ID
-        
+
     init(id: Movie.ID) {
         self.id = id
         _tvbMovies = Query(filter: #Predicate<TVBuddyMovie> { $0.id == id })
     }
-    
+
     var body: some View {
         content
             .toolbarBackground(visibility, for: .navigationBar)
@@ -48,7 +48,7 @@ struct MovieView: View {
                             .foregroundStyle(.accent)
                     }
                 }
-                
+
                 ToolbarItem(placement: .principal) {
                     Text(movie?.title ?? "")
                         .font(.system(size: 18, weight: .semibold))
@@ -56,13 +56,15 @@ struct MovieView: View {
                         .minimumScaleFactor(0.5)
                         .opacity(max(0, -22.0 + 20.0 * progress))
                 }
-                
+
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        if let movie = tvbMovie {
-                            movie.isFavorite.toggle()
-                        } else if let tmdbMovie = movie {
-                            context.insert(TVBuddyMovie(movie: tmdbMovie, watched: true, isFavorite: true))
+                        let container = context.container
+                        let movieActor = MovieActor(modelContainer: container)
+                        if let movieID = self.movie?.id {  // Ensure movie ID is available
+                            Task {
+                                await movieActor.toggleFavorite(movieID: movieID)
+                            }
                         }
                     } label: {
                         Image(systemName: tvbMovie?.isFavorite ?? false ? "heart.fill" : "heart")
@@ -77,8 +79,8 @@ struct MovieView: View {
                 backdrop = await MovieStore.shared.backdrops(withID: id).first
             }
     }
-    
-    @ViewBuilder 
+
+    @ViewBuilder
     private var content: some View {
         if let movie = movie {
             OffsettableScrollView(showsIndicators: false) { point in

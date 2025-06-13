@@ -12,13 +12,13 @@ import WrappingHStack
 
 struct MovieBody: View {
     @Environment(\.modelContext) private var context
-    
+
     @State private var credits: ShowCredits?
     @State private var recommendations: [Movie]?
-    
+
     let movie: Movie
     let tvbMovie: TVBuddyMovie?
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             watchButtons
@@ -32,26 +32,25 @@ struct MovieBody: View {
             recommendations = await MovieStore.shared.recommendations(forMovie: movie.id)
         }
     }
-    
+
     private var watchButtons: some View {
-        HStack {
+        let container = context.container
+        let movieActor = MovieActor(modelContainer: container)
+
+        return HStack {
             Button {
-                if let movie = tvbMovie {
-                    context.delete(movie)
-                } else {
-                    context.insert(TVBuddyMovie(movie: movie, watched: false))
+                Task {
+                    await movieActor.toggleWatchlist(movieID: movie.id)
                 }
             } label: {
                 Label("Watchlist", systemImage: tvbMovie == nil ? "plus" : "checkmark")
                     .frame(height: 30)
                     .frame(maxWidth: .infinity)
             }
-            
+
             Button {
-                if let movie = tvbMovie {
-                    movie.watched.toggle()
-                } else {
-                    context.insert(TVBuddyMovie(movie: movie, watched: true))
+                Task {
+                    await movieActor.toggleWatched(movieID: movie.id)
                 }
             } label: {
                 Label("Watched", systemImage: tvbMovie?.watched ?? false ? "eye.fill" : "eye")
@@ -62,7 +61,7 @@ struct MovieBody: View {
         .bold()
         .buttonStyle(.bordered)
     }
-    
+
     @ViewBuilder
     private var overview: some View {
         if let overview = movie.overview, !overview.isEmpty {
@@ -72,7 +71,7 @@ struct MovieBody: View {
             Text(overview)
         }
     }
-    
+
     @ViewBuilder
     private var genres: some View {
         if let genres = movie.genres {
@@ -88,21 +87,21 @@ struct MovieBody: View {
             }
         }
     }
-    
+
     @ViewBuilder
     private var castAndCrew: some View {
         if let credits = credits, !credits.cast.isEmpty || !credits.crew.isEmpty {
             Text("Cast & Crew")
                 .font(.title2)
                 .bold()
-            
+
             ScrollView(.horizontal, showsIndicators: false) {
                 ZStack {
                     // Needed for SwiftUI to correctly calculate the height when the first
                     // CreditsItem has a name that only spans one line
                     CreditsItem(id: 0, name: "Lorem ipsum dolor sit amet", role: "-")
                         .hidden()
-                    
+
                     LazyHStack(alignment: .top, spacing: 10) {
                         ForEach(credits.cast) { cast in
                             CreditsItem(
@@ -111,7 +110,7 @@ struct MovieBody: View {
                                 role: cast.character
                             )
                         }
-                                
+
                         ForEach(credits.crew, id: \.uniqueId) { crew in
                             CreditsItem(
                                 id: crew.id,
@@ -124,7 +123,7 @@ struct MovieBody: View {
             }
         }
     }
-    
+
     @ViewBuilder
     private var similarMovies: some View {
         if let movies = recommendations, !movies.isEmpty {

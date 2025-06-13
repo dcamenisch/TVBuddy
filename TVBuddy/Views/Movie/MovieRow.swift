@@ -11,20 +11,20 @@ import TMDb
 
 struct MovieRow: View {
     @State private var viewModel: ViewModel
-    
+
     @Environment(\.modelContext) private var context
-        
+
     @Query
     private var tvbMovies: [TVBuddyMovie]
     private var tvbMovie: TVBuddyMovie? { tvbMovies.first }
-        
+
     init(id: Movie.ID) {
         _tvbMovies = Query(filter: #Predicate<TVBuddyMovie> { $0.id == id })
-        
+
         let viewModel = ViewModel(forMovie: id)
         _viewModel = State(initialValue: viewModel)
     }
-    
+
     var body: some View {
         if let movie = viewModel.movie {
             NavigationLink {
@@ -36,20 +36,20 @@ struct MovieRow: View {
                         placeholder: movie.title
                     )
                     .posterStyle(size: .tiny)
-                    
+
                     VStack(alignment: .leading, spacing: 5) {
                         if let releaseDate = movie.releaseDate {
                             Text(DateFormatter.year.string(from: releaseDate))
                                 .foregroundColor(.gray)
                         }
-                        
+
                         Text(movie.title)
                             .font(.system(size: 22, weight: .bold))
                             .lineLimit(2)
                     }
-                    
+
                     Spacer()
-                    
+
                     Button(action: toggleMovieInWatchlist) {
                         Image(systemName: buttonImage())
                             .font(.title)
@@ -64,17 +64,17 @@ struct MovieRow: View {
             ProgressView()
         }
     }
-    
+
     private func toggleMovieInWatchlist() {
-        if let tvbMovie = tvbMovie {
-            context.delete(tvbMovie)
-            try? context.save()
-        } else if let movie = viewModel.movie {
-            context.insert(TVBuddyMovie(movie: movie, watched: false))
-            try? context.save()
+        let container = context.container
+        let movieActor = MovieActor(modelContainer: container)
+        if let movieID = viewModel.movie?.id {
+            Task {
+                await movieActor.toggleWatchlist(movieID: movieID)
+            }
         }
     }
-    
+
     private func buttonImage() -> String {
         if let tvbMovie = tvbMovie {
             return tvbMovie.watched ? "eye.circle" : "checkmark.circle"
@@ -88,15 +88,15 @@ extension MovieRow {
     @MainActor @Observable
     class ViewModel {
         let id: Movie.ID
-        
+
         private(set) var movie: Movie?
         private(set) var posterURL: URL?
-        
+
         init(forMovie id: Movie.ID) {
             self.id = id
             fetchData()
         }
-        
+
         func fetchData() {
             Task {
                 movie = await MovieStore.shared.movie(withID: id)

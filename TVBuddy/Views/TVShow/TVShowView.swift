@@ -60,7 +60,11 @@ struct TVShowView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     if let show = _show {
                         Button {
-                            show.isArchived.toggle()
+                            let container = context.container
+                            let actor = TVShowActor(modelContainer: container)
+                            Task {
+                                await actor.toggleShowArchived(showID: id)
+                            }
                         } label: {
                             Image(systemName: show.isArchived ? "archivebox.fill" : "archivebox")
                                 .fontWeight(.semibold)
@@ -71,10 +75,10 @@ struct TVShowView: View {
 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        if let show = _show {
-                            show.isFavorite.toggle()
-                        } else if let tmdbTVShow = tmdbTVShow {
-                            insertTVShow(id: tmdbTVShow.id, watched: true, isFavorite: true)
+                        let container = context.container
+                        let actor = TVShowActor(modelContainer: container)
+                        Task {
+                            await actor.toggleShowFavorite(showID: id)
                         }
                     } label: {
                         Image(systemName: _show?.isFavorite ?? false ? "heart.fill" : "heart")
@@ -108,14 +112,6 @@ struct TVShowView: View {
             }
         } else {
             ProgressView()
-        }
-    }
-    
-    func insertTVShow(id: TVSeries.ID, watched: Bool, isFavorite: Bool) {
-        Task {
-            let container = context.container
-            let actor = TVShowActor(modelContainer: container)
-            await actor.insertTVSeries(id: id, watched: watched, isFavorite: isFavorite)
         }
     }
 }

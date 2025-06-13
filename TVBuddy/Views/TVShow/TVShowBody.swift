@@ -45,13 +45,13 @@ struct TVShowBody: View {
     }
 
     private var watchButtons: some View {
-        HStack {
+        let container = context.container
+        let actor = TVShowActor(modelContainer: container)
+
+        return HStack {
             Button {
-                if let show = tvBuddyTVShow {
-                    context.delete(show)
-                    try! context.save()
-                } else {
-                    insertTVShow(id: tmdbTVShow.id, watched: false, isFavorite: false)
+                Task {
+                    await actor.toggleShowWatchlist(showID: tmdbTVShow.id)
                 }
             } label: {
                 Label("Watchlist", systemImage: tvBuddyTVShow == nil ? "plus" : "checkmark")
@@ -60,10 +60,8 @@ struct TVShowBody: View {
             }
 
             Button {
-                if let show = tvBuddyTVShow {
-                    show.toggleWatched()
-                } else {
-                    insertTVShow(id: tmdbTVShow.id, watched: true, isFavorite: false)
+                Task {
+                    await actor.toggleShowWatched(showID: tmdbTVShow.id)
                 }
             } label: {
                 Label("Watched", systemImage: tvBuddyTVShow?.finishedWatching ?? false ? "eye.fill" : "eye")
@@ -173,14 +171,6 @@ struct TVShowBody: View {
             if let tmdbTVShows = recommendations, !tmdbTVShows.isEmpty {
                 MediaCollection(title: "Recommendations", media: tmdbTVShows)
             }
-        }
-    }
-    
-    func insertTVShow(id: TVSeries.ID, watched: Bool, isFavorite: Bool) {
-        Task {
-            let container = context.container
-            let actor = TVShowActor(modelContainer: container)
-            await actor.insertTVSeries(id: id, watched: watched, isFavorite: isFavorite)
         }
     }
 }
