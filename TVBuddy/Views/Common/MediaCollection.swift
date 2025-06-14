@@ -8,14 +8,14 @@
 import SwiftUI
 import TMDb
 
-struct MediaCollection<T:TVBuddyMediaItem>: View {
+struct MediaCollection<T: TVBuddyMediaItem>: View {
     let title: String
     let showAllButton: Bool
     let fetchMethod: ((Bool) async -> [T])?
     let posterSize: PosterStyle.Size
-    
+
     @State private var media: [T]
-    
+
     init(
         title: String = "",
         showAllButton: Bool = true,
@@ -30,35 +30,34 @@ struct MediaCollection<T:TVBuddyMediaItem>: View {
         self.posterSize = posterSize
     }
 
-    var body: some View {        
+    var body: some View {
         VStack(alignment: .leading) {
             if !title.isEmpty || showAllButton {
                 upperBar
             }
-            
+
             horizontalList
         }
         .task {
-            if let fetchMethod = fetchMethod {
-                Task {
-                    media = await fetchMethod(false)
-                }
+            let fetch = fetchMethod
+            if let fetchMethod = fetch {
+                media = await fetchMethod(false)
             }
         }
     }
-    
+
     var upperBar: some View {
         HStack(alignment: .bottom) {
             if showAllButton {
                 NavigationLink {
-                verticalGrid
-                    .navigationTitle(title)
+                    verticalGrid
+                        .navigationTitle(title)
                 } label: {
                     HStack(spacing: 5) {
                         Text(title)
                             .font(.title2)
                             .bold()
-                        
+
                         Image(systemName: "chevron.right")
                             .bold()
                             .foregroundColor(.secondary)
@@ -72,7 +71,7 @@ struct MediaCollection<T:TVBuddyMediaItem>: View {
             }
         }
     }
-    
+
     var horizontalList: some View {
         ScrollView(.horizontal) {
             LazyHStack {
@@ -80,7 +79,10 @@ struct MediaCollection<T:TVBuddyMediaItem>: View {
                     MediaListItem(mediaItem: element)
                         .posterStyle(size: posterSize)
                         .task {
-                            if let fetchMethod = fetchMethod, media.endIndex - AppConstants.nextPageOffset == index {
+                            let fetch = fetchMethod
+                            if let fetchMethod = fetch,
+                                media.endIndex - AppConstants.nextPageOffset == index
+                            {
                                 media = await fetchMethod(true)
                             }
                         }
@@ -89,20 +91,21 @@ struct MediaCollection<T:TVBuddyMediaItem>: View {
         }
         .scrollIndicators(.never)
     }
-    
+
     var verticalGrid: some View {
         ScrollView {
             LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 3), spacing: 10) {
                 ForEach(Array(media.enumerated()), id: \.element) { index, element in
                     MediaListItem(mediaItem: element)
                         .posterStyle()
-                        .onAppear(perform: {
-                            if let fetchMethod = fetchMethod, media.endIndex - AppConstants.nextPageOffset == index {
-                                Task {
-                                    media = await fetchMethod(true)
-                                }
+                        .task {
+                            let fetch = fetchMethod
+                            if let fetchMethod = fetch,
+                                media.endIndex - AppConstants.nextPageOffset == index
+                            {
+                                media = await fetchMethod(true)
                             }
-                        })
+                        }
                 }
             }
             .padding(.horizontal)
@@ -111,7 +114,7 @@ struct MediaCollection<T:TVBuddyMediaItem>: View {
     }
 }
 
-struct MediaListItem<T:TVBuddyMediaItem>: View {
+struct MediaListItem<T: TVBuddyMediaItem>: View {
     @State var poster: URL?
 
     let mediaItem: T
