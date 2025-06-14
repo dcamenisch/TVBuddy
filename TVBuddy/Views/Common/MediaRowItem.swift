@@ -17,9 +17,9 @@ struct MediaRowItem: View {
             MovieRow(id: movie.id)
         case let .tvSeries(tvShow):
             TVShowRow(id: tvShow.id)
-        case let .person(person):
-            Color.red
-//            PersonRow(person: person)
+        default:
+            // This case should not happen
+            EmptyView()
         }
     }
 }

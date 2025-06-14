@@ -41,8 +41,15 @@ class SearchStore: ObservableObject {
     
         var newPage = await searchManager.search(query: searchQuery, page: nextPageNumber) ?? []
         newPage.removeAll { item in results.contains { $0.id == item.id } }
+        newPage.removeAll { media in
+            if case .person = media {
+                return true
+            } else {
+                return false
+            }
+        }
         results += newPage
-        
+
         searchPage = max(searchPage, nextPageNumber)
         return results
     }
