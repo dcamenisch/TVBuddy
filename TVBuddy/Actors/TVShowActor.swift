@@ -39,7 +39,20 @@ actor TVShowActor {
             if let existingTVSeries = try modelContext.fetch(FetchDescriptor(predicate: predicate))
                 .first
             {
-                existingTVSeries.toggleWatched()
+                let episodes = existingTVSeries.episodes.filter({ $0.hasAired })
+
+                if episodes.allSatisfy({ $0.watched }) {
+                    for episode in episodes {
+                        episode.watched.toggle()
+                    }
+                } else {
+                    for episode in episodes {
+                        if !episode.watched {
+                            episode.watched.toggle()
+                        }
+                    }
+                }
+
                 try modelContext.save()
                 TVShowActor.logger.info(
                     "Toggled watched status for show \(existingTVSeries.name). Now: started=\(existingTVSeries.startedWatching), finished=\(existingTVSeries.finishedWatching)"
@@ -96,7 +109,7 @@ actor TVShowActor {
         }
     }
 
-    func toggleSeasonWatched(showID: TVSeries.ID, seasonNumber: Int, watched: Bool) async {
+    func toggleSeasonWatched(showID: TVSeries.ID, seasonNumber: Int) async {
         let predicate = #Predicate<TVBuddyTVShow> { $0.id == showID }
         do {
             if (try modelContext.fetch(FetchDescriptor(predicate: predicate)).first) == nil {
@@ -111,16 +124,24 @@ actor TVShowActor {
                 return
             }
 
-            let episodes = show.episodes.filter({ $0.seasonNumber == seasonNumber })
-            if !episodes.isEmpty {
+            let episodes = show.episodes.filter({ $0.seasonNumber == seasonNumber && $0.hasAired })
+
+            if episodes.allSatisfy({ $0.watched }) {
                 for episode in episodes {
-                    episode.toggleWatched()
+                    episode.watched.toggle()
                 }
-                try modelContext.save()
-                TVShowActor.logger.info(
-                    "Toggled watched for season \(seasonNumber) of show \(show.name) to \(watched)."
-                )
+            } else {
+                for episode in episodes {
+                    if !episode.watched {
+                        episode.watched.toggle()
+                    }
+                }
             }
+
+            try modelContext.save()
+            TVShowActor.logger.info(
+                "Toggled watched for season \(seasonNumber) of show \(show.name)."
+            )
         } catch {
             TVShowActor.logger.error(
                 "Error toggling season watched for S\(seasonNumber) of show ID \(showID): \(error.localizedDescription)"
@@ -149,7 +170,7 @@ actor TVShowActor {
             }
 
             if let episode = show.episodes.first(where: { $0.id == episodeID }) {
-                episode.toggleWatched()
+                episode.watched.toggle()
                 try modelContext.save()
                 TVShowActor.logger.info(
                     "Toggled watched for S\(seasonNumber)E\(episodeNumber) of show \(show.name) to \(episode.watched)."
@@ -167,7 +188,6 @@ actor TVShowActor {
                 ) {
                     let newEpisode = TVBuddyTVEpisode(episode: episodeData, watched: true)
                     show.episodes.append(newEpisode)
-                    show.checkWatching()
                     try modelContext.save()
                     TVShowActor.logger.info(
                         "Added missing episode S\(seasonNumber)E\(episodeNumber) to show \(show.name) and marked as watched."
@@ -199,8 +219,6 @@ actor TVShowActor {
 
             let tvbSeries = TVBuddyTVShow(
                 tvShow: series,
-                startedWatching: finishedWatching,
-                finishedWatching: finishedWatching,
                 isFavorite: isFavorite
             )
 
@@ -339,7 +357,6 @@ actor TVShowActor {
                 }) {
 
                     tvbSeries.episodes.append(TVBuddyTVEpisode(episode: episode))
-                    tvbSeries.checkWatching()
                 }
             })
         }

@@ -18,6 +18,9 @@ struct FeedView: View {
 
     @Query
     private var tvShows: [TVBuddyTVShow]
+    private var unwatchedTVShows: [TVBuddyTVShow] {
+        tvShows.filter { !$0.startedWatching }
+    }
 
     @Query
     private var unreleasedTVShows: [TVBuddyTVShow]
@@ -29,8 +32,8 @@ struct FeedView: View {
         _movies = Query(filter: #Predicate<TVBuddyMovie> { !$0.watched && $0.releaseDate ?? future <= now })
         _unreleasedMovies = Query(filter: #Predicate<TVBuddyMovie> { !$0.watched && $0.releaseDate ?? future > now })
 
-        _tvShows = Query(filter: #Predicate<TVBuddyTVShow> { !$0.startedWatching && $0.firstAirDate ?? future <= now })
-        _unreleasedTVShows = Query(filter: #Predicate<TVBuddyTVShow> { !$0.startedWatching && $0.firstAirDate ?? future > now })
+        _tvShows = Query(filter: #Predicate<TVBuddyTVShow> { $0.firstAirDate ?? future <= now })
+        _unreleasedTVShows = Query(filter: #Predicate<TVBuddyTVShow> { $0.firstAirDate ?? future > now })
     }
 
     var body: some View {
@@ -38,8 +41,8 @@ struct FeedView: View {
             VStack(alignment: .leading, spacing: 10) {
                 TVEpisodeProgressView()
                 
-                if !tvShows.isEmpty {
-                    MediaCollection(title: "TV Show Watchlist", media: tvShows).id(tvShows)
+                if !unwatchedTVShows.isEmpty {
+                    MediaCollection(title: "TV Show Watchlist", media: unwatchedTVShows).id(unwatchedTVShows)
                 }
                 
                 if !unreleasedTVShows.isEmpty {

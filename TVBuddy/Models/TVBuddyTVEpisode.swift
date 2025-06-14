@@ -21,9 +21,13 @@ extension TVBuddyMediaSchemaV1 {
         var seasonNumber: Int
         var airDate: Date?
 
-        var tvShow: TVBuddyTVShow?
+        var tvShow: TVBuddyMediaSchemaV1.TVBuddyTVShow?
 
         var watched: Bool
+
+        var hasAired: Bool {
+            airDate != nil && Date.now >= airDate!
+        }
 
         init(id: Int, episodeNumber: Int, seasonNumber: Int, airDate: Date?, watched: Bool) {
             self.id = id
@@ -47,11 +51,6 @@ extension TVBuddyMediaSchemaV1 {
             self.episodeNumber = episode.episodeNumber
             self.seasonNumber = episode.seasonNumber
             self.airDate = episode.airDate
-        }
-
-        func toggleWatched() {
-            watched.toggle()
-            tvShow?.checkWatching()
         }
     }
 }

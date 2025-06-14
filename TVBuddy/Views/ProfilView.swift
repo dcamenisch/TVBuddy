@@ -17,8 +17,11 @@ struct ProfilView: View {
     @Query(filter: #Predicate<TVBuddyMovie> { $0.watched })
     private var watchedMovies: [TVBuddyMovie]
 
-    @Query(filter: #Predicate<TVBuddyTVShow> { $0.finishedWatching })
-    private var watchedTVShows: [TVBuddyTVShow]
+    @Query
+    private var tvShows: [TVBuddyTVShow]
+    private var watchedTVShows: [TVBuddyTVShow] {
+        tvShows.filter { $0.finishedWatching }
+    }
 
     @Query(filter: #Predicate<TVBuddyTVShow> { $0.isArchived })
     private var archivedTVShows: [TVBuddyTVShow]

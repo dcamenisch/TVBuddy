@@ -20,7 +20,7 @@ struct TVSeasonBody: View {
 
     private var watchedAll: Bool {
         tvBuddyTVEpisodes.allSatisfy {
-            $0.seasonNumber != tvSeason.seasonNumber || $0.watched
+            $0.seasonNumber != tvSeason.seasonNumber || $0.watched || !$0.hasAired
         } && tvBuddyTVEpisodes.count > 0
     }
 
@@ -33,7 +33,6 @@ struct TVSeasonBody: View {
                     await actor.toggleSeasonWatched(
                         showID: tvShow.id,
                         seasonNumber: tvSeason.seasonNumber,
-                        watched: watchedAll
                     )
                 }
             } label: {

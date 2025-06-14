@@ -21,54 +21,56 @@ extension TVBuddyMediaSchemaV1 {
         var firstAirDate: Date?
         var lastAirDate: Date?
 
-        @Relationship(deleteRule: .cascade, inverse: \TVBuddyTVEpisode.tvShow)
-        var episodes: [TVBuddyTVEpisode] = []
+        @Relationship(deleteRule: .cascade, inverse: \TVBuddyMediaSchemaV1.TVBuddyTVEpisode.tvShow)
+        var episodes: [TVBuddyMediaSchemaV1.TVBuddyTVEpisode] = []
 
-        var startedWatching: Bool
-        var finishedWatching: Bool
         var isFavorite: Bool
         var isArchived: Bool
 
-        init(id: Int, name: String, firstAirDate: Date?, lastAirDate: Date?, startedWatching: Bool, finishedWatching: Bool, isFavorite: Bool = false, isArchived: Bool = false) {
+        var startedWatching: Bool {
+            if episodes.isEmpty { return false }
+            return episodes.contains(where: { $0.watched })
+        }
+
+        var finishedWatching: Bool {
+            episodes.allSatisfy({ $0.watched })
+        }
+
+        init(
+            id: Int,
+            name: String,
+            firstAirDate: Date?,
+            lastAirDate: Date?,
+            isFavorite: Bool = false,
+            isArchived: Bool = false
+        ) {
             self.id = id
             self.name = name
             self.firstAirDate = firstAirDate
             self.lastAirDate = lastAirDate
-            self.startedWatching = startedWatching
-            self.finishedWatching = finishedWatching
             self.isFavorite = isFavorite
             self.isArchived = isArchived
         }
 
         convenience init(
-            tvShow: TVSeries, startedWatching: Bool = false, finishedWatching: Bool = false, isFavorite: Bool = false, isArchived: Bool = false
+            tvShow: TVSeries,
+            isFavorite: Bool = false,
+            isArchived: Bool = false
         ) {
             self.init(
                 id: tvShow.id,
                 name: tvShow.name,
                 firstAirDate: tvShow.firstAirDate,
                 lastAirDate: tvShow.lastAirDate,
-                startedWatching: startedWatching,
-                finishedWatching: finishedWatching,
                 isFavorite: isFavorite,
                 isArchived: isArchived
             )
         }
-        
+
         func update(tvShow: TVSeries) {
             self.name = tvShow.name
             self.firstAirDate = tvShow.firstAirDate
             self.lastAirDate = tvShow.lastAirDate
-        }
-
-        func toggleWatched() {
-            episodes.forEach { $0.watched = !finishedWatching }
-            checkWatching()
-        }
-
-        func checkWatching() {
-            startedWatching = episodes.contains { $0.watched && $0.seasonNumber != 0 }
-            finishedWatching = episodes.allSatisfy { $0.watched || $0.seasonNumber == 0 }
         }
     }
 }
